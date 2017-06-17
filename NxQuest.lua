@@ -9225,9 +9225,11 @@ function Nx.Quest.Watch:UpdateList()
 							end
 							for criteria = 1, #bonusSteps do
 								local index = bonusSteps[criteria]
-								local task, _, completed, quantity, totalquantity = C_Scenario.GetCriteriaInfoByStep(index,1)
+								local task, criteriatype, completed, quantity, totalquantity, flags, assetid, quantitystring, criteriaid, duration, elapsed, failed, weighted = C_Scenario.GetCriteriaInfoByStep(index,1)
 								if completed then
-									task = format("|cffffffff%d/%d %s |cffff0000[|cffffffff" ..L["Complete"] .."|cffff0000]",quantity, totalquantity, task)
+									task = format("|cffffffff%d/%d %s |cffff0000[|cffffffff" ..L["Complete"] .."|cffff0000]",quantity, totalquantity, task)																
+								elseif failed then
+								    task = format("|cffffffff%d/%d %s |cffff0000[|cffffffff" .. L["Failed"] .. "|cffff0000]",quantity, totalquantity, task)
 								else
 									task = format("|cffffffff%d/%d %s",quantity, totalquantity, task)
 								end
@@ -9235,6 +9237,11 @@ function Nx.Quest.Watch:UpdateList()
 								list:ItemSetOffset (16, -1)
 								list:ItemSet(2,task)
 								list:ItemSetButton("QuestWatch",false)
+								if (duration > 0 and elapsed <= duration and not (completed or failed)) then
+									list:ItemAdd(0)
+									list:ItemSetOffset(16,-1)
+									list:ItemSet(2,"Time Left: " .. Nx.Util_GetTimeElapsedMinSecStr(duration - elapsed))									
+								end
 							end
 						end
 					end
