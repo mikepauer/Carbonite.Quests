@@ -348,6 +348,7 @@ L["Click ? to complete"] = "Clicca ? per completare"
 L["Quest Info (shift click - goto)..."] = "Info Missione (Maiuscola + Click SX : vai a)..."
 L[" (Complete)"] = " (Completato)"
 L["(done)"] = "(fatto)"
+L["Time Left"] = true
 
 L["Quest Complete '%s'"] = "Missione Completata '%s'"
 L["Load quest data by threshold"] = "Carica dati missione da soglia"

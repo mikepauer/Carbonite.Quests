@@ -349,6 +349,7 @@ L["Click ? to complete"] = "Klicke ? zum Abschlie\195\159en"
 L["Quest Info (shift click - goto)..."] = "Quest Info (Umschalt Klick - Ziel hinzuf\195\188gen)..."
 L[" (Complete)"] = " (Abgeschlossen)"
 L["(done)"] = "(erledigt)"
+L["Time Left"] = true
 
 L["Quest Complete '%s'"] = "Quest Abgeschlossen '%s'"
 L["Load quest data by threshold"] = "Lade Questdaten nach Grenzwert"

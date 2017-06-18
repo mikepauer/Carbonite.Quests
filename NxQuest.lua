@@ -7930,186 +7930,11 @@ function Nx.Quest:UpdateIcons (map)
 					local tid, name, questtype, rarity, elite, tradeskill = GetQuestTagInfo (questId)
 					local timeLeft = C_TaskQuest.GetQuestTimeLeftMinutes(questId)
 					if timeLeft and timeLeft > 0 then
-						--[[ Some code is borrowed from great addon WorldQuestList: https://mods.curse.com/addons/wow/world-quests-list
-
-						-- reward
-						local totalAP = 0
-						local reward = ""
-						local rewardItem
-						local rewardColor
-						local rewardType = 0
-						local rewardSort = 0
-						local rewardItemLink
-
-						if not WQTable[questId] then WQTable[questId] = {} end
-
-						if not WQTable[questId].reward and ( GetQuestLogRewardXP(questId) > 0 or GetNumQuestLogRewardCurrencies(questId) > 0 or GetNumQuestLogRewards(questId) > 0 or GetQuestLogRewardMoney(questId) > 0 or GetQuestLogRewardArtifactXP(questId) > 0 ) then
-							local hasRewardFiltered = false
-							-- xp
-							local xp = GetQuestLogRewardXP(questId)
-							if ( xp > 0 ) then
-								reward = BONUS_OBJECTIVE_EXPERIENCE_FORMAT:format(xp)
-								rewardSort = xp
-								rewardType = 50
-							end
-							-- money
-							local money = GetQuestLogRewardMoney(questId)
-							if ( money > 0 ) then
-								reward = GetCoinTextureString(money)
-								rewardType = 40
-								if money > 500000 then
-									hasRewardFiltered = true
-									rewardSort = money
-								end
-							end
-
-							local artifactXP = GetQuestLogRewardArtifactXP(questId)
-							if ( artifactXP > 0 ) then
-								reward = BONUS_OBJECTIVE_ARTIFACT_XP_FORMAT:format(artifactXP)
-								rewardSort = artifactXP
-								rewardType = 25
-							end
-							-- currency
-							local numQuestCurrencies = GetNumQuestLogRewardCurrencies(questId)
-							for i = 1, numQuestCurrencies do
-								local name, texture, numItems = GetQuestLogRewardCurrencyInfo(i, questId)
-								local text = BONUS_OBJECTIVE_REWARD_WITH_COUNT_FORMAT:format(texture, numItems, name)
-								reward = text
-								rewardType = 30
-
-								if texture and texture:find("orderresources$") then
-									hasRewardFiltered = true
-									rewardSort = numItems or 0
-								end
-							end
-
-							-- items
-							local numQuestRewards = GetNumQuestLogRewards(questId)
-							if numQuestRewards > 0 then
-								local name,icon,numItems,quality,_,itemID = GetQuestLogRewardInfo(1,questId)
-								if name then
-									rewardType = 10
-									rewardItem = true
-									reward = "|T"..icon..":0|t "..name..(numItems and numItems > 1 and " x"..numItems or "")
-								end
-
-
-								if quality and quality >= LE_ITEM_QUALITY_COMMON and BAG_ITEM_QUALITY_COLORS[quality] then
-									rewardColor = BAG_ITEM_QUALITY_COLORS[quality]
-								end
-
-								local isBoeItem = nil
-
-								inspectScantip:SetQuestLogItem("reward", 1, questId)
-								rewardItemLink = select(2,inspectScantip:GetItem())
-								for j=2, inspectScantip:NumLines() do
-									local tooltipLine = _G[GlobalAddonName.."WQInspectScanningTooltipTextLeft"..j]
-									local text = tooltipLine:GetText()
-									if text and ( text:find(ARTIFACT_POWER.."|r$") or text:find("Artifact Power|r$") ) then
-										hasRewardFiltered = true
-										rewardType = 20
-										if BAG_ITEM_QUALITY_COLORS[6] then
-											rewardColor = BAG_ITEM_QUALITY_COLORS[6]
-										end
-									elseif text and text:find(ITEM_LEVEL) then
-										local ilvl = text:match(ITEM_LEVEL)
-										reward = "|T"..icon..":0|t "..ilvl.." "..name
-										ilvl = tonumber( ilvl:gsub("%+",""),nil )
-										if ilvl then
-											rewardType = 0
-											rewardSort = ilvl
-										end
-									elseif text and rewardType == 20 and text:find("^"..ITEM_SPELL_TRIGGER_ONUSE) then
-										local ap = tonumber((text:match("%d+[,%d%.]*") or "?"):gsub(",",""):gsub("%.",""),nil)
-										if ap then
-											reward = reward:gsub(":0|t ",":0|t ["..ap.."] ")
-											rewardSort = ap
-											totalAP = totalAP + ap
-										end
-									elseif text and text:find(ITEM_BIND_ON_EQUIP) then
-										isBoeItem = true
-									end
-								end
-								inspectScantip:ClearLines()
-
-								if itemID == 124124 then
-									rewardType = 35
-									rewardSort = numItems or 0
-									hasRewardFiltered = true
-								end
-
-								if itemID then
-									local _, _, subclass, invType = GetItemInfoInstant(itemID)
-
-									if invType and invType ~= "" or subclass == ArtifactRelicSubclass then
-										if rewardType > 0 then
-											rewardType = 5
-										end
-										hasRewardFiltered = true
-									end
-								end
-
-								if (rewardType == 0 or rewardType == 5) and isBoeItem then
-									reward = reward:gsub("(|t %d+) ","%1 BOE ")
-								end
-
-							end
-
-							if not hasRewardFiltered then
-								rewardType = 60
-							end
-
-							local color = ""
-							if rewardColor then color = format("|cff%02x%02x%02x", rewardColor.r * 255, rewardColor.g * 255, rewardColor.b * 255) end
-							reward = reward ~= "" and L["\n \nReward: "] .. color .. reward or nil
-
-							WQTable[questId].reward = reward
-						end
-
-						-- objectives
-						local objTxt = ""
-						for objectiveIndex = 1, taskInfo[i].numObjectives do
-							local objectiveText, objectiveType, finished = GetQuestObjectiveInfo(questId, objectiveIndex, false)
-							if ( objectiveText and #objectiveText > 0 ) then
-								local color = finished and HIGHLIGHT_FONT_COLOR or GRAY_FONT_COLOR
-								color = format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255);
-								objTxt = objTxt .. "\n- " .. color .. objectiveText
-							end
-						end
-
-						-- time left
-						local timeLeftTxt = ""
-						local color
-						local timeString
-						local timeLeftMinutes = timeLeft
-						if ( timeLeftMinutes <= WORLD_QUESTS_TIME_CRITICAL_MINUTES ) then
-							color = "|cffff3333"
-							timeString = SecondsToTime(timeLeftMinutes * 60)
-						else
-							if timeLeftMinutes <= 30 then
-								color = "|cffff3333"
-							elseif timeLeftMinutes <= 180 then
-								color = "|cffffff00"
-							end
-
-							if timeLeftMinutes >= 14400 then
-								timeString = ""		--A lot, 10+ days
-							elseif timeLeftMinutes >= 1440 then
-								timeString = format(L["%dd%02dh%02dm"],floor(timeLeftMinutes / 1440),floor(timeLeftMinutes / 60) % 24, timeLeftMinutes % 60)
-							else
-								timeString = (timeLeftMinutes >= 60 and (floor(timeLeftMinutes / 60) % 24) or "0")..L["h"]..format("%02d",timeLeftMinutes % 60)..L["m"]
-							end
-						end
-						timeLeftTxt = (color or "")..(timeString and L["\n \n Time Left: "] .. timeString or "")]]--
 
 						local x,y = info.x * 100, info.y * 100
 						local f = map:GetIconWQ(120)
 
-						--f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
-
 						map:ClipFrameZ (f, x, y, 24, 24, 0)
-
-						--f.texture:SetTexCoord (GetObjectIconTextureCoords(4734))
 
 						local selected = info.questId == GetSuperTrackedQuestID();
 
@@ -9240,7 +9065,7 @@ function Nx.Quest.Watch:UpdateList()
 								if (duration > 0 and elapsed <= duration and not (completed or failed)) then
 									list:ItemAdd(0)
 									list:ItemSetOffset(16,-1)
-									list:ItemSet(2,"Time Left: " .. Nx.Util_GetTimeElapsedMinSecStr(duration - elapsed))									
+									list:ItemSet(2, L["Time Left"] .. ": " .. Nx.Util_GetTimeElapsedMinSecStr(duration - elapsed))									
 								end
 							end
 						end
