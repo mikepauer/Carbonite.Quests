@@ -7924,7 +7924,7 @@ function Nx.Quest:UpdateIcons (map)
 				local info = taskInfo[i]
 				local questId = taskInfo[i].questId
 				local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
-				if UnitLevel('player') >= 110 and QuestUtils_IsQuestWorldQuest (questId) then
+				if QuestUtils_IsQuestWorldQuest (questId) then
 					activeWQ[questId] = true
 					C_TaskQuest.RequestPreloadRewardData (questId)
 					local tid, name, questtype, rarity, elite, tradeskill = GetQuestTagInfo (questId)
@@ -7946,8 +7946,8 @@ function Nx.Quest:UpdateIcons (map)
 						f.numObjectives = info.numObjectives;
 						f.Texture:SetDrawLayer("OVERLAY");
 						f:SetScript("OnClick", function (self, button)
+							map:SetTargetAtStr (format("%s, %s", x, y))
 							if not InCombatLockdown() and self.worldQuest then
-						      map:SetTargetAtStr (format("%s, %s", x, y))
 							  if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
 								PlaySound("igMainMenuOptionCheckBoxOn");
 						 
