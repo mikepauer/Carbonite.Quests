@@ -348,6 +348,7 @@ L["Click ? to complete"] = "Clic ? pour terminer"
 L["Quest Info (shift click - goto)..."] = "Info Qu\195\170te (Maj clic - destination)..."
 L[" (Complete)"] = " (Termin\195\169e)"
 L["(done)"] = "Fini"
+L["Time Left"] = true
 
 L["Quest Complete '%s'"] = "Qu\195\170te Termin\195\169e '%s'"
 L["Load quest data by threshold"] = "Charger donn\195\169e de Qu\195\170te par seuil de niveau"

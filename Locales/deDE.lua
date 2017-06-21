@@ -342,13 +342,14 @@ L["Complete"] = "Abgeschlossen"
 L["Achievement:"] = "Erfolg:"
 L["New: "] = "Neu: "
 L["(Complete)"] = "(Abgeschlossen)"
-L["QFind bad mode %d"] = true
-L["QFind Failed to find"] = true
+L["QFind bad mode %d"] = "QFind Fehlerhafter Modus %d"
+L["QFind Failed to find"] = "QFind Finden fehlgeschlagen"
 L["Quest"] = "Quest"
 L["Click ? to complete"] = "Klicke ? zum Abschlie\195\159en"
 L["Quest Info (shift click - goto)..."] = "Quest Info (Umschalt Klick - Ziel hinzuf\195\188gen)..."
 L[" (Complete)"] = " (Abgeschlossen)"
 L["(done)"] = "(erledigt)"
+L["Time Left"] = "Verbleibende Zeit"
 
 L["Quest Complete '%s'"] = "Quest Abgeschlossen '%s'"
 L["Load quest data by threshold"] = "Lade Questdaten nach Grenzwert"

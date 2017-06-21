@@ -348,6 +348,7 @@ L["Click ? to complete"] = true
 L["Quest Info (shift click - goto)..."] = true
 L[" (Complete)"] = true
 L["(done)"] = true
+L["Time Left"] = true
 
 L["Quest Complete '%s'"] = true
 L["Load quest data by threshold"] = true
