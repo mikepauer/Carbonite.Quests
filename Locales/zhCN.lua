@@ -348,7 +348,7 @@ L["Click ? to complete"] = "点击左边问号完成任务"
 L["Quest Info (shift click - goto)..."] = "任务信息(Shift-左键前往)..."
 L[" (Complete)"] = " (完成)"
 L["(done)"] = "(完成)"
-L["Time Left"] = true
+L["Time Left"] = "剩余时间"
 
 L["Quest Complete '%s'"] = "任务完成 '%s'"
 L["Load quest data by threshold"] = "按玩家等级区间载入任务数据"
