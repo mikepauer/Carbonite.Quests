@@ -7629,7 +7629,7 @@ function Nx.Quest:UpdateIcons (map)
 				local wx, wy = map:GetWorldPos (mapId, x, y)
 				local f = map:GetIconStatic (4)
 
-				if map:ClipFrameW (f, wx, wy, navscale, navscale, 0) then
+				if map:ClipFrameByMapType (f, wx, wy, navscale, navscale, 0) then
 
 					f.NXType = 9000
 					f.NXData = cur
@@ -7696,7 +7696,7 @@ function Nx.Quest:UpdateIcons (map)
 					local wx, wy = map:GetWorldPos (mapId, x, y)
 					local f = map:GetIconStatic (4)
 
-					if map:ClipFrameW (f, wx, wy, navscale, navscale, 0) then
+					if map:ClipFrameByMapType (f, wx, wy, navscale, navscale, 0) then
 						f.NxTip = format (L["%s\nStart: %s (%.1f %.1f)"], qname, startName, x, y)
 						f.texture:SetTexture ("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconExclaim")
 					end
@@ -7719,7 +7719,7 @@ function Nx.Quest:UpdateIcons (map)
 				local wx, wy = map:GetWorldPos (mapId, x, y)
 				local f = map:GetIconStatic (4)
 
-				if map:ClipFrameW (f, wx, wy, navscale, navscale, 0) then
+				if map:ClipFrameByMapType (f, wx, wy, navscale, navscale, 0) then
 
 					f.NXType = 9000
 					f.NXData = cur
@@ -7792,7 +7792,7 @@ function Nx.Quest:UpdateIcons (map)
 							local wx, wy = map:GetWorldPos (mapId, x, y)
 
 							local f = map:GetIconStatic (4)
-							if map:ClipFrameW (f, wx, wy, sz, sz, 0) then
+							if map:ClipFrameByMapType (f, wx, wy, sz, sz, 0) then
 								f.NXType = 9000 + n
 								f.NXData = cur
 								f.NxTip = format ("%s\nObj: %s (%.1f %.1f)", qname, oname, x, y)
@@ -7838,7 +7838,7 @@ function Nx.Quest:UpdateIcons (map)
 									sz = sz * .8
 								end
 
-								if map:ClipFrameW (f, x, y, sz, sz, 0) then
+								if map:ClipFrameByMapType (f, x, y, sz, sz, 0) then
 
 									f.NXType = 9000 + n
 									f.NXData = cur
