@@ -11572,7 +11572,7 @@ function Nx.Quest.WQList:CheckBounty(questId)
 end
 
 function Nx.Quest.WQList:Update()	
-	local list = self.List	
+	local list = Nx.Quest.WQList.List	
 	list:Empty()		
 	list:ColumnSetWidth(2,60)
 	list:ColumnSetWidth(4,60)
@@ -11586,10 +11586,10 @@ function Nx.Quest.WQList:Update()
 		local newwidth = #title * 5 + 10
 		local timeleft = C_TaskQuest.GetQuestTimeLeftMinutes(questId)
 		local rewardstring = ""		
-		local isbounty = self:CheckBounty(questId)
+		local isbounty = Nx.Quest.WQList:CheckBounty(questId)
 		
 		if timeleft > 0 then								
-			local reward = self:GetWQReward(questId)
+			local reward = Nx.Quest.WQList:GetWQReward(questId)
 			if (reward == 10 and not Nx.qdb.profile.WQList.showap) or
 			   (reward == 20 and not Nx.qdb.profile.WQList.showgold) or 
 			   (reward == 30 and not Nx.qdb.profile.WQList.showorder) or
