@@ -35,6 +35,7 @@ Nx.VERSIONCAP		= .80
 Nx.Quest = {}
 Nx.Quest.List = {}
 Nx.Quest.Watch = {}
+Nx.Quest.WQList = {}
 Nx.Quest.Cols = {}
 Nx.Quests = {}
 Nx.qdb = {}
@@ -157,6 +158,25 @@ local defaults = {
 			WatchFontSize = 11,
 			WatchFontSpacing = 2,
 		},
+		WQList = {
+			showgear = true,
+			showap = true,
+			showorder = true,
+			showgold = true,
+			showother = true,
+			showpvp = true,
+			showbounty = false,
+			sortmode = 1,
+			zoneonly = false,
+			showfaronis = true,
+			showdreamweaver = true,
+			showhighmountain = true,
+			showlegionfall = true,
+			shownightfallen = true,
+			showwardens = true,
+			showvalarjar = true,
+			bountycolor = true,
+		},
 	},
 }
 
@@ -168,6 +188,10 @@ local WQTable = {}
 local ITEM_LEVEL = (ITEM_LEVEL or "NO DATA FOR ITEM_LEVEL"):gsub("%%d","(%%d+%+*)")
 
 local questoptions
+local worldquestdb = {}
+local worldquesttip = CreateFrame("GameTooltip", "WQListTip", nil, "GameTooltipTemplate")
+worldquesttip:SetOwner(UIParent, "ANCHOR_NONE")
+
 local function QuestOptions ()
 	if not questoptions then
 		questoptions = {
@@ -2083,7 +2107,16 @@ function CarboniteQuest:OnInitialize()
 		VRGBAUp = "1|1|1|.31",
 		VRGBADn = "1|1|1|.85",
 	}
-
+	Nx.Button.TypeData["WQListMenu"] = {
+		Tip = L["Menu"],
+		Skin = true,
+		Up = "ButWatchMenu",
+		Dn = "ButWatchMenu",
+		SizeUp = 14,
+		SizeDn = 14,
+		VRGBAUp = "1|1|1|.5",
+		VRGBADn = "1|1|1|.75",
+	}
 	-- Capture data
 	local cap = NXQuest.Gather
 
@@ -2107,6 +2140,7 @@ function CarboniteQuest:OnInitialize()
 	Nx.Quest.RecordQuests(true)
 	Nx.Quest.List:LogUpdate()
 	Nx.Quest.Watch:Update()
+	Nx.Quest.WQList:Update()
 	tinsert(Nx.BrokerMenuTemplate,{ text = L["Toggle Quest Watch"], func = function() Nx.Quest.Watch.Win:Show(not Nx.Quest.Watch.Win:IsShown()) end })
 end
 
@@ -2695,8 +2729,9 @@ function Nx.Quest:Init()
 	--
 
 	self.List:Open()
-	self.Watch:Open()
-
+	self.Watch:Open()		
+	self.WQList:Open()
+	
 	-- Menu
 
 	local menu = Nx.Menu:Create (self.Map.Frm)
@@ -3282,6 +3317,7 @@ function Nx.Quest:FinishQuest()
 
 --	self.List:Update()
 	self.Watch:Update()
+	self.WQList:Update()
 end
 
 -------------------------------------------------------------------------------
@@ -3469,6 +3505,7 @@ function Nx.Quest:RecordQuestsLog()
 						if Nx.qdb.profile.QuestWatch.RemoveComplete and not cur.IsAutoComplete then
 							self.Watch:RemoveWatch (cur.QId, cur.QI)
 							self.Watch:Update()
+							self.WQList:Update()
 							change = false
 						else
 							change = true
@@ -5911,7 +5948,7 @@ function Nx.Quest:OnUpdate (elapsed)
 	end
 	local t = GetTime()
 	if t - elap >= 1 then
-		Nx.Quest.Watch:Update()
+		Nx.Quest.Watch:Update()		
 		elap = t
 	end
 
@@ -6766,6 +6803,7 @@ function Nx.Quest.List:LogUpdate()
 	Quest.Watch:ClearCompleted()
 	self:Update()
 	Quest.Watch:Update()
+	Quest.WQList:Update()
 end
 
 -------------------------------------------------------------------------------
@@ -8521,7 +8559,11 @@ function Nx.Quest.Watch:Open()
 	item:SetSlider (qopts, 1, i, 1, "NXWVisMax")
 
 --	menu:AddItem (0, "")
-
+	local function func()
+		Nx.Quest.WQList.Win:Show()
+	end
+	menu:AddItem (0, L["Open World Quest List"], func)
+	
 	local function func()
 		Nx.Opts:Open ("Quest Watch")
 	end
@@ -11236,5 +11278,381 @@ function Nx.Quest:GetQuestID (loc)
 	local _, _, _, _, _, _, _, questId, _, _, _, _, _, _ = GetQuestLogTitle(loc)
 	return questId
 end
+
+function Nx.Quest.WQList:Open()
+	self.GOpts = opts
+	local qopts = Nx.Quest:GetQuestOpts()		
+	local win = Nx.Window:Create ("NxQuestWQList", nil, nil, nil, 1, false)
+	local xo, yo = 7,3
+	Nx.Window:SetCreateFade (1, .15)
+	self.Opened = true	
+	self.Win = win	
+	win:InitLayoutData (nil, -.80, -.35, -.2, -.1)	
+	win:CreateButtons (true, nil, nil)
+	win:SetBGAlpha (0, 1)
+	win:SetBorderSize (0, 7)	
+	win.Sizeable = false	
+	win:SetTitleXOff (84 + xo, -1 - yo)
+	win.Frm:SetClampedToScreen (true)
+	win.UserUpdateFade = self.WinUpdateFade	
+	win:SetTitle (L["World Quest Tracker"])	
+	local function update (self)
+		self:Update()
+	end
+	local function func (self)
+		self.Menu:Open()
+	end
+	self.ButMenu = Nx.Button:Create (win.Frm, "WQListMenu", nil, nil, 4, -5 + yo, "TOPLEFT", 1, 1, func, self)
+	local function func (self)
+		self.MenuPri:Open()
+	end
+	Nx.List:SetCreateFont ("QuestWatch.WatchFont", 12)
+	local list = Nx.List:Create (false, 2, -2, 100, 12 * 3, win.Frm, true, true)
+	self.List = list
+	list:SetMinSize (200, 20)
+	list.Frm:EnableMouse (false)	
+	list:ColumnAdd ("", 1, 14)
+	list:ColumnAdd ("Name", 2, 60)
+	list:ColumnAdd ("", 3, 0)
+	list:ColumnAdd ("Faction", 4, 60)
+	list:ColumnAdd ("Reward", 5, 60)
+	list:ColumnAdd ("Time Left", 6, 20)
+	win:Attach (list.Frm, 0, 1, 0, 1)
+	list:SetUser (self, self.OnListEvent)
+	
+	local wqlist = Nx.Quest.WQList
+	local menu = Nx.Menu:Create (list.Frm)
+	self.Menu = menu
+	
+	local function func ()
+		self:Update()
+	end
+	
+	local item = menu:AddItem (0, L["Show Gold Rewards"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showgold")
+	local item = menu:AddItem (0, L["Show AP Rewards"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showap")
+	local item = menu:AddItem (0, L["Show Order Resource Rewards"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showorder")
+	local item = menu:AddItem (0, L["Show Gear Rewards"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showgear")
+	local item = menu:AddItem (0, L["Show PVP Rewards"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showpvp")
+	local item = menu:AddItem (0, L["Show Other Rewards"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showother")
+	local item = menu:AddItem (0, "", func, wqlist)
+	local item = menu:AddItem (0, L["Court of Farondis"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showfaronis")
+	local item = menu:AddItem (0, L["Dreamweavers"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showdreamweaver")	
+	local item = menu:AddItem (0, L["Highmountain Tribe"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showhighmountain")		
+	local item = menu:AddItem (0, L["Legionfall"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showlegionfall")
+	local item = menu:AddItem (0, L["Nightfallen"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "shownightfallen")
+	local item = menu:AddItem (0, L["Wardens"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showwardens")		
+	local item = menu:AddItem (0, L["Valarjar"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showvalarjar")			
+	local item = menu:AddItem (0, "", func, wqlist)
+	local item = menu:AddItem (0, L["Color Active Faction Bounties"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "bountycolor")	
+	local item = menu:AddItem (0, L["Current Zone Only"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "zoneonly")
+	local item = menu:AddItem (0, L["Faction Bounties Only"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showbounty")	
+	self.FirstUpdate = true
+	self.FlashColor = 0
+	win:RegisterEvent ("QUEST_LOG_UPDATE", self.UpdateDB)
+	win:RegisterEvent ("UNIT_QUEST_LOG_CHANGED", self.UpdateDB)
+	win:RegisterEvent ("ZONE_CHANGED_NEW_AREA", self.Update)
+	win.Frm:SetScript ("OnShow",self.UpdateDB)
+--	self:SetSortMode (1)
+	win.Frm:Hide()
+end
+
+function Nx.Quest.WQList:WinUpdateFade (fade)	
+	Nx.Quest.WQList.Win:SetTitleColors (1, 1, 1, fade)		
+	Nx.Quest.WQList.List.Frm:SetAlpha (fade)
+	Nx.Quest.WQList.ButMenu.Frm:SetAlpha (fade)
+end
+
+function Nx.Quest.WQList:GenWQTip(questId)	
+	if worldquestdb[questId].tip and worldquestdb[questId].tip ~= false then		
+		return worldquestdb[questId].tip
+	end
+	worldquesttip:ClearLines()
+	local title, factionID, capped = C_TaskQuest.GetQuestInfoByQuestID(questId)
+	local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex, displayTimeLeft = GetQuestTagInfo(questId)
+	local color = WORLD_QUEST_QUALITY_COLORS[rarity]
+	local style = TOOLTIP_QUEST_REWARDS_STYLE_DEFAULT
+	local tipdone = false
+	
+	worldquesttip:SetText(title, color.r, color.g, color.b)	
+	QuestUtils_AddQuestTypeToTooltip(worldquesttip, questId, NORMAL_FONT_COLOR)
+	if factionID then
+		local factionName = GetFactionInfoByID(factionID)
+		if factionName then
+			if capped then
+				worldquesttip:AddLine(factionName, GRAY_FONT_COLOR:GetRGB())
+			else
+				worldquesttip:AddLine(factionName)
+			end
+		end
+	end
+
+	if displayTimeLeft then
+		WorldMap_AddQuestTimeToTooltip(questId)
+	end
+
+	for objectiveIndex = 1, worldquestdb[questId].numobjectives do
+		local objectiveText, objectiveType, finished = GetQuestObjectiveInfo(questId, objectiveIndex, false)
+		if objectiveText and #objectiveText > 0 then
+			local color = finished and GRAY_FONT_COLOR or HIGHLIGHT_FONT_COLOR
+			worldquesttip:AddLine(QUEST_DASH .. objectiveText, color.r, color.g, color.b, true)
+		end
+	end
+
+	local percent = C_TaskQuest.GetQuestProgressBarInfo(questId)
+	if percent then				
+		worldquesttip:AddLine(L["Percent Complete"] .. ":  " .. percent .. "%")
+	end
+
+	if (GetQuestLogRewardXP(questId) > 0 or GetNumQuestLogRewardCurrencies(questId) > 0 or GetNumQuestLogRewards(questId) > 0 or GetQuestLogRewardMoney(questId) > 0 or GetQuestLogRewardArtifactXP(questId) > 0 or GetQuestLogRewardHonor(questId)) then
+		GameTooltip_AddBlankLinesToTooltip(worldquesttip, style.prefixBlankLineCount)
+		worldquesttip:AddLine(style.headerText, style.headerColor.r, style.headerColor.g, style.headerColor.b, style.wrapHeaderText)
+		GameTooltip_AddBlankLinesToTooltip(worldquesttip, style.postHeaderBlankLineCount)
+
+		local xp = GetQuestLogRewardXP(questId)				
+		if ( xp > 0 ) then
+			worldquesttip:AddLine(BONUS_OBJECTIVE_EXPERIENCE_FORMAT:format(xp), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+			tipdone = true			
+		end
+		local artifactXP = GetQuestLogRewardArtifactXP(questId)
+		if ( artifactXP > 0 ) then
+			worldquesttip:AddLine(BONUS_OBJECTIVE_ARTIFACT_XP_FORMAT:format(artifactXP), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+			tipdone = true			
+		end
+		local numAddedQuestCurrencies = QuestUtils_AddQuestCurrencyRewardsToTooltip(questId, worldquesttip)
+		if ( numAddedQuestCurrencies > 0 ) then
+			tipdone = true			
+		end		
+		local honorAmount = GetQuestLogRewardHonor(questId)
+		if ( honorAmount > 0 ) then
+			worldquesttip:AddLine(BONUS_OBJECTIVE_REWARD_WITH_COUNT_FORMAT:format("Interface\\ICONS\\Achievement_LegionPVPTier4", honorAmount, HONOR), HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)			
+			tipdone = true
+			worldquestdb[questId].PVP = true
+		end		
+		local money = GetQuestLogRewardMoney(questId)
+		if ( money > 0 ) then
+			worldquesttip:AddLine(Nx.Util_GetMoneyStr (money))
+			tipdone = true			
+		end
+		local numQuestRewards = GetNumQuestLogRewards(questId)
+		if numQuestRewards > 0 then			
+			local name,icon,numItems,quality,_,itemID = GetQuestLogRewardInfo(1,questId)
+			local color = BAG_ITEM_QUALITY_COLORS[quality]
+			if name then
+				worldquesttip:AddLine("|T"..icon..":0|t "..(numItems and numItems > 1 and numItems.."x " or "")..name, color.r, color.g, color.b)
+				tipdone = true
+			end
+		end
+	end
+	if not tipdone then
+		return false
+	end
+	local tip = ""
+	for i=1, worldquesttip:NumLines() do
+		local line = _G["WQListTipTextLeft" .. i]:GetText()
+		local r, g, b = _G["WQListTipTextLeft" .. i]:GetTextColor()		
+		tip = tip .. format("|cff%02x%02x%02x%s|r\n", r * 255, g * 255, b * 255, line)		
+	end
+	
+	return tip
+end
+
+function Nx.Quest.WQList:GetWQReward(questId)
+	local reward = ""
+	
+	local artxp = GetQuestLogRewardArtifactXP(questId)	
+	if artxp > 0 then				
+		return 10
+	end
+	local items = GetNumQuestLogRewards(questId)
+	if items > 0 then
+		worldquesttip:ClearLines()
+		local name,icon,qty,quality,_,itemID = GetQuestLogRewardInfo(1,questId)
+		local foundartifact = false
+		worldquesttip:SetQuestLogItem("reward", 1, questId)
+		local link = select(2,worldquesttip:GetItem())		
+		for i=2, worldquesttip:NumLines() do
+			local line = _G["WQListTipTextLeft" .. i]:GetText()
+			if line and ( line:find(ARTIFACT_POWER.."|r$") or line:find("Artifact Power|r$") ) then
+				return 10		
+			end		
+			if line and line:find(ITEM_LEVEL) then				
+				return 40
+			end
+		end
+		worldquesttip:ClearLines()
+	end
+	local gold = GetQuestLogRewardMoney(questId)
+	if gold > 0 then
+		return 20
+	end
+	local numcurrency = GetNumQuestLogRewardCurrencies(questId)
+	for i = 1, numcurrency do
+		local name, texture, num, id = GetQuestLogRewardCurrencyInfo(i, questId)
+		if id == 1220 then
+			return 30
+		end
+	end
+	return false
+end
+
+function Nx.Quest.WQList:OnListEvent (eventName, sel, val2, click)
+	local itemData = self.List:ItemGetData (sel) or 0
+	local shift = IsShiftKeyDown() or eventName == "mid"
+	local map = Nx.Map:GetMap (1)	
+	if eventName == "button" and itemData then				
+		local title, faction = C_TaskQuest.GetQuestInfoByQuestID(itemData.questid)		
+		map:SetTargetXY (itemData.mapid, itemData.x, itemData.y, title, false)	
+	end
+end
+
+function Nx.Quest.WQList:UpdateDB(event, ...)
+--	if not Nx.Quest.WQList.Win.Frm:IsVisible() then
+--		return
+--	end	
+	local legionzones = {1015, 1018, 1024, 1017, 1033, 1014, 1021, 1096}
+	if not WorldMapFrame:IsShown() then
+		SetMapByID(1007)
+	end		
+	for i=1,#legionzones do
+		local zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i], legionzones[i])
+		for j, quest in pairs(zonequests) do			
+			local questId = quest.questId			
+			C_TaskQuest.RequestPreloadRewardData (questId)
+			if QuestUtils_IsQuestWorldQuest (questId) then
+				if not worldquestdb[questId] then
+					worldquestdb[questId] = {}					
+				end
+				worldquestdb[questId].x = quest.x * 100				
+				worldquestdb[questId].y = quest.y * 100				
+				worldquestdb[questId].mapid = legionzones[i]
+				worldquestdb[questId].questid = questId
+				worldquestdb[questId].numobjectives = quest.numObjectives
+				local tip = Nx.Quest.WQList:GenWQTip(questId)
+				if not worldquestdb[questId].tip and tip then						
+					worldquestdb[questId].tip = tip
+				end
+			end
+		end
+	end
+	if not WorldMapFrame:IsShown() then
+		SetMapByID(Nx.Map.UpdateMapID)
+	end	
+	if event == "QUEST_LOG_UPDATE" then
+		Nx.Quest.WQList.Win.Frm:UnregisterEvent("QUEST_LOG_UPDATE")
+		C_Timer.After(5, function() Nx.Quest.WQList:UpdateDB() end)
+	end	
+	C_Timer.After(1, function() Nx.Quest.WQList:Update() end)	
+end
+
+function Nx.Quest.WQList:CheckBounty(questId)
+	local bounties = GetQuestBountyInfoForMapID(1014)
+	local isbounty = false
+	for bountyIndex, bounty in ipairs(bounties) do
+		if IsQuestCriteriaForBounty(questId, bounty.questID) then
+			isbounty = true
+		end
+	end
+	return isbounty
+end
+
+function Nx.Quest.WQList:Update()	
+	local list = self.List	
+	list:Empty()		
+	list:ColumnSetWidth(2,60)
+	list:ColumnSetWidth(4,60)
+	list:ColumnSetWidth(5,60)	
+	list:ColumnSetWidth(6,60)		
+	
+	for quest, _ in pairs(worldquestdb) do
+		local info = worldquestdb[quest]
+		local questId = quest					
+		local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
+		local newwidth = #title * 5 + 10
+		local timeleft = C_TaskQuest.GetQuestTimeLeftMinutes(questId)
+		local rewardstring = ""		
+		local isbounty = self:CheckBounty(questId)
+		
+		if timeleft > 0 then								
+			local reward = self:GetWQReward(questId)
+			if (reward == 10 and not Nx.qdb.profile.WQList.showap) or
+			   (reward == 20 and not Nx.qdb.profile.WQList.showgold) or 
+			   (reward == 30 and not Nx.qdb.profile.WQList.showorder) or
+			   (reward == 40 and not Nx.qdb.profile.WQList.showgear) or
+			   (info.PVP and not Nx.qdb.profile.WQList.showpvp) or
+			   (faction == 1900 and not Nx.qdb.profile.WQList.showfaronis) or
+			   (faction == 1883 and not Nx.qdb.profile.WQList.showdreamweaver) or
+			   (faction == 1828 and not Nx.qdb.profile.WQList.showhighmountain) or
+			   (faction == 2045 and not Nx.qdb.profile.WQList.showlegionfall) or
+			   (faction == 1859 and not Nx.qdb.profile.WQList.shownightfallen) or
+			   (faction == 1894 and not Nx.qdb.profile.WQList.showwardens) or
+			   (faction == 1948 and not Nx.qdb.profile.WQList.showvalarjar) or
+			   (isbounty == false and Nx.qdb.profile.WQList.showbounty) or
+			   (info.mapid ~= GetCurrentMapAreaID() and Nx.qdb.profile.WQList.zoneonly) or
+			   (reward == false and not Nx.qdb.profile.WQList.showother)then
+			else	
+				local colstring = "|r"
+				if isbounty and Nx.qdb.profile.WQList.bountycolor then
+					colstring = "|cff00DD00"
+				end
+				if newwidth > list:ColumnGetWidth(2) then
+					list:ColumnSetWidth(2,newwidth)
+				end
+				list:ItemAdd(0)			
+				list:ItemSet(2,colstring .. title)
+				if faction then				
+					local factionname = GetFactionInfoByID(faction)
+					newwidth = #factionname * 5 + 10
+					if newwidth > list:ColumnGetWidth(4) then
+						list:ColumnSetWidth(4,newwidth)
+					end					
+					list:ItemSet(4,colstring .. factionname)
+				end
+				if reward == 10 then
+					rewardstring = "Artifact Power"
+				elseif reward == 20 then
+					rewardstring = "Gold"
+				elseif reward == 30 then
+					rewardstring = "Order Resources"
+				elseif reward == 40 then
+					rewardstring = "Gear"
+				end
+				newwidth = #rewardstring * 5 + 10
+				if newwidth > list:ColumnGetWidth(5) then
+					list:ColumnSetWidth (5, newwidth)
+				end
+				list:ItemSet(5, colstring .. rewardstring)
+				local timestr = Nx.Util_GetTimeElapsedStr (timeleft * 60)
+				newwidth = #timestr * 5 +10
+				if newwidth > list:ColumnGetWidth(6) then
+					list:ColumnSetWidth (6, newwidth)
+				end
+				list:ItemSet(6,colstring .. timestr)				
+				list:ItemSetButton ("QuestWatchCustomTip", false)
+				list:ItemSetData(list:ItemGetNum(), info)
+				if info.tip then
+					list:ItemSetButtonTip(info.tip)
+				end
+			end
+		end
+	end
+	list:Update()			
+end
+
 -------------------------------------------------------------------------------
 -- EOF
