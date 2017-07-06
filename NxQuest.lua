@@ -11312,10 +11312,10 @@ function Nx.Quest.WQList:Open()
 	list:SetMinSize (200, 20)
 	list.Frm:EnableMouse (false)	
 	list:ColumnAdd ("", 1, 14)
-	list:ColumnAdd ("Name", 2, 60)
+	list:ColumnAdd ("Name", 2, 120)
 	list:ColumnAdd ("", 3, 0)
-	list:ColumnAdd ("Faction", 4, 60)
-	list:ColumnAdd ("Reward", 5, 60)
+	list:ColumnAdd ("Faction", 4, 20)
+	list:ColumnAdd ("Reward", 5, 40)
 	list:ColumnAdd ("Time Left", 6, 20)
 	win:Attach (list.Frm, 0, 1, 0, 1)
 	list:SetUser (self, self.OnListEvent)
@@ -11352,7 +11352,9 @@ function Nx.Quest.WQList:Open()
 	local item = menu:AddItem (0, L["Nightfallen"], func, wqlist)
 	item:SetChecked (Nx.qdb.profile.WQList, "shownightfallen")
 	local item = menu:AddItem (0, L["Wardens"], func, wqlist)
-	item:SetChecked (Nx.qdb.profile.WQList, "showwardens")		
+	item:SetChecked (Nx.qdb.profile.WQList, "showwardens")	
+	local item = menu:AddItem (0, L["Kirin Tor"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showkirintor")	
 	local item = menu:AddItem (0, L["Valarjar"], func, wqlist)
 	item:SetChecked (Nx.qdb.profile.WQList, "showvalarjar")			
 	local item = menu:AddItem (0, "", func, wqlist)
@@ -11574,10 +11576,10 @@ end
 function Nx.Quest.WQList:Update()	
 	local list = Nx.Quest.WQList.List	
 	list:Empty()		
-	list:ColumnSetWidth(2,60)
-	list:ColumnSetWidth(4,60)
-	list:ColumnSetWidth(5,60)	
-	list:ColumnSetWidth(6,60)		
+	list:ColumnSetWidth(2,120)
+	list:ColumnSetWidth(4,20)
+	list:ColumnSetWidth(5,40)	
+	list:ColumnSetWidth(6,20)		
 	
 	for quest, _ in pairs(worldquestdb) do
 		local info = worldquestdb[quest]
@@ -11602,6 +11604,7 @@ function Nx.Quest.WQList:Update()
 			   (faction == 1859 and not Nx.qdb.profile.WQList.shownightfallen) or
 			   (faction == 1894 and not Nx.qdb.profile.WQList.showwardens) or
 			   (faction == 1948 and not Nx.qdb.profile.WQList.showvalarjar) or
+			   (faction == 1090 and not Nx.qdb.profile.WQList.showkirintor) or
 			   (isbounty == false and Nx.qdb.profile.WQList.showbounty) or
 			   (info.mapid ~= GetCurrentMapAreaID() and Nx.qdb.profile.WQList.zoneonly) or
 			   (reward == false and not Nx.qdb.profile.WQList.showother)then
