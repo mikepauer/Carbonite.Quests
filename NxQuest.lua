@@ -11585,7 +11585,7 @@ function Nx.Quest.WQList:Update()
 		local info = worldquestdb[quest]
 		local questId = quest					
 		local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
-		local newwidth = #title * 5 + 10
+		local newwidth = #title * 7 + 10
 		local timeleft = C_TaskQuest.GetQuestTimeLeftMinutes(questId)
 		local rewardstring = ""		
 		local isbounty = Nx.Quest.WQList:CheckBounty(questId)
@@ -11620,7 +11620,7 @@ function Nx.Quest.WQList:Update()
 				list:ItemSet(2,colstring .. title)
 				if faction then				
 					local factionname = GetFactionInfoByID(faction)
-					newwidth = #factionname * 5 + 10
+					newwidth = #factionname * 7 + 10
 					if newwidth > list:ColumnGetWidth(4) then
 						list:ColumnSetWidth(4,newwidth)
 					end					
@@ -11635,13 +11635,13 @@ function Nx.Quest.WQList:Update()
 				elseif reward == 40 then
 					rewardstring = "Gear"
 				end
-				newwidth = #rewardstring * 5 + 10
+				newwidth = #rewardstring * 7 + 10
 				if newwidth > list:ColumnGetWidth(5) then
 					list:ColumnSetWidth (5, newwidth)
 				end
 				list:ItemSet(5, colstring .. rewardstring)
 				local timestr = Nx.Util_GetTimeElapsedStr (timeleft * 60)
-				newwidth = #timestr * 5 +10
+				newwidth = #timestr * 7 +10
 				if newwidth > list:ColumnGetWidth(6) then
 					list:ColumnSetWidth (6, newwidth)
 				end
