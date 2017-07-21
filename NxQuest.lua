@@ -2946,7 +2946,7 @@ function Nx.Quest:ProcessQuestDB(questTotal)
 					while qc do
 						cnum = cnum + 1
 						qc.CNum = cnum
-						name, side, level, minlevel, qnext = self:Unpack (qc["Quest"])
+						local name, side, level, minlevel, qnext = self:Unpack (qc["Quest"])
 						clvlmax = max (clvlmax, level)
 						if not qnext or qnext == 0 or _qids[qnext] == true or cnum > 40 then
 							break
@@ -8572,7 +8572,7 @@ function Nx.Quest.Watch:Open()
 
 	-- Create priority button menu
 
-	local menu = Nx.Menu:Create (list.Frm, 260)
+	local menu = Nx.Menu:Create (list.Frm, 300)
 	self.MenuPri = menu
 
 	local item = menu:AddItem (0, L["Hide Unfinished Quests"], update, self)
