@@ -7958,11 +7958,11 @@ function Nx.Quest:UpdateIcons (map)
 	if Map.UpdateMapID ~= 9000 then
 		local taskInfo = C_TaskQuest.GetQuestsForPlayerByMapID(Map.UpdateMapID);
 		if taskInfo and Nx.db.char.Map.ShowWorldQuest then
-			for i=1,#taskInfo do
+			for i=1,#taskInfo do				
 				local info = taskInfo[i]
-				local questId = taskInfo[i].questId
+				local questId = taskInfo[i].questId				
 				local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
-				if QuestUtils_IsQuestWorldQuest (questId) then
+				if QuestUtils_IsQuestWorldQuest (questId) and (worldquestdb[questId] and not worldquestdb[questId].Filtered) then
 					activeWQ[questId] = true
 					C_TaskQuest.RequestPreloadRewardData (questId)
 					local tid, name, questtype, rarity, elite, tradeskill = GetQuestTagInfo (questId)
@@ -11608,7 +11608,8 @@ function Nx.Quest.WQList:Update()
 			   (isbounty == false and Nx.qdb.profile.WQList.showbounty) or
 			   (info.mapid ~= GetCurrentMapAreaID() and Nx.qdb.profile.WQList.zoneonly) or
 			   (reward == false and not Nx.qdb.profile.WQList.showother)then
-			else	
+					worldquestdb[questId].Filtered = true
+			else					
 				local colstring = "|r"
 				if isbounty and Nx.qdb.profile.WQList.bountycolor then
 					colstring = "|cff00DD00"
@@ -11651,6 +11652,7 @@ function Nx.Quest.WQList:Update()
 				if info.tip then
 					list:ItemSetButtonTip(info.tip)
 				end
+				worldquestdb[questId].Filtered = false
 			end
 		end
 	end
