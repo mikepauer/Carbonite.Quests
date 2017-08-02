@@ -8019,25 +8019,27 @@ function Nx.Quest:UpdateIcons (map)
 						end]]--
 					end
 				else
-					taskIconIndex = taskIconIndex + 1
-					local x,y = taskInfo[i].x * 100, taskInfo[i].y * 100
-					local f = map:GetIcon (3)
+					if not worldquestdb[questId] then
+						taskIconIndex = taskIconIndex + 1
+						local x,y = taskInfo[i].x * 100, taskInfo[i].y * 100
+						local f = map:GetIcon (3)
 
-					-- objectives
-					local objTxt = ""
-					for objectiveIndex = 1, taskInfo[i].numObjectives do
-						local objectiveText, objectiveType, finished = GetQuestObjectiveInfo(questId, objectiveIndex, false)
-						if ( objectiveText and #objectiveText > 0 ) then
-							local color = finished and HIGHLIGHT_FONT_COLOR or GRAY_FONT_COLOR
-							color = format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255);
-							objTxt = objTxt .. "\n- " .. color .. objectiveText
+						-- objectives
+						local objTxt = ""
+						for objectiveIndex = 1, taskInfo[i].numObjectives do
+							local objectiveText, objectiveType, finished = GetQuestObjectiveInfo(questId, objectiveIndex, false)
+							if ( objectiveText and #objectiveText > 0 ) then
+								local color = finished and HIGHLIGHT_FONT_COLOR or GRAY_FONT_COLOR
+								color = format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255);
+								objTxt = objTxt .. "\n- " .. color .. objectiveText
+							end
 						end
-					end
 
-					f.NxTip = "|cffffd100Bonus Task:\n" .. title:gsub("Bonus Objective: ", "") .. objTxt
-					f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
-					map:ClipFrameZ (f, x, y, 16, 16, 0)
-					f.texture:SetTexCoord (GetObjectIconTextureCoords(4734))
+						f.NxTip = "|cffffd100Bonus Task:\n" .. title:gsub("Bonus Objective: ", "") .. objTxt
+						f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
+						map:ClipFrameZ (f, x, y, 16, 16, 0)
+						f.texture:SetTexCoord (GetObjectIconTextureCoords(4734))
+					end
 				end
 			end
 		end
