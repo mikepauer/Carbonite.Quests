@@ -11529,12 +11529,18 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 --	if not Nx.Quest.WQList.Win.Frm:IsVisible() then
 --		return
 --	end	
-	local legionzones = {1015, 1018, 1024, 1017, 1033, 1014, 1021, 1096}
+	local legionzones = {1014, 1015, 1017, 1018, 1021, 1024, 1033, 1096}
 	if not WorldMapFrame:IsShown() then
 		SetMapByID(1007)
 	end		
 	for i=1,#legionzones do
-		local zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i], legionzones[i])
+		local zonequests = {}
+		if legionzones[i] == 1014 then
+			SetMapByID(1014)
+			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i])
+		else
+			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i], legionzones[i])
+		end
 		for j, quest in pairs(zonequests) do			
 			local questId = quest.questId			
 			C_TaskQuest.RequestPreloadRewardData (questId)
