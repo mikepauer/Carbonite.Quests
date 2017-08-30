@@ -4943,7 +4943,7 @@ function Nx.Quest:Abandon (qIndex, qId)
 					if ( QuestLogPopupDetailFrame:IsShown() ) then
 						HideUIPanel(QuestLogPopupDetailFrame);
 					end
-					PlaySound("igQuestLogAbandonQuest");
+					PlaySound(846);
 					
 					-- carb
 					if qId > 0 then
@@ -7987,7 +7987,7 @@ function Nx.Quest:UpdateIcons (map)
 							map:SetTargetAtStr (format("%s, %s", x, y))
 							if not InCombatLockdown() and self.worldQuest then
 							  if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
-								PlaySound("igMainMenuOptionCheckBoxOn");
+								PlaySound(856);
 						 
 								if IsShiftKeyDown() then
 								  if IsWorldQuestHardWatched(self.questID) or (IsWorldQuestWatched(self.questID) and GetSuperTrackedQuestID() == self.questID) then
