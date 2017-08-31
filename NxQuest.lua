@@ -27,7 +27,7 @@
 
 local _G = getfenv(0)
 
-CarboniteQuest = LibStub("AceAddon-3.0"):NewAddon("Carbonite.Quest","AceEvent-3.0", "AceComm-3.0")
+CarboniteQuest = LibStub("AceAddon-3.0"):NewAddon("Carbonite.Quest", "AceEvent-3.0", "AceComm-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Carbonite.Quest", true)
 
 Nx.VERSIONQOPTS		= .12				-- Quest options
@@ -172,8 +172,11 @@ local defaults = {
 			showdreamweaver = true,
 			showhighmountain = true,
 			showlegionfall = true,
+			showargussian = true,
 			shownightfallen = true,
 			showwardens = true,
+			showkirintor = true,
+			showarmyoflight = true,
 			showvalarjar = true,
 			bountycolor = true,
 		},
@@ -4418,7 +4421,7 @@ end
 
 -------------------------------------------------------------------------------
 
-function Nx.Quest.OnChat_msg_combat_faction_change (event, arg1)
+function CarboniteQuest:OnChat_msg_combat_faction_change (event, arg1)
 
 	local self = Nx.Quest
 
@@ -4943,7 +4946,7 @@ function Nx.Quest:Abandon (qIndex, qId)
 					if ( QuestLogPopupDetailFrame:IsShown() ) then
 						HideUIPanel(QuestLogPopupDetailFrame);
 					end
-					PlaySound("igQuestLogAbandonQuest");
+					PlaySound(PlaySoundKitID and "igMainMenuOptionCheckBoxOn" or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 					
 					-- carb
 					if qId > 0 then
@@ -5227,7 +5230,7 @@ Nx.Quest.AlchemistsApprenticeData = {
 	["Withered Batwing"] = "4~3~3496~5153",
 }
 
-function	Nx.Quest:OnChat_msg_raid_boss_whisper (event, arg1)
+function CarboniteQuest:OnChat_msg_raid_boss_whisper (event, arg1)
 
 	if arg1 then
 
@@ -5455,31 +5458,25 @@ function Nx.Quest.List:Open()
 	win.Frm:SetMinResize (250, 120)
 
 	win:SetUser (self, self.OnWin)
-	win:RegisterEvent ("PLAYER_LOGIN", self.OnQuestUpdate)
-	win:RegisterEvent ("UPDATE_FACTION", self.OnQuestUpdate)
-	win:RegisterEvent ("GARRISON_MISSION_COMPLETE_RESPONSE", self.OnQuestUpdate)
-	win:RegisterEvent ("WORLD_QUEST_COMPLETED_BY_SPELL", self.OnQuestUpdate)
-	win:RegisterEvent ("UNIT_QUEST_LOG_CHANGED", self.OnQuestUpdate)
---	win:RegisterEvent ("QUESTLINE_UPDATE", self.OnQuestUpdate)
---	win:RegisterEvent ("QUESTTASK_UPDATE", self.OnQuestUpdate)
---	win:RegisterEvent ("QUEST_LOG_UPDATE", self.OnQuestUpdate)
---  win:RegisterEvent ("QUEST_WATCH_UPDATE", self.OnQuestUpdate)
---	win:RegisterEvent ("QUEST_WATCH_LIST_CHANGED", self.OnQuestUpdate)
---	win:RegisterEvent ("QUEST_WATCH_OBJECTIVES_CHANGED", self.OnQuestUpdate)
-	win:RegisterEvent ("QUEST_PROGRESS", self.OnQuestUpdate)
-	win:RegisterEvent ("QUEST_COMPLETE", self.OnQuestUpdate)
-	win:RegisterEvent ("QUEST_ACCEPTED", self.OnQuestUpdate)
-	win:RegisterEvent ("QUEST_REMOVED", self.OnQuestUpdate)
-	win:RegisterEvent ("QUEST_TURNED_IN", self.OnQuestUpdate)
-	win:RegisterEvent ("QUEST_DETAIL", self.OnQuestUpdate)
-	win:RegisterEvent ("SCENARIO_UPDATE", self.OnQuestUpdate)
-	win:RegisterEvent ("SCENARIO_CRITERIA_UPDATE", self.OnQuestUpdate)
-	win:RegisterEvent ("WORLD_STATE_TIMER_START", self.OnQuestUpdate)
-	win:RegisterEvent ("WORLD_STATE_TIMER_STOP", self.OnQuestUpdate)
-	win:RegisterEvent ("WORLD_MAP_UPDATE", self.OnQuestUpdate)
-	win:RegisterEvent ("CRITERIA_UPDATE", self.OnQuestUpdate)
-	win:RegisterEvent ("CHAT_MSG_COMBAT_FACTION_CHANGE", Nx.Quest.OnChat_msg_combat_faction_change)
-	win:RegisterEvent ("CHAT_MSG_RAID_BOSS_WHISPER", Nx.Quest.OnChat_msg_raid_boss_whisper)
+	CarboniteQuest:RegisterEvent ("PLAYER_LOGIN", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("UPDATE_FACTION", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("GARRISON_MISSION_COMPLETE_RESPONSE", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("WORLD_QUEST_COMPLETED_BY_SPELL", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("UNIT_QUEST_LOG_CHANGED", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("QUEST_PROGRESS", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("QUEST_COMPLETE", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("QUEST_ACCEPTED", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("QUEST_REMOVED", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("QUEST_TURNED_IN", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("QUEST_DETAIL", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("SCENARIO_UPDATE", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("SCENARIO_CRITERIA_UPDATE", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_START", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_STOP", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("WORLD_MAP_UPDATE", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("CRITERIA_UPDATE", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("CHAT_MSG_COMBAT_FACTION_CHANGE", "OnChat_msg_combat_faction_change")
+	CarboniteQuest:RegisterEvent ("CHAT_MSG_RAID_BOSS_WHISPER", "OnChat_msg_raid_boss_whisper")
 	-- Filter Edit Box
 
 	local f = CreateFrame ("EditBox", "NxQuestFilter", win.Frm)
@@ -6664,7 +6661,7 @@ function Nx.Quest.List:Refresh()
 	end)
 end
 
-function Nx.Quest.List:OnQuestUpdate (event, ...)
+function CarboniteQuest:OnQuestUpdate (event, ...)
 	local Quest = Nx.Quest
 	local arg1, arg2, arg3 = select (1, ...)
 	
@@ -6673,14 +6670,12 @@ function Nx.Quest.List:OnQuestUpdate (event, ...)
 	if event == "PLAYER_LOGIN" then
 		self.LoggingIn = true
 	elseif event == "QUEST_TURNED_IN" then
-		self:Refresh(event)
+		Nx.Quest.List:Refresh(event)
 	elseif event == "WORLD_MAP_UPDATE" then
 		local oldmap = GetCurrentMapAreaID()
 		if Nx.Quest.OldMap ~= oldmap then
 			Nx.Quest.OldMap = oldmap
 			Nx.Quest:MapChanged()
-			
---			self:Refresh() --killed this, makes load time really long
 		end
 	elseif event == "QUEST_PROGRESS" then
 		local auto = Nx.qdb.profile.Quest.AutoTurnIn
@@ -6693,7 +6688,7 @@ function Nx.Quest.List:OnQuestUpdate (event, ...)
 			CompleteQuest()
 --			Nx.prt ("Auto turn in")
 		end
-		self:Refresh()
+		Nx.Quest.List:Refresh(event)
 		return
 	elseif event == "QUEST_COMPLETE" then
 		local auto = Nx.qdb.profile.Quest.AutoTurnIn
@@ -6706,7 +6701,7 @@ function Nx.Quest.List:OnQuestUpdate (event, ...)
 --				Nx.prt ("Auto turn in choice")
 			end
 		end
-		self:Refresh(event)
+		Nx.Quest.List:Refresh(event)
 		return
 	elseif event == "QUEST_ACCEPTED" then
 		if QuestGetAutoAccept() then
@@ -6721,7 +6716,7 @@ function Nx.Quest.List:OnQuestUpdate (event, ...)
 				Quest:PartyStartSend()
 			end
 		end
-		self:Refresh(event)
+		Nx.Quest.List:Refresh(event)
 	elseif event == "QUEST_DETAIL" then		-- Happens when auto accept quest is given
 
 		if QuestGetAutoAccept() and QuestIsFromAreaTrigger() then
@@ -6730,7 +6725,7 @@ function Nx.Quest.List:OnQuestUpdate (event, ...)
 			CloseQuest();
 --			Quest.AcceptQId = GetQuestID()
 --			Nx.prt ("QUEST_DETAIL %s", GetQuestID())
-			self:Refresh(event)
+			Nx.Quest.List:Refresh(event)
 		end
 
 	elseif event == "QUEST_LOG_UPDATE" or event == "UNIT_QUEST_LOG_CHANGED" or event == "WORLD_QUEST_COMPLETED_BY_SPELL" then
@@ -6742,10 +6737,10 @@ function Nx.Quest.List:OnQuestUpdate (event, ...)
 			Quest:AccessAllQuests()
 			QLogUpdate = Nx:ScheduleTimer(self.LogUpdate,.5,self)	-- Small delay, so access works (0 does work)
 		else
-			self:Refresh(event)
+			Nx.Quest.List:Refresh(event)
 		end
 	elseif event == "GARRISON_MISSION_COMPLETE_RESPONSE" then
-		self:LogUpdate()
+		Nx.Quest.List:LogUpdate()
 	else
 		Nx.Quest.Watch:Update()
 	end
@@ -7987,7 +7982,7 @@ function Nx.Quest:UpdateIcons (map)
 							map:SetTargetAtStr (format("%s, %s", x, y))
 							if not InCombatLockdown() and self.worldQuest then
 							  if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
-								PlaySound("igMainMenuOptionCheckBoxOn");
+								PlaySound(PlaySoundKitID and "igMainMenuOptionCheckBoxOn" or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 						 
 								if IsShiftKeyDown() then
 								  if IsWorldQuestHardWatched(self.questID) or (IsWorldQuestWatched(self.questID) and GetSuperTrackedQuestID() == self.questID) then
@@ -11349,7 +11344,7 @@ function Nx.Quest.WQList:Open()
 	item:SetChecked (Nx.qdb.profile.WQList, "showdreamweaver")	
 	local item = menu:AddItem (0, L["Highmountain Tribe"], func, wqlist)
 	item:SetChecked (Nx.qdb.profile.WQList, "showhighmountain")		
-	local item = menu:AddItem (0, L["Legionfall"], func, wqlist)
+	local item = menu:AddItem (0, L["Armies of Legionfall"], func, wqlist)
 	item:SetChecked (Nx.qdb.profile.WQList, "showlegionfall")
 	local item = menu:AddItem (0, L["Nightfallen"], func, wqlist)
 	item:SetChecked (Nx.qdb.profile.WQList, "shownightfallen")
@@ -11357,6 +11352,10 @@ function Nx.Quest.WQList:Open()
 	item:SetChecked (Nx.qdb.profile.WQList, "showwardens")	
 	local item = menu:AddItem (0, L["Kirin Tor"], func, wqlist)
 	item:SetChecked (Nx.qdb.profile.WQList, "showkirintor")	
+	local item = menu:AddItem (0, L["Army of the Light"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showarmyoflight")
+	local item = menu:AddItem (0, L["Argussian Reach"], func, wqlist)
+	item:SetChecked (Nx.qdb.profile.WQList, "showargussian")
 	local item = menu:AddItem (0, L["Valarjar"], func, wqlist)
 	item:SetChecked (Nx.qdb.profile.WQList, "showvalarjar")			
 	local item = menu:AddItem (0, "", func, wqlist)
@@ -11368,9 +11367,10 @@ function Nx.Quest.WQList:Open()
 	item:SetChecked (Nx.qdb.profile.WQList, "showbounty")	
 	self.FirstUpdate = true
 	self.FlashColor = 0
-	win:RegisterEvent ("QUEST_LOG_UPDATE", self.UpdateDB)
-	win:RegisterEvent ("UNIT_QUEST_LOG_CHANGED", self.UpdateDB)
-	win:RegisterEvent ("ZONE_CHANGED_NEW_AREA", self.Update)
+	LibStub("AceEvent-3.0"):Embed(Nx.Quest.WQList)
+	Nx.Quest.WQList:RegisterEvent ("QUEST_LOG_UPDATE", "UpdateDB")
+	Nx.Quest.WQList:RegisterEvent ("UNIT_QUEST_LOG_CHANGED", "UpdateDB")
+	Nx.Quest.WQList:RegisterEvent ("ZONE_CHANGED_NEW_AREA", "Update")	
 	win.Frm:SetScript ("OnShow",self.UpdateDB)
 --	self:SetSortMode (1)
 	win.Frm:Hide()
@@ -11529,15 +11529,15 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 --	if not Nx.Quest.WQList.Win.Frm:IsVisible() then
 --		return
 --	end	
-	local legionzones = {1014, 1015, 1017, 1018, 1021, 1024, 1033, 1096}
+	local legionzones = {1014, 1015, 1017, 1018, 1021, 1024, 1033, 1096, 1135, 1170, 1171}
 	if not WorldMapFrame:IsShown() then
 		SetMapByID(1007)
 	end		
 	for i=1,#legionzones do
 		local zonequests = {}
-		if legionzones[i] == 1014 then
-			SetMapByID(1014)
-			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i])
+		if legionzones[i] == 1014 then			
+			SetMapByID(1014)			
+			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i])			
 		else
 			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i], legionzones[i])
 		end
@@ -11564,7 +11564,7 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 		SetMapByID(Nx.Map.UpdateMapID)
 	end	
 	if event == "QUEST_LOG_UPDATE" then
-		Nx.Quest.WQList.Win.Frm:UnregisterEvent("QUEST_LOG_UPDATE")
+		Nx.Quest.WQList:UnregisterEvent("QUEST_LOG_UPDATE")
 		C_Timer.After(5, function() Nx.Quest.WQList:UpdateDB() end)
 	end	
 	C_Timer.After(1, function() Nx.Quest.WQList:Update() end)	
@@ -11613,6 +11613,8 @@ function Nx.Quest.WQList:Update()
 			   (faction == 1894 and not Nx.qdb.profile.WQList.showwardens) or
 			   (faction == 1948 and not Nx.qdb.profile.WQList.showvalarjar) or
 			   (faction == 1090 and not Nx.qdb.profile.WQList.showkirintor) or
+			   (faction == 2165 and not Nx.qdb.profile.WQList.showarmyoflight) or
+			   (faction == 2170 and not Nx.qdb.profile.WQList.showargussian) or
 			   (isbounty == false and Nx.qdb.profile.WQList.showbounty) or
 			   (info.mapid ~= GetCurrentMapAreaID() and Nx.qdb.profile.WQList.zoneonly) or
 			   (reward == false and not Nx.qdb.profile.WQList.showother)then
