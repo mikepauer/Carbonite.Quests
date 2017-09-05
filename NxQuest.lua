@@ -2145,6 +2145,10 @@ function CarboniteQuest:OnInitialize()
 	Nx.Quest.Watch:Update()
 	Nx.Quest.WQList:Update()
 	tinsert(Nx.BrokerMenuTemplate,{ text = L["Toggle Quest Watch"], func = function() Nx.Quest.Watch.Win:Show(not Nx.Quest.Watch.Win:IsShown()) end })
+	tinsert(Nx.Whatsnew.Categories, "Quests")
+	Nx.Whatsnew.Quests = {
+		[1504562405] = {"Sept 4th 2017","","New feature for world quests.","Carbonite Quests now has it's own WorldQuest Tracker","","You can find it as World Quest List under the menu in the top left of quest watch.","(Play button icon)"}
+	}
 end
 
 function Nx.Quest:InitQuestCharacter()
