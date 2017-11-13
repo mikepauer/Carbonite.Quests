@@ -9061,9 +9061,9 @@ function Nx.Quest.Watch:UpdateList()
 						for criteria = 1, numCriteria do
 							local text, _, finished, quantity, totalquantity = C_Scenario.GetCriteriaInfo(criteria)
 							if finished then
-								s = format("|cffffffff%d/%d %s |cffff0000[|cffffffff" ..L["Complete"] .."|cffff0000]",quantity, totalquantity, text)
+								s = format("|cffffffff%d/%d %s |cffff0000[|cffffffff" ..L["Complete"] .."|cffff0000]", quantity, totalquantity, text)
 							else
-								s = format("|cffffffff%d/%d %s",quantity, totalquantity, text)
+								s = format("|cffffffff%d/%d %s", quantity, totalquantity, text and text or "")
 							end
 							list:ItemAdd(0)
 							list:ItemSetOffset (16, -1)
