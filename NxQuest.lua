@@ -7970,8 +7970,8 @@ function Nx.Quest:UpdateIcons (map)
 				local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
 				if QuestUtils_IsQuestWorldQuest (questId) and (worldquestdb[questId] and not worldquestdb[questId].Filtered) then
 					activeWQ[questId] = true
-					C_TaskQuest.RequestPreloadRewardData (questId)
-					local tid, name, questtype, rarity, elite, tradeskill = GetQuestTagInfo (questId)
+					C_TaskQuest.RequestPreloadRewardData(questId)
+					local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex = GetQuestTagInfo(questId)
 					local timeLeft = C_TaskQuest.GetQuestTimeLeftMinutes(questId)
 					if timeLeft and timeLeft > 0 then
 
@@ -9067,9 +9067,9 @@ function Nx.Quest.Watch:UpdateList()
 						list:ItemAdd(0)
 						list:ItemSet(2,s)
 						for criteria = 1, numCriteria do
-							local text, _, finished, quantity, totalquantity = C_Scenario.GetCriteriaInfo(criteria)
+							local text, _, finished, quantity, totalQuantity = C_Scenario.GetCriteriaInfo(criteria)
 							if finished then
-								s = format("|cffffffff%d/%d %s |cffff0000[|cffffffff" ..L["Complete"] .."|cffff0000]", quantity, totalquantity, text)
+								s = format("|cffffffff%d/%d %s |cffff0000[|cffffffff" ..L["Complete"] .."|cffff0000]", quantity, totalQuantity, text)
 							else
 								s = format("|cffffffff%d/%d %s", quantity, totalquantity, text and text or "")
 							end
@@ -9099,13 +9099,13 @@ function Nx.Quest.Watch:UpdateList()
 							end
 							for criteria = 1, #bonusSteps do
 								local index = bonusSteps[criteria]
-								local task, criteriatype, completed, quantity, totalquantity, flags, assetid, quantitystring, criteriaid, duration, elapsed, failed, weighted = C_Scenario.GetCriteriaInfoByStep(index,1)
+								local task, criteriaType, completed, quantity, totalQuantity, flags, assetID, quantityString, criteriaID, duration, elapsed, failed, Weighted = C_Scenario.GetCriteriaInfoByStep(index,1)
 								if completed then
-									task = format("|cffffffff%d/%d %s |cffff0000[|cffffffff" ..L["Complete"] .."|cffff0000]",quantity, totalquantity, task)																
+									task = format("|cffffffff%d/%d %s |cffff0000[|cffffffff" ..L["Complete"] .."|cffff0000]", quantity, totalQuantity, task)																
 								elseif failed then
-								    task = format("|cffffffff%d/%d %s |cffff0000[|cffffffff" .. L["Failed"] .. "|cffff0000]",quantity, totalquantity, task)
+								    task = format("|cffffffff%d/%d %s |cffff0000[|cffffffff" .. L["Failed"] .. "|cffff0000]", quantity, totalQuantity, task)
 								else
-									task = format("|cffffffff%d/%d %s",quantity, totalquantity, task)
+									task = format("|cffffffff%d/%d %s", quantity, totalQuantity, task)
 								end
 								list:ItemAdd(0)
 								list:ItemSetOffset (16, -1)
@@ -11554,7 +11554,7 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 		end
 		for j, quest in pairs(zonequests) do			
 			local questId = quest.questId			
-			C_TaskQuest.RequestPreloadRewardData (questId)
+			C_TaskQuest.RequestPreloadRewardData(questId)
 			if QuestUtils_IsQuestWorldQuest (questId) then
 				if not worldquestdb[questId] then
 					worldquestdb[questId] = {}					
