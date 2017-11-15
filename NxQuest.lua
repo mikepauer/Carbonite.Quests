@@ -3780,9 +3780,9 @@ function Nx.Quest:RecordQuestsLog()
 
 						local total = qT[n + 100]
 
-						local desc, done = self:CalcDesc (quest, n, cnt, total)
+						local desc, done = self:CalcDesc (qId, n, cnt, total)
 
---						cur[n] = desc
+						cur[n] = desc
 
 						done = cur[n + 200] and done
 						cur[n + 200] = done
@@ -3834,7 +3834,7 @@ function Nx.Quest:RecordQuestsLog()
 
 						local total = qT[n + 100]
 
-						cur[n], cur[n + 100] = self:CalcDesc (quest, n, cnt, total)
+						cur[n], cur[n + 100] = self:CalcDesc (qId, n, cnt, total)
 
 						cur[n + 400] = cur.PartyNames
 
@@ -4200,19 +4200,27 @@ function Nx.Quest:QuestQueryTimer()
 	end
 end
 
-
-function Nx.Quest:CalcDesc (quest, objI, cnt, total)
-
-	local desc = ""
-	local obj = quest and quest[objI + 3]
-	if obj then
-		desc = self:UnpackObjective (obj)
+local firstTimeEmpty = true
+function Nx.Quest:CalcDesc (qId, objI, cnt, total)
+	local odesc = GetQuestObjectiveInfo(qId, objI, false);
+	local _, _, desc = strmatch (odesc, "(%d+)/(%d+) (.+)")
+	
+	if firstTimeEmpty and not desc then 
+		firstTimeEmpty = false
+		Nx.Quest:RecordQuestsLog()	
+		return Nx.Quest:CalcDesc (qId, objI, cnt, total)
 	end
-
+	
+	if not desc then
+		desc = odesc or "?"
+	end
+	
+	--Nx.prt("%s, %s, %s", qId, objI, odesc)
+	
 	if total == 0 then
 		return desc, cnt == 1
 	else
-		return format ("%s : %d/%d", desc, cnt, total), cnt >= total
+		return format ("%s: %d/%d", desc, cnt, total), cnt >= total
 	end
 end
 
@@ -8900,7 +8908,7 @@ end
 
 function Nx.Quest.Watch:UpdateList()
 --	Nx.prt ("QWatchUpdate")
-
+	
 	local Nx = Nx
 	local Quest = Nx.Quest
 	local Map = Nx.Map
@@ -9380,6 +9388,7 @@ function Nx.Quest.Watch:UpdateList()
 										desc = cur[ln]
 										done = cur[ln + 300]
 									end
+									--Nx.prt("%s", desc);
 									if not (hideDoneObj and done) then
 										if showPerColor then
 											if done then
@@ -11112,7 +11121,7 @@ function Nx.Quest:OnPartyMsg (plName, msg)
 			off = off + 6 + oCnt * 4
 		end
 	end
-
+	
 	QPartyUpdate = Nx:ScheduleTimer(self.PartyUpdateTimer,.7,self)
 end
 
