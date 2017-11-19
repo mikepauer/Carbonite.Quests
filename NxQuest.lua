@@ -4207,7 +4207,7 @@ function Nx.Quest:CalcDesc (qId, objI, cnt, total)
 	
 	if firstTimeEmpty and not desc then 
 		firstTimeEmpty = false
-		Nx.Quest:RecordQuestsLog()	
+		Nx.Quest:RecordQuests()	
 		return Nx.Quest:CalcDesc (qId, objI, cnt, total)
 	end
 	
