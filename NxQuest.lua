@@ -4205,12 +4205,6 @@ function Nx.Quest:CalcDesc (qId, objI, cnt, total)
 	local odesc = GetQuestObjectiveInfo(qId, objI, false);
 	local _, _, desc = strmatch (odesc, "(%d+)/(%d+) (.+)")
 	
-	if firstTimeEmpty and not desc then 
-		firstTimeEmpty = false
-		Nx.Quest:RecordQuests()	
-		return Nx.Quest:CalcDesc (qId, objI, cnt, total)
-	end
-	
 	if not desc then
 		desc = odesc or "?"
 	end
@@ -11128,7 +11122,7 @@ end
 -------------------------------------------------------------------------------
 
 function Nx.Quest:PartyUpdateTimer()
-	self:RecordQuests(0)
+	self:RecordQuests()
 	self.Watch:Update()
 end
 
