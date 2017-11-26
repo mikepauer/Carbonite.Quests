@@ -7075,10 +7075,10 @@ function Nx.Quest.List:Update()
 
 			if show then
 
-				local qname, side_, lvl
+				local qname, side, lvl
 
 				if quest then
-					qname, side_, lvl = Quest:Unpack (quest["Quest"])
+					qname, side, lvl = Quest:Unpack (quest["Quest"])
 				else
 					qname = format ("%s?", qId)
 					lvl = 0
