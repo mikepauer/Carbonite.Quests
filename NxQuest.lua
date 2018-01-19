@@ -4952,7 +4952,7 @@ function Nx.Quest:Abandon (qIndex, qId)
 					if ( QuestLogPopupDetailFrame:IsShown() ) then
 						HideUIPanel(QuestLogPopupDetailFrame);
 					end
-					PlaySound(846);					
+					PlaySound(SOUNDKIT.IG_QUEST_LOG_ABANDON_QUEST);					
 					-- carb
 					if qId > 0 then
 						--Nx.Quest.CurQ[qIndex] = nil
@@ -7987,7 +7987,7 @@ function Nx.Quest:UpdateIcons (map)
 							map:SetTargetAtStr (format("%s, %s", x, y))
 							if not InCombatLockdown() and self.worldQuest then
 							  if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
-								PlaySound(856);						 
+								PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);						 
 								if IsShiftKeyDown() then
 								  if IsWorldQuestHardWatched(self.questID) or (IsWorldQuestWatched(self.questID) and GetSuperTrackedQuestID() == self.questID) then
 									BonusObjectiveTracker_UntrackWorldQuest(self.questID);
