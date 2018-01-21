@@ -6709,13 +6709,15 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 		Nx.Quest.List:Refresh(event)
 		return
 	elseif event == "QUEST_ACCEPTED" then
-		local auto = Nx.qdb.profile.Quest.AutoAccept
-		if IsShiftKeyDown() and IsControlKeyDown() then
-			auto = not auto
-		end
-		if auto and QuestGetAutoAccept() then
-			QuestFrameDetailPanel:Hide();
-			CloseQuest();
+		if QuestGetAutoAccept() then
+			local auto = Nx.qdb.profile.Quest.AutoAccept
+			if IsShiftKeyDown() and IsControlKeyDown() then
+				auto = not auto
+			end
+			if auto then
+				QuestFrameDetailPanel:Hide();
+				CloseQuest();
+			end
 		end
 		if arg1 and Nx.qdb.profile.QuestWatch.AddNew then
 			local qId = Nx.Quest:GetQuestID (arg1)
@@ -6727,9 +6729,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 		end
 		Nx.Quest.List:Refresh(event)
 	elseif event == "QUEST_DETAIL" then		-- Happens when auto accept quest is given
-
 		if QuestGetAutoAccept() and QuestIsFromAreaTrigger() then
-
 			Quest:RecordQuestAcceptOrFinish()
 			local auto = Nx.qdb.profile.Quest.AutoAccept
 			if IsShiftKeyDown() and IsControlKeyDown() then
