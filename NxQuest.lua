@@ -6297,7 +6297,7 @@ end
 function Nx.Quest.List:OnSendQuestInfoTimer()
 
 	local qi = self.SendQInfoQI
-	local i, cur = qi > 0 and Nx.Quest:FindCurByIndex (qi) or nil, nil
+	local i, cur = Nx.Quest:FindCurByIndex (qi) --qi > 0 and Nx.Quest:FindCurByIndex (qi) or nil, nil
 
 	if not i then
 		return
@@ -6631,8 +6631,8 @@ function Nx.Quest.List:MakeDescLink (cur, id, debug)
 	if realLevel <= 0 then
 		level = UnitLevel ("player")
 	end
-
-	local s = Quest:CreateLink (qId, realLevel, title)
+	
+	local s = GetQuestLink(qId) or '' --Quest:CreateLink (qId, realLevel, title)
 
 	-- Needs a leading space according to Blizzard. White color breaks link
 	if quest and Nx.qdb.profile.Quest.ShowLinkExtra then
