@@ -6628,7 +6628,7 @@ function Nx.Quest.List:MakeDescLink (cur, id, debug)
 
 	local level = realLevel or 0
 
-	if realLevel <= 0 then
+	if level <= 0 then
 		level = UnitLevel ("player") or 0
 	end
 	
