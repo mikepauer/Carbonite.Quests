@@ -842,16 +842,16 @@ function Nx.ModQuests:Data6()
 		},
 		[7495] = {
 			Quest = [[Victory for the Alliance|0|60|60|0|0]],
-			End = "285|301|32|85.60|31.80",
+			End = "285|84|32|85.60|31.80",
 		},
 		[7496] = {
 			Quest = [[Celebrating Good Times|0|60|60|0|0]],
-			End = "286|301|32|67.20|85.20",
+			End = "286|84|32|67.20|85.20",
 		},
 		[7497] = {
 			Quest = [[The Journey Has Just Begun|0|60|60|0|0]],
-			Start = "286|301|32|67.20|85.20",
-			End = "286|301|32|67.20|85.20",
+			Start = "286|84|32|67.20|85.20",
+			End = "286|84|32|67.20|85.20",
 		},
 		[7498] = {
 			Quest = [[Garona: A Study on Stealth and Treachery|0|60|54|0|0]],
@@ -873,12 +873,12 @@ function Nx.ModQuests:Data6()
 		},
 		[7781] = {
 			Quest = [[The Lord of Blackrock|0|60|60|7782|0]],
-			End = "285|301|32|85.60|31.80",
+			End = "285|84|32|85.60|31.80",
 		},
 		[7782] = {
 			Quest = [[The Lord of Blackrock|0|60|60|0|0]],
-			Start = "285|301|32|85.60|31.80",
-			End = "296|301|32|71.20|80.40",
+			Start = "285|84|32|85.60|31.80",
+			End = "296|84|32|71.20|80.40",
 		},
 		[7783] = {
 			Quest = [[The Lord of Blackrock|2|60|60|0|0]],
@@ -10771,7 +10771,7 @@ function Nx.ModQuests:Data6()
 		[13188] = {
 			Quest = [[Where Kings Walk|1|55|55|0|0]],
 			Start = "1625|23|32|83.40|49.40",
-			End = "285|301|32|85.60|31.80",
+			End = "285|84|32|85.60|31.80",
 		},
 		[13189] = {
 			Quest = [[Saurfang's Blessing|2|55|55|0|0]],
