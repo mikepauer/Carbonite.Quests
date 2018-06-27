@@ -862,9 +862,9 @@ local function QuestOptions ()
 							get	= function()
 								local vals = Nx.Opts:CalcChoices("FontFace","Get")
 								for a,b in pairs(vals) do
-								  if (b == Nx.qdb.profile.Quest.QuestFont) then
-									 return a
-								  end
+									if (b == Nx.qdb.profile.Quest.QuestFont) then
+										return a
+									end
 								end
 								return ""
 							end,
@@ -1455,9 +1455,9 @@ local function QuestOptions ()
 							get	= function()
 								local vals = Nx.Opts:CalcChoices("FontFace","Get")
 								for a,b in pairs(vals) do
-								  if (b == Nx.qdb.profile.QuestWatch.WatchFont) then
-									 return a
-								  end
+									if (b == Nx.qdb.profile.QuestWatch.WatchFont) then
+										return a
+									end
 								end
 								return ""
 							end,
@@ -3140,7 +3140,7 @@ function Nx.Quest:LoadQuestDB()
 		Nx.ModQuests:Clear12()
 	end
 
-	local qStep = 100 / maxQLoad
+--	local qStep = 100 / maxQLoad
 	C_Timer.NewTicker(1, function(self)
 		if (Nx.Initialized == true and numQLoad == 0) or self._remainingIterations == 0 then
 			self:Cancel()
@@ -3997,7 +3997,7 @@ function Nx.Quest:ScanBlizzQuestDataZone()
 	local num = QuestMapUpdateAllQuests()		-- Blizz calls these in this order
 	if num > 0 then
 --		QuestPOIUpdateIcons()
-		local mapId = C_Map.GetBestMapForUnit('player')
+		local mapId = Nx.Map:GetCurrentMapAreaID()
 		if Nx.Map:IsBattleGroundMap(mapId) then
 			return
 		end
@@ -6490,7 +6490,7 @@ function Nx.Quest.List:OnListEvent (eventName, sel, val2, click)
 			-- 0 is quest name line
 			local qObj = bit.band (bit.rshift (itemData, 8), 0xff)
 
-			local mapId = Map:GetCurrentMapId()
+			local mapId = Nx.Map:GetCurrentMapAreaID()
 			Quest:TrackOnMap (qId, qObj, qIndex > 0, shift)
 			Map:SetCurrentMap (mapId)
 
@@ -6596,7 +6596,7 @@ function Nx.Quest.List:ToggleWatch (qId, qIndex, qObj, shift)
 				self:Update()
 			end
 
-			local mapId = Map:GetCurrentMapId()
+			local mapId = Nx.Map:GetCurrentMapAreaID()
 			Quest:TrackOnMap (qId, qObj, qIndex > 0, true)
 			Map:SetCurrentMap (mapId)
 		end
@@ -6681,7 +6681,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 	elseif event == "QUEST_TURNED_IN" then
 		Nx.Quest.List:Refresh(event)
 --	elseif event == "WORLD_MAP_UPDATE" then
---		local oldmap = C_Map.GetBestMapForUnit('player')
+--		local oldmap = Nx.Map:GetCurrentMapAreaID()
 --		if Nx.Quest.OldMap ~= oldmap then
 --			Nx.Quest.OldMap = oldmap
 --			Nx.Quest:MapChanged()
@@ -7062,7 +7062,7 @@ function Nx.Quest.List:Update()
 		local showFinished = self.ShowFinished or self.ShowAllQuests
 		local showOnlyDailies = self.ShowOnlyDailies and not self.ShowAllQuests
 
-		local mapId = Map:GetCurrentMapId()
+		local mapId = Nx.Map:GetCurrentMapAreaID()
 
 		local minLevel = UnitLevel ("player") - GetQuestGreenRange()
 		local maxLevel = showHighLevel and MAX_PLAYER_LEVEL or UnitLevel ("player") + 6
@@ -7190,7 +7190,7 @@ function Nx.Quest.List:Update()
 		local showFinished = self.ShowFinished or self.ShowAllQuests
 		local showOnlyDailies = self.ShowOnlyDailies and not self.ShowAllQuests
 
-		local mapId = Map:GetCurrentMapId()
+		local mapId = Nx.Map:GetCurrentMapAreaID()
 
 		local minLevel = UnitLevel ("player") - GetQuestGreenRange()
 		local maxLevel = showHighLevel and 110 or UnitLevel ("player") + 6
@@ -8000,23 +8000,23 @@ function Nx.Quest:UpdateIcons (map)
 						f:SetScript("OnClick", function (self, button)
 							map:SetTargetAtStr (format("%s, %s", x, y))
 							if not InCombatLockdown() and self.worldQuest then
-							  if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
-								PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);						 
-								if IsShiftKeyDown() then
-								  if IsWorldQuestHardWatched(self.questID) or (IsWorldQuestWatched(self.questID) and GetSuperTrackedQuestID() == self.questID) then
-									BonusObjectiveTracker_UntrackWorldQuest(self.questID);
-								  else
-									BonusObjectiveTracker_TrackWorldQuest(self.questID, true);
-								  end
-								else
-								  if IsWorldQuestHardWatched(self.questID) then
-									SetSuperTrackedQuestID(self.questID);
-								  else
-									BonusObjectiveTracker_TrackWorldQuest(self.questID);
-								  end
+								if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
+									PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);						 
+									if IsShiftKeyDown() then
+										if IsWorldQuestHardWatched(self.questID) or (IsWorldQuestWatched(self.questID) and GetSuperTrackedQuestID() == self.questID) then
+											BonusObjectiveTracker_UntrackWorldQuest(self.questID);
+										else
+											BonusObjectiveTracker_TrackWorldQuest(self.questID, true);
+										end
+									else
+										if IsWorldQuestHardWatched(self.questID) then
+											SetSuperTrackedQuestID(self.questID);
+										else
+											BonusObjectiveTracker_TrackWorldQuest(self.questID);
+										end
+									end
 								end
-							   end
-							 end
+							end
 						end)
 
 						WorldMap_SetupWorldQuestButton(f, questtype, rarity, elite, tradeskill, info.inProgress, selected, isCriteria, isSpellTarget)
@@ -11250,7 +11250,7 @@ end
 
 function Nx.Quest:UnpackLocRect (locStr)
 
-	local _,_,_,x, y, w, h = Nx.Split ("|",locStr)
+	local _, _,_, x, y, w, h = Nx.Split ("|",locStr)
 
 	return	tonumber(x),		-- * 100 / 200	Optimised
 				tonumber(y),		-- * 100 / 200
@@ -11260,10 +11260,10 @@ end
 
 function Nx.Quest:UnpackLocPtOff (locStr)
 	if type(locStr) == "string" then
-		local _,_,_,x1,x2,y1,y2 = Nx.Split("|",locStr)
+		local _, _, _, x1, x2, y1, y2 = Nx.Split("|",locStr)
 		return tonumber(x1), tonumber(x2), tonumber(y1), tonumber(y2)
 	else
-		local _,_,_,x1,x2,y1,y2 = Nx.Split("|",locStr[1])
+		local _, _, _, x1, x2, y1, y2 = Nx.Split("|",locStr[1])
 		return tonumber(x1), tonumber(x2), tonumber(y1), tonumber(y2)
 	end
 end
@@ -11505,7 +11505,7 @@ function Nx.Quest.WQList:GetWQReward(questId)
 	local items = GetNumQuestLogRewards(questId)
 	if items > 0 then
 		worldquesttip:ClearLines()
-		local name,icon,qty,quality,_,itemID = GetQuestLogRewardInfo(1,questId)
+		local name, icon, qty, quality, _, itemID = GetQuestLogRewardInfo(1,questId)
 		local foundartifact = false
 		worldquesttip:SetQuestLogItem("reward", 1, questId)
 		local link = select(2,worldquesttip:GetItem())		
@@ -11620,23 +11620,23 @@ function Nx.Quest.WQList:Update()
 		if timeleft > 0 then								
 			local reward = Nx.Quest.WQList:GetWQReward(questId)
 			if (reward == 10 and not Nx.qdb.profile.WQList.showap) or
-			   (reward == 20 and not Nx.qdb.profile.WQList.showgold) or 
-			   (reward == 30 and not Nx.qdb.profile.WQList.showorder) or
-			   (reward == 40 and not Nx.qdb.profile.WQList.showgear) or
-			   (info.PVP and not Nx.qdb.profile.WQList.showpvp) or
-			   (faction == 1900 and not Nx.qdb.profile.WQList.showfaronis) or
-			   (faction == 1883 and not Nx.qdb.profile.WQList.showdreamweaver) or
-			   (faction == 1828 and not Nx.qdb.profile.WQList.showhighmountain) or
-			   (faction == 2045 and not Nx.qdb.profile.WQList.showlegionfall) or
-			   (faction == 1859 and not Nx.qdb.profile.WQList.shownightfallen) or
-			   (faction == 1894 and not Nx.qdb.profile.WQList.showwardens) or
-			   (faction == 1948 and not Nx.qdb.profile.WQList.showvalarjar) or
-			   (faction == 1090 and not Nx.qdb.profile.WQList.showkirintor) or
-			   (faction == 2165 and not Nx.qdb.profile.WQList.showarmyoflight) or
-			   (faction == 2170 and not Nx.qdb.profile.WQList.showargussian) or
-			   (isbounty == false and Nx.qdb.profile.WQList.showbounty) or
-			   (info.mapid ~= C_Map.GetBestMapForUnit('player') and Nx.qdb.profile.WQList.zoneonly) or
-			   (reward == false and not Nx.qdb.profile.WQList.showother)then
+				(reward == 20 and not Nx.qdb.profile.WQList.showgold) or 
+				(reward == 30 and not Nx.qdb.profile.WQList.showorder) or
+				(reward == 40 and not Nx.qdb.profile.WQList.showgear) or
+				(info.PVP and not Nx.qdb.profile.WQList.showpvp) or
+				(faction == 1900 and not Nx.qdb.profile.WQList.showfaronis) or
+				(faction == 1883 and not Nx.qdb.profile.WQList.showdreamweaver) or
+				(faction == 1828 and not Nx.qdb.profile.WQList.showhighmountain) or
+				(faction == 2045 and not Nx.qdb.profile.WQList.showlegionfall) or
+				(faction == 1859 and not Nx.qdb.profile.WQList.shownightfallen) or
+				(faction == 1894 and not Nx.qdb.profile.WQList.showwardens) or
+				(faction == 1948 and not Nx.qdb.profile.WQList.showvalarjar) or
+				(faction == 1090 and not Nx.qdb.profile.WQList.showkirintor) or
+				(faction == 2165 and not Nx.qdb.profile.WQList.showarmyoflight) or
+				(faction == 2170 and not Nx.qdb.profile.WQList.showargussian) or
+				(isbounty == false and Nx.qdb.profile.WQList.showbounty) or
+				(info.mapid ~= Nx.Map:GetCurrentMapAreaID() and Nx.qdb.profile.WQList.zoneonly) or
+				(reward == false and not Nx.qdb.profile.WQList.showother)then
 					worldquestdb[questId].Filtered = true
 			else					
 				local colstring = "|r"
