@@ -3932,7 +3932,7 @@ function Nx.Quest:ScanBlizzQuestDataTimer()
 		return
 	end
 	IS_BACKGROUND_WORLD_CACHING = true
-	ObjectiveTrackerFrame:UnregisterEvent ("WORLD_MAP_UPDATE")		-- Map::ScanContinents can enable this again
+	--ObjectiveTrackerFrame:UnregisterEvent ("WORLD_MAP_UPDATE")		-- Map::ScanContinents can enable this again
 --	local tm = GetTime()
 
 	local Map = Nx.Map
@@ -3941,17 +3941,17 @@ function Nx.Quest:ScanBlizzQuestDataTimer()
 			local mapId = a
 			if Nx.Map.MapWorldInfo[mapId] then
 			if InCombatLockdown() then
-				ObjectiveTrackerFrame:RegisterEvent ("WORLD_MAP_UPDATE")	-- Back on when done
+				--ObjectiveTrackerFrame:RegisterEvent ("WORLD_MAP_UPDATE")	-- Back on when done
 				Nx.Quest.WorldUpdate = false
 				IS_BACKGROUND_WORLD_CACHING = false
 				return
 			end
-			SetMapByID(mapId)			-- Triggers WORLD_MAP_UPDATE, which calls MapChanged
+			--WorldMapFrame:SetMapID(mapId)			-- Triggers WORLD_MAP_UPDATE, which calls MapChanged
 			local cont = Nx.Map.MapWorldInfo[mapId].Cont
 			local info = Map.MapInfo[cont]
 			end
 		end
-	ObjectiveTrackerFrame:RegisterEvent ("WORLD_MAP_UPDATE")
+	--ObjectiveTrackerFrame:RegisterEvent ("WORLD_MAP_UPDATE")
 	-- Back on when done
 	Map:SetCurrentMap (curMapId)
 	IS_BACKGROUND_WORLD_CACHING = false
@@ -3997,7 +3997,7 @@ function Nx.Quest:ScanBlizzQuestDataZone()
 	local num = QuestMapUpdateAllQuests()		-- Blizz calls these in this order
 	if num > 0 then
 --		QuestPOIUpdateIcons()
-		local mapId = GetCurrentMapAreaID()
+		local mapId = Nx.Map:GetCurrentMapAreaID()
 		if Nx.Map:IsBattleGroundMap(mapId) then
 			return
 		end
@@ -5478,7 +5478,7 @@ function Nx.Quest.List:Open()
 	CarboniteQuest:RegisterEvent ("SCENARIO_CRITERIA_UPDATE", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_START", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_STOP", "OnQuestUpdate")
-	CarboniteQuest:RegisterEvent ("WORLD_MAP_UPDATE", "OnQuestUpdate")
+	--CarboniteQuest:RegisterEvent ("WORLD_MAP_UPDATE", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("CRITERIA_UPDATE", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_COMBAT_FACTION_CHANGE", "OnChat_msg_combat_faction_change")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_RAID_BOSS_WHISPER", "OnChat_msg_raid_boss_whisper")
@@ -6681,7 +6681,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 	elseif event == "QUEST_TURNED_IN" then
 		Nx.Quest.List:Refresh(event)
 	elseif event == "WORLD_MAP_UPDATE" then
-		local oldmap = GetCurrentMapAreaID()
+		local oldmap = Nx.Map:GetCurrentMapAreaID()
 		if Nx.Quest.OldMap ~= oldmap then
 			Nx.Quest.OldMap = oldmap
 			Nx.Quest:MapChanged()
@@ -11548,14 +11548,14 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 --	if not Nx.Quest.WQList.Win.Frm:IsVisible() then
 --		return
 --	end	
-	local legionzones = {1014, 1015, 1017, 1018, 1021, 1024, 1033, 1096, 1135, 1170, 1171}
+	--[[local legionzones = {1014, 1015, 1017, 1018, 1021, 1024, 1033, 1096, 1135, 1170, 1171}
 	if not WorldMapFrame:IsShown() then
-		SetMapByID(1007)
+		WorldMapFrame:SetMapID(1007)
 	end		
 	for i=1,#legionzones do
 		local zonequests = {}
 		if legionzones[i] == 1014 then			
-			SetMapByID(1014)			
+			WorldMapFrame:SetMapID(1014)			
 			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i])			
 		else
 			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i], legionzones[i])
@@ -11578,9 +11578,9 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 				end
 			end
 		end
-	end
+	end]]--
 	if not WorldMapFrame:IsShown() then
-		SetMapByID(Nx.Map.UpdateMapID)
+		WorldMapFrame:SetMapID(Nx.Map.UpdateMapID)
 	end	
 	if event == "QUEST_LOG_UPDATE" then
 		Nx.Quest.WQList:UnregisterEvent("QUEST_LOG_UPDATE")
@@ -11635,7 +11635,7 @@ function Nx.Quest.WQList:Update()
 			   (faction == 2165 and not Nx.qdb.profile.WQList.showarmyoflight) or
 			   (faction == 2170 and not Nx.qdb.profile.WQList.showargussian) or
 			   (isbounty == false and Nx.qdb.profile.WQList.showbounty) or
-			   (info.mapid ~= GetCurrentMapAreaID() and Nx.qdb.profile.WQList.zoneonly) or
+			   (info.mapid ~= Nx.Map:GetCurrentMapAreaID() and Nx.qdb.profile.WQList.zoneonly) or
 			   (reward == false and not Nx.qdb.profile.WQList.showother)then
 					worldquestdb[questId].Filtered = true
 			else					
