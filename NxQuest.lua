@@ -2822,7 +2822,7 @@ function Nx.Quest:Init()
 	
 	hooksecurefunc ("ShowUIPanel", CarboniteQuest.ShowUIPanel)
 	hooksecurefunc ("HideUIPanel", CarboniteQuest.HideUIPanel)
-	hooksecurefunc ("ToggleQuestLog", function(...)
+	--[[hooksecurefunc ("ToggleQuestLog", function(...)
 		local orig = IsAltKeyDown() and not self.IgnoreAlt
 		if Nx.qdb.profile.Quest.UseAltLKey then
 			orig = not orig
@@ -2838,8 +2838,8 @@ function Nx.Quest:Init()
 				ShowUIPanel(QuestMapFrame)
 			end
 		end
-	end)
-	--[[Nx.Quest.OldWindow = ToggleQuestLog
+	end)]]--
+	Nx.Quest.OldWindow = ToggleQuestLog
 	function ToggleQuestLog(...)
 		local orig = IsAltKeyDown() and not self.IgnoreAlt
 		if Nx.qdb.profile.Quest.UseAltLKey then
@@ -2861,7 +2861,7 @@ function Nx.Quest:Init()
 				ShowUIPanel(QuestMapFrame)
 			end
 		end
-	end]]--
+	end
 	
 end
 
@@ -3961,7 +3961,7 @@ function Nx.Quest:ScanBlizzQuestDataTimer()
 end
 
 -------------------------------------------------------------------------------
--- Called by map WORLD_MAP_UPDATE
+-- Called by map QUEST_POI_UPDATE
 -------------------------------------------------------------------------------
 
 local qelapsed = 0
@@ -5489,7 +5489,7 @@ function Nx.Quest.List:Open()
 	CarboniteQuest:RegisterEvent ("SCENARIO_CRITERIA_UPDATE", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_START", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_STOP", "OnQuestUpdate")
-	--CarboniteQuest:RegisterEvent ("WORLD_MAP_UPDATE", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("QUEST_POI_UPDATE", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("CRITERIA_UPDATE", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_COMBAT_FACTION_CHANGE", "OnChat_msg_combat_faction_change")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_RAID_BOSS_WHISPER", "OnChat_msg_raid_boss_whisper")
@@ -6691,7 +6691,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 		self.LoggingIn = true
 	elseif event == "QUEST_TURNED_IN" then
 		Nx.Quest.List:Refresh(event)
-	elseif event == "WORLD_MAP_UPDATE" then
+	elseif event == "QUEST_POI_UPDATE" then
 		local oldmap = Nx.Map:GetCurrentMapAreaID()
 		if Nx.Quest.OldMap ~= oldmap then
 			Nx.Quest.OldMap = oldmap
