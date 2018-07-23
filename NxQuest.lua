@@ -4414,7 +4414,7 @@ function Nx.Quest:RecordQuestAcceptOrFinish()
 	self.AcceptDLvl = 0
 
 	if Nx.Map:GetCurrentMapId() == id then
-		self.AcceptDLvl = GetCurrentMapDungeonLevel()
+		self.AcceptDLvl = Nx.Map:GetCurrentMapDungeonLevel()
 	end
 
 	local map = Nx.Map:GetMap (1)
