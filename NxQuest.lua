@@ -3946,6 +3946,8 @@ function Nx.Quest:ScanBlizzQuestDataTimer()
 				IS_BACKGROUND_WORLD_CACHING = false
 				return
 			end
+			C_QuestLog.SetMapForQuestPOIs(mapId)
+			Nx.Quest:MapChanged()
 			--WorldMapFrame:SetMapID(mapId)			-- Triggers WORLD_MAP_UPDATE, which calls MapChanged
 			local cont = Nx.Map.MapWorldInfo[mapId].Cont
 			local info = Map.MapInfo[cont]
@@ -3997,7 +3999,8 @@ function Nx.Quest:ScanBlizzQuestDataZone()
 	local num = QuestMapUpdateAllQuests()		-- Blizz calls these in this order
 	if num > 0 then
 --		QuestPOIUpdateIcons()
-		local mapId = Nx.Map:GetCurrentMapAreaID()
+		local mapId = C_QuestLog.GetMapForQuestPOIs()
+--		Nx.prt("%s %s", num or 0, mapId)
 		if Nx.Map:IsBattleGroundMap(mapId) then
 			return
 		end
@@ -4005,28 +4008,35 @@ function Nx.Quest:ScanBlizzQuestDataZone()
 			return
 		end
 		for n = 1, num do
-			local id, qi = QuestPOIGetQuestIDByVisibleIndex (n)
-			if qi and qi > 0 then
+			local mapQuests = C_QuestLog.GetQuestsOnMap(mapId)
+			local id = mapQuests[n] and mapQuests[n].questID or -1
+			local qi = GetQuestLogIndexByID(id)
+--			Nx.prt("%s %s", id, qi)
+			if mapQuests[n] and qi and qi > 0 then
+				local objectives = C_QuestLog.GetQuestObjectives(id)
 				local title, level, groupCnt, isHeader, isCollapsed, isComplete, _, questID = GetQuestLogTitle (qi)
 				local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex = GetQuestTagInfo(qi)
-				local lbCnt = GetNumQuestLeaderBoards (qi)
+				local lbCnt = #objectives; --GetNumQuestLeaderBoards (qi)
 				local quest = Nx.Quests[id] or {}
 				local patch = Nx.Quests[-id] or 0
 				local needEnd = isComplete and not quest["End"]
 				local fac = UnitFactionGroup ("player") == "Horde" and 1 or 2
 
-				if worldQuestType == nil and (patch > 0 or needEnd or (not isComplete and not quest["Objectives"])) then
-					local _, x, y, objective = QuestPOIGetIconInfo (id)
+				if worldQuestType == nil and (patch > 0 or needEnd or (not isComplete and not quest["Objectives"]) or #quest["Objectives"] < lbCnt) then
+					local x, y, objective;
+					x = mapQuests[n].x
+					y = mapQuests[n].y
+					objective = objectives[1] or nil;
 					if x then	-- Miner's Fortune was found in org, but x, y, obj were nil
 						x = x * 100
 						y = y * 100
---						Nx.prt ("%s #%s %s %s %s %s", mapId, n, id, x or "nil", y or "nil", objective or "nil")
+--						Nx.prt ("%s #%s %s %s %s %s", mapId, n, id, x or "nil", y or "nil", objective and objective.text or "nil")
 						if not quest["Quest"] then
 							quest["Quest"] = format ("[[%s|%s|%s|0|0|0]]",title,fac,level)
 						end
 						if needEnd or bit.band (patch, 1) then
 							if not quest["End"] or bit.band(patch,1) then
-								quest["End"] = format ("|%s|32|%f|%f", mapId,x,y)
+								quest["End"] = format ("|%s|32|%f|%f", mapId, x, y)
 							end
 							patch = bit.bor (patch, 1)		-- Flag as a patched quest
 						end
@@ -4038,9 +4048,8 @@ function Nx.Quest:ScanBlizzQuestDataZone()
 							patch = bit.bor (patch, 2)
 
 							local s = title
-							local obj = format ("nil|%s|32|%f|%f|6|6",mapId, x, y)
-
 							for i = 1, lbCnt do
+								local obj = format ("%s|%s|32|%f|%f|6|6", objectives[i] and objectives[i].text or "nil", mapId, x, y)
 								quest["Objectives"][i] = {obj}
 							end
 						end
