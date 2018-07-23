@@ -4049,8 +4049,10 @@ function Nx.Quest:ScanBlizzQuestDataZone()
 
 							local s = title
 							for i = 1, lbCnt do
-								local obj = format ("%s|%s|32|%f|%f|6|6", objectives[i] and objectives[i].text or "nil", mapId, x, y)
-								quest["Objectives"][i] = {obj}
+								if not quest["Objectives"][i] then
+									local obj = format ("%s|%s|32|%f|%f|6|6", objectives[i] and objectives[i].text or "nil", mapId, x, y)
+									quest["Objectives"][i] = {obj}
+								end
 							end
 						end
 					end
