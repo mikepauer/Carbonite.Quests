@@ -4016,13 +4016,17 @@ function Nx.Quest:ScanBlizzQuestDataZone()
 				local objectives = C_QuestLog.GetQuestObjectives(id)
 				local title, level, groupCnt, isHeader, isCollapsed, isComplete, _, questID = GetQuestLogTitle (qi)
 				local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex = GetQuestTagInfo(qi)
-				local lbCnt = #objectives; --GetNumQuestLeaderBoards (qi)
+				local lbCnt = objectives and #objectives or 0; --GetNumQuestLeaderBoards (qi)
+				local qObjl = 0;
+				if quest and quest["Objectives"] then
+					qObjl = #quest["Objectives"]
+				end
 				local quest = Nx.Quests[id] or {}
 				local patch = Nx.Quests[-id] or 0
 				local needEnd = isComplete and not quest["End"]
 				local fac = UnitFactionGroup ("player") == "Horde" and 1 or 2
-
-				if worldQuestType == nil and (patch > 0 or needEnd or (not isComplete and not quest["Objectives"]) or #quest["Objectives"] < lbCnt) then
+				
+				if worldQuestType == nil and (patch > 0 or needEnd or (not isComplete and not quest["Objectives"])) then
 					local x, y, objective;
 					x = mapQuests[n].x
 					y = mapQuests[n].y
@@ -5829,7 +5833,7 @@ function Nx.Quest:ShowUIPanel (frame)
 		self.IsOrigOpen = true
 		frame:SetScale (1)
 		--QuestMapFrame:SetAttribute ("UIPanelLayout-enabled", true)
-		ShowQuestLog();
+		ShowUIPanel (WorldMapFrame)
 		if detailFrm then
 			detailFrm:SetScale (1)
 		end
