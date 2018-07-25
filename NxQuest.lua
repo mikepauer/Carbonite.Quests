@@ -3956,6 +3956,7 @@ function Nx.Quest:ScanBlizzQuestDataTimer()
 	--ObjectiveTrackerFrame:RegisterEvent ("WORLD_MAP_UPDATE")
 	-- Back on when done
 	Map:SetCurrentMap (curMapId)
+	C_QuestLog.SetMapForQuestPOIs(curMapId)
 	IS_BACKGROUND_WORLD_CACHING = false
 	self:RecordQuestsLog()
 end

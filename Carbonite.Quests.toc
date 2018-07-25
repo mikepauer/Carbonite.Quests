@@ -1,4 +1,4 @@
-## Interface: 80100
+## Interface: 80000
 ## Title: Carbonite Quest 8.0.0
 ## Version: 8.0.0
 ## Author: No One
