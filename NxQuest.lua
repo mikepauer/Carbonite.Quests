@@ -5894,9 +5894,9 @@ function Nx.Quest:HideUIPanel (frame)
 	else
 		self.IsOpen = false
 		local detailFrm = QuestLogDetailFrame
-		if detailFrm then
-			detailFrm:SetScale (1)
-		end
+		--if detailFrm then
+			--detailFrm:SetScale (1)
+		--end
 		self.List.Win:Show (false)
 		if self.List.List:ItemGetNum() > 0 then
 			self.List.List:Empty()
