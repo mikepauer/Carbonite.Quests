@@ -3259,7 +3259,8 @@ end
 
 function Nx.Quest:Menu_OnShowQuest()
 
-	ShowUIPanel (QuestMapFrame)
+	ToggleQuestLog()
+	--ShowUIPanel (QuestMapFrame)
 
 	self.List.Bar:Select (1)
 
@@ -8747,7 +8748,8 @@ end
 
 function Nx.Quest.Watch:Menu_OnShowQuest()
 
-	ShowUIPanel (QuestMapFrame)
+	ToggleQuestLog()
+	--ShowUIPanel (QuestMapFrame)
 
 	Nx.Quest.List.Bar:Select (1)
 	Nx.Quest.List:Select (self.MenuQId, self.MenuQIndex)
@@ -9684,7 +9686,7 @@ function Nx.Quest.Watch:OnListEvent (eventName, val1, val2, click, but)
 
 				if IsAltKeyDown() then
 					Quest.IgnoreAlt = true
-					ShowUIPanel (QuestMapFrame)
+					ToggleQuestLog()
 					Quest.IgnoreAlt = nil
 					Quest.List.Bar:Select (1)
 					Quest.List:Select (qId, qIndex)
