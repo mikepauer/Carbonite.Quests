@@ -2841,6 +2841,7 @@ function Nx.Quest:Init()
 			orig = not orig
 		end
 		if orig then
+			WorldMapFrame:SetQuestLogPanelShown(true)
 			Nx.Quest:OldToggleQuestLog()
 		else
 			if self.InShowUIPanel then
@@ -5868,7 +5869,7 @@ function Nx.Quest:ShowUIPanel (frame)
 			win:Show()
 			self.List:Update()
 			wf:Raise()
-			frame:Show()
+			--frame:Show()
 			--if detailFrm then
 				--detailFrm:SetScale (.1)
 			--end
