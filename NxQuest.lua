@@ -8027,8 +8027,8 @@ function Nx.Quest:UpdateIcons (map)
 
 						local selected = info.questId == GetSuperTrackedQuestID();
 
-						local isCriteria = WorldMapFrame.UIElementsFrame.BountyBoard:IsWorldQuestCriteriaForSelectedBounty(info.questId);
-						local isSpellTarget = SpellCanTargetQuest() and IsQuestIDValidSpellTarget(info.questId);
+						--local isCriteria = WorldMapFrame.UIElementsFrame.BountyBoard:IsWorldQuestCriteriaForSelectedBounty(info.questId);
+						--local isSpellTarget = SpellCanTargetQuest() and IsQuestIDValidSpellTarget(info.questId);
 
 						f.worldQuest = true;
 						f.questID = info.questId
@@ -8056,7 +8056,7 @@ function Nx.Quest:UpdateIcons (map)
 							 end
 						end)
 
-						WorldMap_SetupWorldQuestButton(f, questtype, rarity, elite, tradeskill, info.inProgress, selected, isCriteria, isSpellTarget)
+						WorldMap_SetupWorldQuestButton(f, questtype, rarity, elite, tradeskill, info.inProgress, selected)
 
 						f.texture:Hide()
 
@@ -11586,14 +11586,25 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 --	if not Nx.Quest.WQList.Win.Frm:IsVisible() then
 --		return
 --	end	
-	--[[local legionzones = {1014, 1015, 1017, 1018, 1021, 1024, 1033, 1096, 1135, 1170, 1171}
+	local legionzones = {625, 626, 627, 628, 629, -- 1014,
+						 630, 631, 632, 633, -- 1015, 
+						 634, 635, 636, 637, 638, 639, 640, --1017, 
+						 641, 642, 643, 644, --1018, 
+						 646, 647, 648, --1021, 
+						 650, 651, 652, 653, 654, 655, 545, 657, 658, 659, 660, --1024, 
+						 680, 681, 682, 683, 684, 685, 686, 687, 688, 689, 690, 691, 692, 693, --1033,
+						 790, --1096, 
+						 695, --1135, 
+						 737, --1170, 
+						 738, --1171
+						}
 	if not WorldMapFrame:IsShown() then
-		WorldMapFrame:SetMapID(1007)
+		WorldMapFrame:SetMapID(619)
 	end		
 	for i=1,#legionzones do
 		local zonequests = {}
-		if legionzones[i] == 1014 then			
-			WorldMapFrame:SetMapID(1014)			
+		if legionzones[i] == 625 then			
+			WorldMapFrame:SetMapID(625)			
 			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i])			
 		else
 			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i], legionzones[i])
@@ -11616,7 +11627,7 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 				end
 			end
 		end
-	end]]--
+	end
 	if not WorldMapFrame:IsShown() then
 		WorldMapFrame:SetMapID(Nx.Map.UpdateMapID)
 	end	
