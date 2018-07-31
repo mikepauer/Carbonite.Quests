@@ -8013,7 +8013,7 @@ function Nx.Quest:UpdateIcons (map)
 				local info = taskInfo[i]
 				local questId = taskInfo[i].questId				
 				local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
-				if QuestUtils_IsQuestWorldQuest (questId) and (worldquestdb[questId] and not worldquestdb[questId].Filtered) then
+				if QuestUtils_IsQuestWorldQuest (questId) and (worldquestdb[questId] and worldquestdb[questId].mapid == Map.UpdateMapID and not worldquestdb[questId].Filtered) then
 					activeWQ[questId] = true
 					C_TaskQuest.RequestPreloadRewardData (questId)
 					local tid, name, questtype, rarity, elite, tradeskill = GetQuestTagInfo (questId)
@@ -11618,7 +11618,7 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 				end
 				worldquestdb[questId].x = quest.x * 100				
 				worldquestdb[questId].y = quest.y * 100				
-				worldquestdb[questId].mapid = legionzones[i]
+				worldquestdb[questId].mapid = C_TaskQuest.GetQuestZoneID(questId) --legionzones[i]
 				worldquestdb[questId].questid = questId
 				worldquestdb[questId].numobjectives = quest.numObjectives
 				local tip = Nx.Quest.WQList:GenWQTip(questId)
