@@ -4040,11 +4040,11 @@ function Nx.Quest:ScanBlizzQuestDataZone()
 				local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex = GetQuestTagInfo(qi)
 				local lbCnt = objectives and #objectives or 0; --GetNumQuestLeaderBoards (qi)
 				local qObjl = 0;
+				local quest = Nx.Quests[id] or {}
+				local patch = Nx.Quests[-id] or 0
 				if quest and quest["Objectives"] then
 					qObjl = #quest["Objectives"]
 				end
-				local quest = Nx.Quests[id] or {}
-				local patch = Nx.Quests[-id] or 0
 				local needEnd = isComplete and not quest["End"]
 				local fac = UnitFactionGroup ("player") == "Horde" and 1 or 2
 				
