@@ -11513,7 +11513,7 @@ function Nx.Quest.WQList:GenWQTip(questId)
 		local numQuestRewards = GetNumQuestLogRewards(questId)
 		if numQuestRewards > 0 then			
 			local name,icon,numItems,quality,_,itemID = GetQuestLogRewardInfo(1,questId)
-			local color = quality < LE_ITEM_QUALITY_COMMON and LE_ITEM_QUALITY_COMMON or BAG_ITEM_QUALITY_COLORS[quality]
+			local color =  BAG_ITEM_QUALITY_COLORS[quality < LE_ITEM_QUALITY_COMMON and LE_ITEM_QUALITY_COMMON or quality]
 			if name then
 				worldquesttip:AddLine("|T"..icon..":0|t "..(numItems and numItems > 1 and numItems.."x " or "")..name, color.r, color.g, color.b)
 				tipdone = true
