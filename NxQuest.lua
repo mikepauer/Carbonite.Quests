@@ -6698,11 +6698,11 @@ end
 -------------------------------------------------------------------------------
 
 function Nx.Quest.List:Refresh()
-	self:LogUpdate()
-	Nx.Quest:ScanBlizzQuestDataZone()
+	--self:LogUpdate()
+	--Nx.Quest:ScanBlizzQuestDataZone()
 	--self:LogUpdate()
 	C_Timer.After(.5, function() 
-		Nx.Quest:RecordQuestsLog()
+		--Nx.Quest:RecordQuests()
 		Nx.Quest.List:LogUpdate()
 	end)
 end
@@ -6769,6 +6769,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 			end
 		end
 		Nx.Quest.List:Refresh(event)
+		--Nx.Quest:RecordQuests()
 	elseif event == "QUEST_DETAIL" then		-- Happens when auto accept quest is given
 		if QuestGetAutoAccept() and QuestIsFromAreaTrigger() then
 			Quest:RecordQuestAcceptOrFinish()
@@ -11586,7 +11587,9 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 --	if not Nx.Quest.WQList.Win.Frm:IsVisible() then
 --		return
 --	end	
-	local legionzones = {625, 626, 627, 628, 629, -- 1014,
+	local legionzones = {
+					     62,
+						 625, 626, 627, 628, 629, -- 1014,
 						 630, 631, 632, 633, -- 1015, 
 						 634, 635, 636, 637, 638, 639, 640, --1017, 
 						 641, 642, 643, 644, --1018, 
