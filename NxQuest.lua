@@ -3961,22 +3961,25 @@ function Nx.Quest:ScanBlizzQuestDataTimer()
 		for a,b in pairs(Nx.Zones) do
 			local mapId = a
 			if Nx.Map.MapWorldInfo[mapId] then
-			if InCombatLockdown() then
-				--ObjectiveTrackerFrame:RegisterEvent ("WORLD_MAP_UPDATE")	-- Back on when done
-				Nx.Quest.WorldUpdate = false
-				IS_BACKGROUND_WORLD_CACHING = false
-				return
-			end
-			C_QuestLog.SetMapForQuestPOIs(mapId)
-			Nx.Quest:MapChanged()
-			--WorldMapFrame:SetMapID(mapId)			-- Triggers WORLD_MAP_UPDATE, which calls MapChanged
-			local cont = Nx.Map.MapWorldInfo[mapId].Cont
-			local info = Map.MapInfo[cont]
+				if InCombatLockdown() then
+					--ObjectiveTrackerFrame:RegisterEvent ("WORLD_MAP_UPDATE")	-- Back on when done
+					Nx.Quest.WorldUpdate = false
+					IS_BACKGROUND_WORLD_CACHING = false
+					return
+				end
+				C_QuestLog.SetMapForQuestPOIs(mapId)
+				Nx.Quest:MapChanged()
+				--C_Timer.After(.01, function(mapId) Nx.Quest:MapChanged(mapId) end) 
+				--Nx.Quest:MapChanged()
+				--WorldMapFrame:SetMapID(mapId)			-- Triggers WORLD_MAP_UPDATE, which calls MapChanged
+				--local cont = Nx.Map.MapWorldInfo[mapId].Cont
+				--local info = Map.MapInfo[cont]
 			end
 		end
+	Nx.Quest.Watch:Update()
 	--ObjectiveTrackerFrame:RegisterEvent ("WORLD_MAP_UPDATE")
 	-- Back on when done
-	Map:SetCurrentMap (curMapId)
+	--Map:SetCurrentMap (curMapId)
 	C_QuestLog.SetMapForQuestPOIs(curMapId)
 	IS_BACKGROUND_WORLD_CACHING = false
 	self:RecordQuestsLog()
@@ -4008,11 +4011,12 @@ function Nx.Quest:MapChanged()
 	end
 	qttl = 0
 	if Nx.QInit then	-- Quests inited?
-		self:ScanBlizzQuestDataZone()
+		self:ScanBlizzQuestDataZone(true)
 	end
 end
 
-function Nx.Quest:ScanBlizzQuestDataZone()
+-- /dump Nx.Quest:ScanBlizzQuestDataTimer()
+function Nx.Quest:ScanBlizzQuestDataZone(WatchUpdate)
 	if not Nx.QInit then
 		return
 	end
@@ -4088,7 +4092,7 @@ function Nx.Quest:ScanBlizzQuestDataZone()
 			end
 		end
 	end
-	if not Nx.Quest.List.LoggingIn then
+	if not Nx.Quest.List.LoggingIn and not WatchUpdate then
 		Nx.Quest.Watch:Update()
 	end
 	--Nx.prt ("%f secs", GetTime() - tm)
@@ -6698,11 +6702,11 @@ end
 -------------------------------------------------------------------------------
 
 function Nx.Quest.List:Refresh()
+	self:LogUpdate()
 	--self:LogUpdate()
-	--Nx.Quest:ScanBlizzQuestDataZone()
-	--self:LogUpdate()
-	C_Timer.After(.5, function() 
-		--Nx.Quest:RecordQuests()
+	C_Timer.After(.5, function()
+		--Nx.Quest:ScanBlizzQuestDataZone()
+		Nx.Quest:RecordQuests()	
 		Nx.Quest.List:LogUpdate()
 	end)
 end
@@ -6722,6 +6726,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 		if Nx.Quest.OldMap ~= oldmap then
 			Nx.Quest.OldMap = oldmap
 			Nx.Quest:MapChanged()
+			Nx.Quest.Watch:Update()
 		end
 	elseif event == "QUEST_PROGRESS" then
 		local auto = Nx.qdb.profile.Quest.AutoTurnIn
