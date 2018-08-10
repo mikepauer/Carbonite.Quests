@@ -11111,6 +11111,10 @@ end
 -- Handle party message
 -------------------------------------------------------------------------------
 
+local pmsg_elapsed = 0
+local pmsg_lasttime
+local pmsg_ttl = 9999
+
 function Nx.Quest:OnPartyMsg (plName, msg)
 
 	if Nx.qdb and Nx.qdb.profile and not Nx.qdb.profile.Quest.PartyShare then
@@ -11174,7 +11178,20 @@ function Nx.Quest:OnPartyMsg (plName, msg)
 		end
 	end
 	
-	QPartyUpdate = Nx:ScheduleTimer(self.PartyUpdateTimer,.7,self)
+	if pmsg_lasttime then
+		local curtime = debugprofilestop()
+		pmsg_elapsed = curtime - pmsg_lasttime
+		pmsg_lasttime = curtime
+	else
+		pmsg_lasttime = debugprofilestop()
+	end
+	pmsg_ttl = pmsg_ttl + pmsg_elapsed
+	if pmsg_ttl < 2000 then
+		return
+	end
+	pmsg_ttl = 0
+	
+	QPartyUpdate = Nx:ScheduleTimer(self.PartyUpdateTimer,.5,self)
 end
 
 -------------------------------------------------------------------------------
