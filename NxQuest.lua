@@ -4023,15 +4023,15 @@ function Nx.Quest:ScanBlizzQuestDataZone(WatchUpdate)
 	
 	--local tm = GetTime()
 	local mapId = C_QuestLog.GetMapForQuestPOIs()
+	if not mapId then
+		return
+	end
 	local mapQuests = C_QuestLog.GetQuestsOnMap(mapId)
 	local num = mapQuests and #mapQuests or 0--QuestMapUpdateAllQuests()		-- Blizz calls these in this order
 	if num > 0 then
 --		QuestPOIUpdateIcons()
 --		Nx.prt("%s %s", num or 0, mapId)
 		if Nx.Map:IsBattleGroundMap(mapId) then
-			return
-		end
-		if not mapId then
 			return
 		end
 		for n = 1, num do
