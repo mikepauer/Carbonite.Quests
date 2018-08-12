@@ -5505,7 +5505,7 @@ function Nx.Quest.List:Open()
 
 	win:SetUser (self, self.OnWin)
 	CarboniteQuest:RegisterEvent ("PLAYER_LOGIN", "OnQuestUpdate")
-	CarboniteQuest:RegisterEvent ("UPDATE_FACTION", "OnQuestUpdate")
+	--CarboniteQuest:RegisterEvent ("UPDATE_FACTION", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("GARRISON_MISSION_COMPLETE_RESPONSE", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("WORLD_QUEST_COMPLETED_BY_SPELL", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("UNIT_QUEST_LOG_CHANGED", "OnQuestUpdate")
@@ -5520,7 +5520,7 @@ function Nx.Quest.List:Open()
 	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_START", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_STOP", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("QUEST_POI_UPDATE", "OnQuestUpdate")
-	CarboniteQuest:RegisterEvent ("CRITERIA_UPDATE", "OnQuestUpdate")
+	--CarboniteQuest:RegisterEvent ("CRITERIA_UPDATE", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_COMBAT_FACTION_CHANGE", "OnChat_msg_combat_faction_change")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_RAID_BOSS_WHISPER", "OnChat_msg_raid_boss_whisper")
 	-- Filter Edit Box
@@ -6701,7 +6701,26 @@ end
 -- On quest updates
 -------------------------------------------------------------------------------
 
+local lr_elapsed = 0
+local lr_lasttime
+local lr_ttl = 9999
+
 function Nx.Quest.List:Refresh()
+	if lr_lasttime then
+		local curtime = debugprofilestop()
+		lr_elapsed = curtime - lr_lasttime
+		lr_lasttime = curtime
+	else
+		lr_lasttime = debugprofilestop()
+	end
+	lr_ttl = lr_ttl + lr_elapsed
+	if lr_ttl < 1000 then
+		return
+	end
+	lr_ttl = 0
+	
+	Nx.prtD ("R %s", "Nx.Quest.List:Refresh")
+	
 	self:LogUpdate()
 	--self:LogUpdate()
 	C_Timer.After(.5, function()
@@ -6714,6 +6733,8 @@ end
 function CarboniteQuest:OnQuestUpdate (event, ...)
 	local Quest = Nx.Quest
 	local arg1, arg2, arg3 = select (1, ...)
+	
+	Nx.prtD ("OnQuestUpdate %s", event)
 	
 	if event ~= "WORLD_MAP_UPDATE" then Nx.prtD ("OnQuestUpdate %s", event) end
 	
