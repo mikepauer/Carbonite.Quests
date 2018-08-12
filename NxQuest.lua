@@ -4022,10 +4022,11 @@ function Nx.Quest:ScanBlizzQuestDataZone(WatchUpdate)
 	end
 	
 	--local tm = GetTime()
-	local num = QuestMapUpdateAllQuests()		-- Blizz calls these in this order
+	local mapId = C_QuestLog.GetMapForQuestPOIs()
+	local mapQuests = C_QuestLog.GetQuestsOnMap(mapId)
+	local num = mapQuests and #mapQuests or 0--QuestMapUpdateAllQuests()		-- Blizz calls these in this order
 	if num > 0 then
 --		QuestPOIUpdateIcons()
-		local mapId = C_QuestLog.GetMapForQuestPOIs()
 --		Nx.prt("%s %s", num or 0, mapId)
 		if Nx.Map:IsBattleGroundMap(mapId) then
 			return
@@ -4034,7 +4035,6 @@ function Nx.Quest:ScanBlizzQuestDataZone(WatchUpdate)
 			return
 		end
 		for n = 1, num do
-			local mapQuests = C_QuestLog.GetQuestsOnMap(mapId)
 			local id = mapQuests[n] and mapQuests[n].questID or -1
 			local qi = GetQuestLogIndexByID(id)
 --			Nx.prt("%s %s", id, qi)
@@ -6701,32 +6701,21 @@ end
 -- On quest updates
 -------------------------------------------------------------------------------
 
-local lr_elapsed = 0
-local lr_lasttime
-local lr_ttl = 9999
-
-function Nx.Quest.List:Refresh()
-	if lr_lasttime then
-		local curtime = debugprofilestop()
-		lr_elapsed = curtime - lr_lasttime
-		lr_lasttime = curtime
-	else
-		lr_lasttime = debugprofilestop()
+local QuestListRefreshTimer
+function Nx.Quest.List:Refresh(event)		
+	if QuestListRefreshTimer then
+		QuestListRefreshTimer:Cancel()
 	end
-	lr_ttl = lr_ttl + lr_elapsed
-	if lr_ttl < 1000 then
-		return
-	end
-	lr_ttl = 0
 	
-	Nx.prtD ("R %s", "Nx.Quest.List:Refresh")
-	
-	self:LogUpdate()
-	--self:LogUpdate()
-	C_Timer.After(.5, function()
-		--Nx.Quest:ScanBlizzQuestDataZone()
-		Nx.Quest:RecordQuests()	
-		Nx.Quest.List:LogUpdate()
+	QuestListRefreshTimer = C_Timer.NewTimer(1, function()
+		self:LogUpdate()
+		C_Timer.After(.5, function()
+			--Nx.Quest:ScanBlizzQuestDataZone()
+			Nx.Quest:RecordQuests()
+			Nx.Quest:RecordQuests(event == "QUEST_LOG_UPDATE" and true or nil)	
+			Nx.Quest.List:LogUpdate()
+			Nx.prtD ("R %s", "Nx.Quest.List:Refresh")
+		end)
 	end)
 end
 
@@ -6820,7 +6809,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 			Quest:AccessAllQuests()
 			QLogUpdate = Nx:ScheduleTimer(self.LogUpdate,.5,self)	-- Small delay, so access works (0 does work)
 		else
-			Nx.Quest.List:Refresh(event)
+			Nx.Quest.List:Refresh("QUEST_LOG_UPDATE")
 		end
 	elseif event == "GARRISON_MISSION_COMPLETE_RESPONSE" then
 		Nx.Quest.List:LogUpdate()
