@@ -4041,7 +4041,7 @@ function Nx.Quest:ScanBlizzQuestDataZone(WatchUpdate)
 			if mapQuests[n] and qi and qi > 0 then
 				local objectives = C_QuestLog.GetQuestObjectives(id)
 				local title, level, groupCnt, isHeader, isCollapsed, isComplete, _, questID = GetQuestLogTitle (qi)
-				local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex = GetQuestTagInfo(qi)
+				local tagID, tagName, worldQuestType, rarity, isElite, tradeskillLineIndex = GetQuestTagInfo(id)
 				local lbCnt = objectives and #objectives or 0; --GetNumQuestLeaderBoards (qi)
 				local qObjl = 0;
 				local quest = Nx.Quests[id] or {}
@@ -5519,7 +5519,7 @@ function Nx.Quest.List:Open()
 	CarboniteQuest:RegisterEvent ("SCENARIO_CRITERIA_UPDATE", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_START", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_STOP", "OnQuestUpdate")
-	CarboniteQuest:RegisterEvent ("QUEST_POI_UPDATE", "OnQuestUpdate")
+	--CarboniteQuest:RegisterEvent ("QUEST_POI_UPDATE", "OnQuestUpdate")
 	--CarboniteQuest:RegisterEvent ("CRITERIA_UPDATE", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_COMBAT_FACTION_CHANGE", "OnChat_msg_combat_faction_change")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_RAID_BOSS_WHISPER", "OnChat_msg_raid_boss_whisper")
@@ -6712,7 +6712,7 @@ function Nx.Quest.List:Refresh(event)
 		C_Timer.After(.5, function()
 			--Nx.Quest:ScanBlizzQuestDataZone()
 			Nx.Quest:RecordQuests()
-			Nx.Quest:RecordQuests(event == "QUEST_LOG_UPDATE" and true or nil)	
+			--Nx.Quest:RecordQuests(event == "QUEST_LOG_UPDATE" and true or nil)	
 			Nx.Quest.List:LogUpdate()
 			Nx.prtD ("R %s", "Nx.Quest.List:Refresh")
 		end)
@@ -6814,7 +6814,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 	elseif event == "GARRISON_MISSION_COMPLETE_RESPONSE" then
 		Nx.Quest.List:LogUpdate()
 	else
-		Nx.Quest.Watch:Update()
+		--Nx.Quest.Watch:Update()
 	end
 --	Nx.prtD ("OnQuestUpdate %s Done", event)
 end
@@ -8706,7 +8706,8 @@ function Nx.Quest.Watch:Open()
 			if qId > 0 then
 				local activityID, categoryID, filters, questName = LFGListUtil_GetQuestCategoryData(qId)
 				if not activityID then
-					return
+					categoryID = 6
+					filters = 0
 				end
 				PVEFrame_ShowFrame("GroupFinderFrame", LFGListPVEStub)
 				local panel = LFGListFrame.CategorySelection;
@@ -8716,7 +8717,7 @@ function Nx.Quest.Watch:Open()
  
 				local searchPanel = panel:GetParent().SearchPanel;
 				LFGListSearchPanel_Clear(searchPanel);
-				searchPanel.SearchBox:SetText(questName or "");
+				searchPanel.SearchBox.Instructions:SetText(questName or "");
 				LFGListSearchPanel_SetCategory(searchPanel, panel.selectedCategory, panel.selectedFilters, baseFilters)
 				LFGListFrame_SetActivePanel(panel:GetParent(), searchPanel);
 			end
@@ -8916,10 +8917,16 @@ local function checkWatchTimer()
 	return true
 end
 
+local QuestWatchDistUp
 function Nx.Quest.Watch:Update()
 	self.CalcDistI = 1
 	self.CalcDistCnt = 25
-	QuestWatchDist = Nx:ScheduleTimer(self.OnTimer,0,self)
+	
+	if QuestWatchDistUp then
+		Nx:CancelTimer(QuestWatchDistUp)
+	end
+	
+	QuestWatchDistUp = Nx:ScheduleTimer(self.OnTimer, 0.5, self)
 end
 
 function Nx.Quest.Watch:ClearCustom ()
