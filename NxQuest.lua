@@ -6814,7 +6814,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 	elseif event == "GARRISON_MISSION_COMPLETE_RESPONSE" then
 		Nx.Quest.List:LogUpdate()
 	else
-		--Nx.Quest.Watch:Update()
+		Nx.Quest.Watch:Update()
 	end
 --	Nx.prtD ("OnQuestUpdate %s Done", event)
 end
@@ -11467,6 +11467,7 @@ function Nx.Quest.WQList:Open()
 	LibStub("AceEvent-3.0"):Embed(Nx.Quest.WQList)
 	Nx.Quest.WQList:RegisterEvent ("QUEST_LOG_UPDATE", "UpdateDB")
 	Nx.Quest.WQList:RegisterEvent ("UNIT_QUEST_LOG_CHANGED", "UpdateDB")
+	--C_Timer.NewTicker(30, function() Nx.Quest.WQList:UpdateDB() end)
 	Nx.Quest.WQList:RegisterEvent ("ZONE_CHANGED_NEW_AREA", "Update")	
 	win.Frm:SetScript ("OnShow",self.UpdateDB)
 --	self:SetSortMode (1)
@@ -11626,30 +11627,17 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 --	if not Nx.Quest.WQList.Win.Frm:IsVisible() then
 --		return
 --	end	
-	local legionzones = {
-					     62,
-						 625, 626, 627, 628, 629, -- 1014,
-						 630, 631, 632, 633, -- 1015, 
-						 634, 635, 636, 637, 638, 639, 640, --1017, 
-						 641, 642, 643, 644, --1018, 
-						 646, 647, 648, --1021, 
-						 650, 651, 652, 653, 654, 655, 545, 657, 658, 659, 660, --1024, 
-						 680, 681, 682, 683, 684, 685, 686, 687, 688, 689, 690, 691, 692, 693, --1033,
-						 790, --1096, 
-						 695, --1135, 
-						 737, --1170, 
-						 738, --1171
-						}
+	local worldquestzones = { 947, 830, 885, 882 }
 	if not WorldMapFrame:IsShown() then
-		WorldMapFrame:SetMapID(619)
+		--WorldMapFrame:SetMapID(619)
 	end		
-	for i=1,#legionzones do
+	for i=1,#worldquestzones do
 		local zonequests = {}
-		if legionzones[i] == 625 then			
-			WorldMapFrame:SetMapID(625)			
-			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i])			
+		if worldquestzones[i] == 625 then			
+			--WorldMapFrame:SetMapID(625)			
+			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(worldquestzones[i])			
 		else
-			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(legionzones[i], legionzones[i])
+			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(worldquestzones[i], worldquestzones[i])
 		end
 		for j, quest in pairs(zonequests) do			
 			local questId = quest.questId			
@@ -11660,7 +11648,7 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 				end
 				worldquestdb[questId].x = quest.x * 100				
 				worldquestdb[questId].y = quest.y * 100				
-				worldquestdb[questId].mapid = C_TaskQuest.GetQuestZoneID(questId) --legionzones[i]
+				worldquestdb[questId].mapid = C_TaskQuest.GetQuestZoneID(questId) --worldquestzones[i]
 				worldquestdb[questId].questid = questId
 				worldquestdb[questId].numobjectives = quest.numObjectives
 				local tip = Nx.Quest.WQList:GenWQTip(questId)
@@ -11671,7 +11659,7 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 		end
 	end
 	if not WorldMapFrame:IsShown() then
-		WorldMapFrame:SetMapID(Nx.Map.UpdateMapID)
+		--WorldMapFrame:SetMapID(Nx.Map.UpdateMapID)
 	end	
 	if event == "QUEST_LOG_UPDATE" then
 		Nx.Quest.WQList:UnregisterEvent("QUEST_LOG_UPDATE")
