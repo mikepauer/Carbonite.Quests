@@ -6707,8 +6707,8 @@ function Nx.Quest.List:Refresh(event)
 		QuestListRefreshTimer:Cancel()
 	end
 	
-	QuestListRefreshTimer = C_Timer.NewTimer(1, function()
-		self:LogUpdate()
+	Nx.Quest.List:LogUpdate()
+	QuestListRefreshTimer = C_Timer.NewTimer(1, function()	
 		C_Timer.After(.5, function()
 			--Nx.Quest:ScanBlizzQuestDataZone()
 			Nx.Quest:RecordQuests()
