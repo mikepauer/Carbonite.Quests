@@ -4383,7 +4383,6 @@ end
 function Nx.Quest:FindNewQuest()
 
 	-- Id
---[[
 	if self.AcceptQId then	-- Auto accept quest triggered?
 
 		local qi = GetQuestLogIndexByID (self.AcceptQId)
@@ -4395,7 +4394,6 @@ function Nx.Quest:FindNewQuest()
 			return qi
 		end
 	end
---]]
 
 	-- Scan by name
 
@@ -6708,7 +6706,8 @@ function Nx.Quest.List:Refresh(event)
 	end
 	
 	Nx.Quest.List:LogUpdate()
-	QuestListRefreshTimer = C_Timer.NewTimer(1, function()	
+	
+	local func = function(timer)	
 		C_Timer.After(.5, function()
 			--Nx.Quest:ScanBlizzQuestDataZone()
 			Nx.Quest:RecordQuests()
@@ -6716,7 +6715,13 @@ function Nx.Quest.List:Refresh(event)
 			Nx.Quest.List:LogUpdate()
 			Nx.prtD ("R %s", "Nx.Quest.List:Refresh")
 		end)
-	end)
+	end
+	
+	if event == "QUEST_ACCEPTED" then
+		func()
+	else 
+		QuestListRefreshTimer = C_Timer.NewTimer(1, func)
+	end
 end
 
 function CarboniteQuest:OnQuestUpdate (event, ...)
@@ -6795,7 +6800,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 			if auto then
 				CloseQuest();
 			end
---			Quest.AcceptQId = GetQuestID()
+			Quest.AcceptQId = GetQuestID()
 --			Nx.prt ("QUEST_DETAIL %s", GetQuestID())
 			Nx.Quest.List:Refresh(event)
 		end
