@@ -34,6 +34,7 @@ Nx.VERSIONQOPTS		= .12				-- Quest options
 Nx.VERSIONCAP		= .80
 Nx.Quest = {}
 Nx.Quest.List = {}
+Nx.Quest.AcceptPool = {}
 Nx.Quest.Watch = {}
 Nx.Quest.WQList = {}
 Nx.Quest.Cols = {}
@@ -6705,7 +6706,12 @@ function Nx.Quest.List:Refresh(event)
 		QuestListRefreshTimer:Cancel()
 	end
 	
-	Nx.Quest.List:LogUpdate()
+	local func = function ()
+		Nx.Quest:RecordQuests()
+		Nx.Quest.List:LogUpdate()
+	end
+	
+	--[[Nx.Quest.List:LogUpdate()
 	
 	local func = function(timer)	
 		C_Timer.After(.5, function()
@@ -6715,7 +6721,7 @@ function Nx.Quest.List:Refresh(event)
 			Nx.Quest.List:LogUpdate()
 			Nx.prtD ("R %s", "Nx.Quest.List:Refresh")
 		end)
-	end
+	end]]--
 	
 	if event == "QUEST_ACCEPTED" then
 		func()
@@ -6729,8 +6735,6 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 	local arg1, arg2, arg3 = select (1, ...)
 	
 	Nx.prtD ("OnQuestUpdate %s", event)
-	
-	if event ~= "WORLD_MAP_UPDATE" then Nx.prtD ("OnQuestUpdate %s", event) end
 	
 	if event == "PLAYER_LOGIN" then
 		self.LoggingIn = true
@@ -6791,7 +6795,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 		Nx.Quest.List:Refresh(event)
 		--Nx.Quest:RecordQuests()
 	elseif event == "QUEST_DETAIL" then		-- Happens when auto accept quest is given
-		if QuestGetAutoAccept() and QuestIsFromAreaTrigger() then
+		--if QuestGetAutoAccept() and QuestIsFromAreaTrigger() then
 			Quest:RecordQuestAcceptOrFinish()
 			local auto = Nx.qdb.profile.Quest.AutoAccept
 			if IsShiftKeyDown() and IsControlKeyDown() then
@@ -6800,11 +6804,11 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 			if auto then
 				CloseQuest();
 			end
-			Quest.AcceptQId = GetQuestID()
---			Nx.prt ("QUEST_DETAIL %s", GetQuestID())
+--			Quest.AcceptQId = GetQuestID()
+			table.insert(Quest.AcceptPool, GetQuestID())
+			Nx.prtD ("QUEST_DETAIL %s", GetQuestID())
 			Nx.Quest.List:Refresh(event)
-		end
-
+		--end
 	elseif event == "QUEST_LOG_UPDATE" or event == "UNIT_QUEST_LOG_CHANGED" or event == "WORLD_QUEST_COMPLETED_BY_SPELL" then
 
 --		Nx.prtStack ("QUpdate")
@@ -6855,19 +6859,23 @@ function Nx.Quest.List:LogUpdate()
 			QHistLogin = Nx:ScheduleTimer(Quest.QuestQueryTimer, 1, Quest)
 		end
 	end
-	if qn and qn > 0 then
-
-		local curi, cur = Quest:FindCurByIndex (qn)
-		if cur then
-			Quest.QIdsNew[cur.QId] = time()
-
-			if Nx.qdb.profile.QuestWatch.AddNew and not Quest.DailyPVPIds[cur.QId] then
-				Quest.Watch:Add (curi,true)
+	
+	for k, qn in ipairs (Quest.AcceptPool) do
+		local qi = GetQuestLogIndexByID (qn)
+		if qi > 0 then
+			local curi, cur = Quest:FindCurByIndex (qi)
+			if cur then
+				Quest.QIdsNew[cur.QId] = time()
+				--Nx.prt ("OnQuestUpdate Watch %d %d", qn, k)
+				if Nx.qdb.profile.QuestWatch.AddNew and not Quest.DailyPVPIds[cur.QId] then
+					Quest.Watch:Add (curi,true)
+				end
+				Quest:Capture (curi)
 			end
-			Quest:Capture (curi)
+			table.remove(Quest.AcceptPool, k)
 		end
---		Nx.prt ("OnQuestUpdate Watch %d %d", qn, i)
 	end
+	
 	Quest:RestoreExpandQuests()
 
 	self.LoggingIn = nil
