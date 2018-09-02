@@ -2076,6 +2076,16 @@ function CarboniteQuest:OnInitialize()
 		VRGBADn = "1|1|1|1",
 		CustomTip = 1
 	}
+	Nx.Button.TypeData["QuestWatchEmissaryTip"] = {
+		Bool = true,
+		Up = "Interface\\Addons\\Carbonite\\Gfx\\Buttons\\DotOn",
+		Dn = "Interface\\Addons\\Carbonite\\Gfx\\Buttons\\DotOn",
+		SizeUp = 9,
+		SizeDn = 9,
+		AlphaUp = .3,
+		AlphaDn = .85,
+		EmissaryTip = 1
+	}
 	Nx.Button.TypeData["QuestWatchTarget"] = {
 		Bool = true,
 		Up = "Interface\\Addons\\Carbonite\\Gfx\\Buttons\\DotOn",
@@ -9073,7 +9083,113 @@ function Nx.Quest.Watch:UpdateList()
 		self.ClosestCur = disti and curq[bit.band (disti, 0xff)]
 
 		--
+		
+		-- Emmissaries
+		local emmFunc = function(id) 
+			qId = bit.rshift(id, 16)
+			bId = bit.band(id, 0xff)
+			--WorldMapFrame.overlayFrames[3].SetSelectedBountyIndex(bId)		
+		end
+		
+		local emmBfA = GetQuestBountyInfoForMapID(875)
+		local emmBfA_Sel = nil --WorldMapFrame.overlayFrames[3].selectedBountyIndex
+		
+		local emmLegion = GetQuestBountyInfoForMapID(619)
+		local emmLegion_Sel = nil --WorldMapFrame.overlayFrames[3].selectedBountyIndex
+		
+		local function AddObjectives(questID, numObjectives)
+			for objectiveIndex = 1, numObjectives do
+				local objectiveText, objectiveType, finished = GetQuestObjectiveInfo(questID, objectiveIndex, false);
+				if objectiveText and #objectiveText > 0 then
+					local color = finished and GRAY_FONT_COLOR or HIGHLIGHT_FONT_COLOR;
+					WorldMapTooltip:AddLine(QUEST_DASH .. objectiveText, color.r, color.g, color.b, true);
+				end
+			end
+		end
+		
+		local function ScanTip(bounty)
+			local tipVisible = WorldMapTooltip:IsShown()
+		
+			local tipText = ""
+			local questIndex = GetQuestLogIndexByID(bounty.questID);
+			local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isStory = GetQuestLogTitle(questIndex);
+		
+			if title and not tipVisible then
+				WorldMapTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
+				WorldMapTooltip.ItemTooltip:Hide();
+				
+				WorldMapTooltip:SetText(title, HIGHLIGHT_FONT_COLOR:GetRGB());
+				WorldMap_AddQuestTimeToTooltip(bounty.questID);
 
+				local _, questDescription = GetQuestLogQuestText(questIndex);
+				WorldMapTooltip:AddLine(questDescription, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true);
+
+				AddObjectives(bounty.questID, bounty.numObjectives);
+
+				if bounty.turninRequirementText then
+					WorldMapTooltip:AddLine(bounty.turninRequirementText, RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b, true);
+				end
+
+				GameTooltip_AddQuestRewardsToTooltip(WorldMapTooltip, bounty.questID, TOOLTIP_QUEST_REWARDS_STYLE_EMISSARY_REWARD);
+
+				for i=1,WorldMapTooltip:NumLines() do
+				  if i == 2 or i == 3 or string.find(_G["WorldMapTooltipTextLeft"..i]:GetText(), "Rewards") then
+					tipText = tipText .. format ("|cff%02x%02x%02x%s", NORMAL_FONT_COLOR.r * 255, NORMAL_FONT_COLOR.g * 255, NORMAL_FONT_COLOR.b * 255, _G["WorldMapTooltipTextLeft"..i]:GetText()) .. "|r\n"				  
+				  else
+					tipText = tipText .. _G["WorldMapTooltipTextLeft"..i]:GetText() .. "\n"
+				  end
+				end
+				for i=1,WorldMapTooltipTooltip:NumLines() do
+				  tipText = tipText .. (i == 1 and "|T"..WorldMapTooltip.ItemTooltip.Icon:GetTexture()..":33|t " or "\n") .. _G["WorldMapTooltipTooltipTextLeft"..i]:GetText() .. "\n"
+				end
+			end
+			if not tipVisible then WorldMapTooltip:Hide() end
+			
+			return tipText
+		end
+		
+		-- BfA
+		if #emmBfA > 0 then 
+			list:ItemAdd(0)
+			list:ItemSet(2,"|cff00ff00----[ |cffffff00" .. "BfA Emissaries" .. " |cff00ff00]----")
+			
+			for bountyIndex, bounty in ipairs(emmBfA) do
+				local objectiveText, objectiveType, finished, numFulfilled, numRequired = GetQuestObjectiveInfo(bounty.questID, 1, false)
+
+				list:ItemAdd(bounty.questID * 0x10000 + bountyIndex)
+				list:ItemSetOffset (16, -1)
+				list:ItemSet(2,"|cffcccccc" .. objectiveText)
+				list:ItemSetButtonTip(ScanTip(bounty))
+				list:ItemSetButton("QuestWatchEmissaryTip", emmBfA_Sel == (bountyIndex) and true or false)
+				list:ItemSetFunc(emmFunc, bounty.questID * 0x10000 + bountyIndex)
+			end
+			
+			if #emmLegion == 0 then
+				list:ItemAdd(0)
+				list:ItemSet(2,"|cff00ff00--------------------------------")
+			end
+		end	
+		
+		-- Legion
+		if #emmLegion > 0 then	
+			list:ItemAdd(0)
+			list:ItemSet(2,"|cff00ff00----[ |cffffff00" .. "Legion Emissaries" .. " |cff00ff00]----")
+			
+			for bountyIndex, bounty in ipairs(emmLegion) do
+				local objectiveText, objectiveType, finished, numFulfilled, numRequired = GetQuestObjectiveInfo(bounty.questID, 1, false)
+			
+				list:ItemAdd(bounty.questID * 0x10000 + bountyIndex)
+				list:ItemSetOffset (16, -1)
+				list:ItemSet(2,"|cffcccccc" .. objectiveText)
+				list:ItemSetButtonTip(ScanTip(bounty))
+				list:ItemSetButton("QuestWatchEmissaryTip",emmLegion_Sel == (bountyIndex) and true or false)
+				list:ItemSetFunc(emmFunc, bounty.questID * 0x10000 + bountyIndex)
+			end
+			
+			list:ItemAdd(0)
+			list:ItemSet(2,"|cff00ff00-------------------------------------")	
+		end
+		
 		if not self.Win:IsSizeMin() and self.Win:IsVisible() then
 			self.FlashColor = (self.FlashColor + 1) % 2
 			list:SetItemFrameScaleAlpha (Nx.qdb.profile.QuestWatch.ItemScale, Nx.Util_str2a (Nx.qdb.profile.QuestWatch.ItemAlpha))
@@ -9652,14 +9768,13 @@ function Nx.Quest.Watch:OnListEvent (eventName, val1, val2, click, but)
 		-- val2 = pressed
 
 		local data = self.List:ItemGetData (val1)
-
 		if data then
 			local qIndex = bit.band (data, 0xff)
 			local qId = bit.rshift (data, 16)
 			local typ = but:GetType()
-			if typ.CustomTip then
+			if typ.CustomTip or typ.EmissaryTip then
 				local func = self.List:ItemGetFunc(data)
-				func()
+				func(data)
 				return
 			end
 			if click == "LeftButton" then
