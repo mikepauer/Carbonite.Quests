@@ -193,6 +193,8 @@ local ITEM_LEVEL = (ITEM_LEVEL or "NO DATA FOR ITEM_LEVEL"):gsub("%%d","(%%d+%+*
 
 local questoptions
 local worldquestdb = {}
+local emmBfA = {}
+local emmLegion = {}
 local worldquesttip = CreateFrame("GameTooltip", "WQListTip", nil, "GameTooltipTemplate")
 worldquesttip:SetOwner(UIParent, "ANCHOR_NONE")
 
@@ -2155,6 +2157,11 @@ function CarboniteQuest:OnInitialize()
 	Nx.Quest.List:LogUpdate()
 	Nx.Quest.Watch:Update()
 	Nx.Quest.WQList:Update()
+	
+	local pLvl = UnitLevel ("player")
+	if pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
+	if pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
+	
 	tinsert(Nx.BrokerMenuTemplate,{ text = L["Toggle Quest Watch"], func = function() Nx.Quest.Watch.Win:Show(not Nx.Quest.Watch.Win:IsShown()) end })
 	tinsert(Nx.Whatsnew.Categories, "Quests")
 	Nx.Whatsnew.Quests = {
@@ -6828,6 +6835,10 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 			Quest:AccessAllQuests()
 			QLogUpdate = Nx:ScheduleTimer(self.LogUpdate,.5,self)	-- Small delay, so access works (0 does work)
 		else
+			local pLvl = UnitLevel ("player")
+			if pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
+			if pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
+		
 			Nx.Quest.List:Refresh("QUEST_LOG_UPDATE")
 		end
 	elseif event == "GARRISON_MISSION_COMPLETE_RESPONSE" then
@@ -9091,10 +9102,7 @@ function Nx.Quest.Watch:UpdateList()
 			--WorldMapFrame.overlayFrames[3].SetSelectedBountyIndex(bId)		
 		end
 		
-		local emmBfA = GetQuestBountyInfoForMapID(875)
 		local emmBfA_Sel = nil --WorldMapFrame.overlayFrames[3].selectedBountyIndex
-		
-		local emmLegion = GetQuestBountyInfoForMapID(619)
 		local emmLegion_Sel = nil --WorldMapFrame.overlayFrames[3].selectedBountyIndex
 		
 		local function AddObjectives(questID, numObjectives)
