@@ -2159,8 +2159,8 @@ function CarboniteQuest:OnInitialize()
 	Nx.Quest.WQList:Update()
 	
 	local pLvl = UnitLevel ("player")
-	if pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
-	if pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
+	if not hideBfAEmmissaries and pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
+	if not hideLegionEmmissaries and pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
 	
 	tinsert(Nx.BrokerMenuTemplate,{ text = L["Toggle Quest Watch"], func = function() Nx.Quest.Watch.Win:Show(not Nx.Quest.Watch.Win:IsShown()) end })
 	tinsert(Nx.Whatsnew.Categories, "Quests")
@@ -2217,7 +2217,10 @@ function Nx.Quest:OptsReset()
 	qopts.NXWVisMax = 8
 	qopts.NXWShowOnMap = true
 	qopts.NXWWatchParty = true
-
+	
+	qopts.NXWHideBfAEmmissaries = false
+	qopts.NXWHideLegionEmmissaries = false
+	
 	qopts.NXWHideUnfinished = false
 	qopts.NXWHideGroup = false
 	qopts.NXWHideNotInZone = false
@@ -6836,8 +6839,8 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 			QLogUpdate = Nx:ScheduleTimer(self.LogUpdate,.5,self)	-- Small delay, so access works (0 does work)
 		else
 			local pLvl = UnitLevel ("player")
-			if pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
-			if pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
+			if not hideBfAEmmissaries and pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
+			if not hideLegionEmmissaries and pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
 		
 			Nx.Quest.List:Refresh("QUEST_LOG_UPDATE")
 		end
@@ -8671,7 +8674,13 @@ function Nx.Quest.Watch:Open()
 	end
 
 	menu:AddItem (0, L["Options..."], func)
-
+	
+	local item = menu:AddItem (0, L["Hide BfA Emmissaries"], update, self)
+	item:SetChecked (qopts, "NXWHideBfAEmmissaries")
+	
+	local item = menu:AddItem (0, L["Hide Legion Emmissaries"], update, self)
+	item:SetChecked (qopts, "NXWHideLegionEmmissaries")
+	
 	-- Create priority button menu
 
 	local menu = Nx.Menu:Create (list.Frm, 300)
@@ -9017,6 +9026,8 @@ function Nx.Quest.Watch:UpdateList()
 	local Map = Nx.Map
 	local map = Map:GetMap(1)
 	local qopts = Nx.Quest:GetQuestOpts()
+	local hideBfAEmmissaries = qopts["NXWHideBfAEmmissaries"]
+	local hideLegionEmmissaries = qopts["NXWHideLegionEmmissaries"]
 	local hideUnfinished = qopts["NXWHideUnfinished"]
 	local hideGroup = qopts["NXWHideGroup"]
 	local hideNotInZone = qopts["NXWHideNotInZone"]
@@ -9157,7 +9168,7 @@ function Nx.Quest.Watch:UpdateList()
 		end
 		
 		-- BfA
-		if #emmBfA > 0 then 
+		if not hideBfAEmmissaries and #emmBfA > 0 then 
 			list:ItemAdd(0)
 			list:ItemSet(2,"|cff00ff00----[ |cffffff00" .. "BfA Emissaries" .. " |cff00ff00]----")
 			
@@ -9179,7 +9190,7 @@ function Nx.Quest.Watch:UpdateList()
 		end	
 		
 		-- Legion
-		if #emmLegion > 0 then	
+		if not hideLegionEmmissaries and #emmLegion > 0 then	
 			list:ItemAdd(0)
 			list:ItemSet(2,"|cff00ff00----[ |cffffff00" .. "Legion Emissaries" .. " |cff00ff00]----")
 			
