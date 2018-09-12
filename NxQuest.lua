@@ -9155,11 +9155,18 @@ function Nx.Quest.Watch:UpdateList()
 				  if i == 2 or i == 3 or string.find(_G["WorldMapTooltipTextLeft"..i]:GetText(), "Rewards") then
 					tipText = tipText .. format ("|cff%02x%02x%02x%s", NORMAL_FONT_COLOR.r * 255, NORMAL_FONT_COLOR.g * 255, NORMAL_FONT_COLOR.b * 255, _G["WorldMapTooltipTextLeft"..i]:GetText()) .. "|r\n"				  
 				  else
+					if i == WorldMapTooltip:NumLines() then
+						local money = GetQuestLogRewardMoney(bounty.questID)
+						if ( money > 0 ) then
+							tipText = tipText .. GetCoinTextureString(money)		
+						end
+					end
 					tipText = tipText .. _G["WorldMapTooltipTextLeft"..i]:GetText() .. "\n"
 				  end
 				end
 				for i=1,WorldMapTooltipTooltip:NumLines() do
-				  tipText = tipText .. (i == 1 and "|T"..WorldMapTooltip.ItemTooltip.Icon:GetTexture()..":33|t " or "\n") .. _G["WorldMapTooltipTooltipTextLeft"..i]:GetText() .. "\n"
+				  local tipTexture = WorldMapTooltip.ItemTooltip.Icon:GetTexture()
+				  tipText = tipText .. ((i == 1 and tipTexture) and "|T"..tipTexture..":33|t " or "\n") .. _G["WorldMapTooltipTooltipTextLeft"..i]:GetText() .. "\n"
 				end
 			end
 			if not tipVisible then WorldMapTooltip:Hide() end
@@ -9183,7 +9190,7 @@ function Nx.Quest.Watch:UpdateList()
 				list:ItemSetFunc(emmFunc, bounty.questID * 0x10000 + bountyIndex)
 			end
 			
-			if #emmLegion == 0 then
+			if #emmLegion == 0 or hideLegionEmmissaries then
 				list:ItemAdd(0)
 				list:ItemSet(2,"|cff00ff00--------------------------------")
 			end
@@ -9400,7 +9407,7 @@ function Nx.Quest.Watch:UpdateList()
 								list:ItemAdd(0)
 								list:ItemSet(2,"|cffff00ff----[ |cffffff00" .. task_title .. " |cffff00ff]----")
 								list:ItemAdd(0)
-								list:ItemSet(2,Nx.Util_str2colstr (Nx.qdb.profile.QuestWatch.OIncompleteColor) .. title)
+								list:ItemSet(2,Nx.Util_str2colstr (Nx.qdb.profile.QuestWatch.OIncompleteColor) .. (title or ""))
 								local _,_, numObjectives = GetTaskInfo(questId)
 								if numObjectives and numObjectives > 0 then
 									for j=1,numObjectives do
