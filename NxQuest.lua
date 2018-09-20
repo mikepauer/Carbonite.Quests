@@ -4101,7 +4101,7 @@ function Nx.Quest:ScanBlizzQuestDataZone(WatchUpdate)
 							local s = title
 							for i = 1, lbCnt do
 								if not quest["Objectives"][i] then
-									local obj = format ("%s|%s|32|%f|%f|6|6", objectives[i] and objectives[i].text or "nil", mapId, x, y)
+									local obj = format ("%s|%s|32|%f|%f|6|6", objectives[i] and objectives[i].text or "?", mapId, x, y)
 									quest["Objectives"][i] = {obj}
 								end
 							end
@@ -9166,7 +9166,8 @@ function Nx.Quest.Watch:UpdateList()
 				end
 				for i=1,WorldMapTooltipTooltip:NumLines() do
 				  local tipTexture = WorldMapTooltip.ItemTooltip.Icon:GetTexture()
-				  tipText = tipText .. ((i == 1 and tipTexture) and "|T"..tipTexture..":33|t " or "\n") .. _G["WorldMapTooltipTooltipTextLeft"..i]:GetText() .. "\n"
+				  local r, g, b = _G["WorldMapTooltipTooltipTextLeft"..i]:GetTextColor()
+				  tipText = tipText .. ((i == 1 and tipTexture) and "|T"..tipTexture..":33|t " or "\n") .. format ("|cff%02x%02x%02x%s", r * 255, g * 255, b * 255, _G["WorldMapTooltipTooltipTextLeft"..i]:GetText()) .. "|r\n"
 				end
 			end
 			if not tipVisible then WorldMapTooltip:Hide() end
