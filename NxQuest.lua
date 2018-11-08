@@ -2155,6 +2155,7 @@ function CarboniteQuest:OnInitialize()
 	Nx.Quest.Initialized = true
 	Nx.Quest.RecordQuests(true)
 	Nx.Quest.List:LogUpdate()
+	CarboniteQuest:OnTrackedAchievementsUpdate()
 	Nx.Quest.Watch:Update()
 	Nx.Quest.WQList:Update()
 	
@@ -5539,7 +5540,8 @@ function Nx.Quest.List:Open()
 	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_START", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_STOP", "OnQuestUpdate")
 	--CarboniteQuest:RegisterEvent ("QUEST_POI_UPDATE", "OnQuestUpdate")
-	--CarboniteQuest:RegisterEvent ("CRITERIA_UPDATE", "OnQuestUpdate")
+	CarboniteQuest:RegisterEvent ("TRACKED_ACHIEVEMENT_UPDATE", "OnTrackedAchievementUpdate")
+	CarboniteQuest:RegisterEvent ("TRACKED_ACHIEVEMENT_LIST_CHANGED", "OnTrackedAchievementsUpdate")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_COMBAT_FACTION_CHANGE", "OnChat_msg_combat_faction_change")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_RAID_BOSS_WHISPER", "OnChat_msg_raid_boss_whisper")
 	-- Filter Edit Box
@@ -6814,6 +6816,13 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 		end
 		Nx.Quest.List:Refresh(event)
 		--Nx.Quest:RecordQuests()
+	elseif event == "QUEST_REMOVED" then
+		local questId = arg1
+		if QuestUtils_IsQuestWorldQuest (questId) then
+			SetSuperTrackedQuestID(0);
+			worldquestdb[questId] = nil
+			Nx.Quest.WQList:UpdateDB()
+		end
 	elseif event == "QUEST_DETAIL" then		-- Happens when auto accept quest is given
 		--if QuestGetAutoAccept() and QuestIsFromAreaTrigger() then
 			Quest:RecordQuestAcceptOrFinish()
@@ -6850,6 +6859,33 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 		Nx.Quest.Watch:Update()
 	end
 --	Nx.prtD ("OnQuestUpdate %s Done", event)
+end
+
+Nx.Quest.TrackedAchievements = {}
+function CarboniteQuest:OnTrackedAchievementsUpdate (event, ...)
+	Nx.Quest.TrackedAchievements = {}
+	local ach = { GetTrackedAchievements() }
+	for _, id in ipairs (ach) do
+		CarboniteQuest:OnTrackedAchievementUpdate(event, id)
+	end
+end
+
+function CarboniteQuest:OnTrackedAchievementUpdate (event, id)
+	local achT = {}
+	local aId, aName, aPoints, aComplete, aMonth, aDay, aYear, aDesc = GetAchievementInfo (id)
+	achT = { aId, aName, aPoints, aComplete, aMonth or false, aDay or false, aYear or false, aDesc }
+	
+	local numC = GetAchievementNumCriteria (id)
+	achT[9] = numC
+	achT[10] = {}
+	local progressCnt = 0
+	local tip = aDesc
+	for n = 1, numC do
+		local cName, cType, cComplete, cQuantity, cReqQuantity, _, _, _, cQuantityString = GetAchievementCriteriaInfo (id, n)
+		achT[10][n] = { cName, cType, cComplete, cQuantity, cReqQuantity, _, _, _, cQuantityString }
+	end
+	
+	Nx.Quest.TrackedAchievements[id] = achT
 end
 
 -------------------------------------------------------------------------------
@@ -9440,17 +9476,16 @@ function Nx.Quest.Watch:UpdateList()
 					end
 				end
 				if Nx.qdb.profile.QuestWatch.AchTrack then
-					local ach = { GetTrackedAchievements() }
-					for _, id in ipairs (ach) do
-						local aId, aName, aPoints, aComplete, aMonth, aDay, aYear, aDesc = GetAchievementInfo (id)
+					local achs = Nx.Quest.TrackedAchievements
+					for id, ach in pairs (achs) do
+						local aId, aName, aPoints, aComplete, aMonth, aDay, aYear, aDesc, numC, aCriteria = unpack(ach)
 						if aName then		-- Person had nil name happen
 							list:ItemAdd (0)
 							list:ItemSet (2, format ("|cffdf9fff" ..L["Achievement:"] .. " %s", aName))
-							local numC = GetAchievementNumCriteria (id)
 							local progressCnt = 0
 							local tip = aDesc
 							for n = 1, numC do
-								local cName, cType, cComplete, cQuantity, cReqQuantity, _, _, _, cQuantityString = GetAchievementCriteriaInfo (id, n)
+								local cName, cType, cComplete, cQuantity, cReqQuantity, _, _, _, cQuantityString = unpack(aCriteria[n])
 								local color = cComplete and "|cff80ff80" or "|cffa0a0a0"
 								if not cComplete and cReqQuantity > 1 and cQuantity > 0 then
 									progressCnt = progressCnt + 1
@@ -9463,7 +9498,7 @@ function Nx.Quest.Watch:UpdateList()
 							list:ItemSetButtonTip (tip)
 							local showCnt = 0
 							for n = 1, numC do
-								local cName, cType, cComplete, cQuantity, cReqQuantity, _, _, _, cQuantityString = GetAchievementCriteriaInfo (id, n)
+								local cName, cType, cComplete, cQuantity, cReqQuantity, _, _, _, cQuantityString = unpack(aCriteria[n])
 								if not cComplete and (progressCnt <= 3 or cQuantity > 0) then
 									list:ItemAdd (0)
 									local s = "  |cffcfafcf"
