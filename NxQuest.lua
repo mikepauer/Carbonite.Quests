@@ -8145,7 +8145,7 @@ function Nx.Quest:UpdateIcons (map)
 							 end
 						end)
 
-						WorldMap_SetupWorldQuestButton(f, questtype, rarity, elite, tradeskill, info.inProgress, selected)
+						QuestUtil.SetupWorldQuestButton(f, questtype, rarity, elite, tradeskill, info.inProgress, selected)
 
 						f.texture:Hide()
 
