@@ -11882,7 +11882,7 @@ function Nx.Quest.WQList:Update()
 		local questId = quest					
 		local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
 		local newwidth = #title * 7 + 10
-		local timeleft = C_TaskQuest.GetQuestTimeLeftMinutes(questId)
+		local timeleft = C_TaskQuest.GetQuestTimeLeftMinutes(questId) or 0
 		local rewardstring = ""		
 		local isbounty = Nx.Quest.WQList:CheckBounty(questId)
 		
