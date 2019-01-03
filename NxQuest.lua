@@ -11829,10 +11829,10 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 		else
 			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(worldquestzones[i], worldquestzones[i])
 		end
-		for j, quest in pairs(zonequests) do			
+		for j, quest in pairs(zonequests) do 
 			local questId = quest.questId			
 			C_TaskQuest.RequestPreloadRewardData (questId)
-			if QuestUtils_IsQuestWorldQuest (questId) then
+			if questId and QuestUtils_IsQuestWorldQuest (questId) then
 				if not worldquestdb[questId] then
 					worldquestdb[questId] = {}					
 				end
