@@ -6731,7 +6731,9 @@ function Nx.Quest.List:Refresh(event)
 	
 	local func = function ()	
 		Nx.prtD("Nx.Quest.List:Refresh")
-		QuestListRefreshTimer:Cancel()		
+		if QuestListRefreshTimer then
+			QuestListRefreshTimer:Cancel()
+		end		
 		
 		local isInst = IsInInstance()
 		-- Update Emmissaries	
@@ -11832,7 +11834,9 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 
 	local func = function ()
 		Nx.prtD("Nx.Quest.WQList:UpdateDB")
-		WQListUpdateDBTimer:Cancel()
+		if WQListUpdateDBTimer then
+			WQListUpdateDBTimer:Cancel()
+		end
 		
 		local worldquestzones = { 947, 830, 885, 882 }	
 		for i=1,#worldquestzones do
