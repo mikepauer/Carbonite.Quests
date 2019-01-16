@@ -2159,6 +2159,7 @@ function CarboniteQuest:OnInitialize()
 	Nx.Quest.Watch:Update()
 	Nx.Quest.WQList:Update()
 	
+	-- Update Emmissaries
 	local pLvl = UnitLevel ("player")
 	if not hideBfAEmmissaries and pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
 	if not hideLegionEmmissaries and pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
@@ -6728,7 +6729,12 @@ function Nx.Quest.List:Refresh(event)
 		QuestListRefreshTimer:Cancel()
 	end
 	
-	local func = function ()
+	local func = function ()		
+		-- Update Emmissaries	
+		local pLvl = UnitLevel ("player")
+		if not hideBfAEmmissaries and pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
+		if not hideLegionEmmissaries and pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
+		
 		Nx.Quest:RecordQuests()
 		Nx.Quest.List:LogUpdate()
 	end
@@ -6847,10 +6853,6 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 			Quest:AccessAllQuests()
 			QLogUpdate = Nx:ScheduleTimer(self.LogUpdate,.5,self)	-- Small delay, so access works (0 does work)
 		else
-			local pLvl = UnitLevel ("player")
-			if not hideBfAEmmissaries and pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
-			if not hideLegionEmmissaries and pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
-		
 			Nx.Quest.List:Refresh("QUEST_LOG_UPDATE")
 		end
 	elseif event == "GARRISON_MISSION_COMPLETE_RESPONSE" then
