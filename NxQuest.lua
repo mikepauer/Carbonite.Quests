@@ -6729,15 +6729,19 @@ function Nx.Quest.List:Refresh(event)
 		QuestListRefreshTimer:Cancel()
 	end
 	
-	local func = function ()		
+	local func = function ()	
+		Nx.prtD("Nx.Quest.List:Refresh")
+		QuestListRefreshTimer:Cancel()		
+		
+		local isInst = IsInInstance()
 		-- Update Emmissaries	
-		if not Nx.Map:IsInstanceMap(Nx.Map.RMapId) then
+		if not isInst then
 			local pLvl = UnitLevel ("player")
 			if not hideBfAEmmissaries and pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
 			if not hideLegionEmmissaries and pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
 		end
 		
-		Nx.Quest:RecordQuests()
+		Nx.Quest:RecordQuests(isInst and 0 or nil)
 		Nx.Quest.List:LogUpdate()
 	end
 	
@@ -6756,7 +6760,7 @@ function Nx.Quest.List:Refresh(event)
 	if event == "QUEST_ACCEPTED" then
 		func()
 	else 
-		QuestListRefreshTimer = C_Timer.NewTimer(Nx.Map:IsInstanceMap(Nx.Map.RMapId) and 2 or 1, func)
+		QuestListRefreshTimer = C_Timer.NewTimer(IsInInstance() and 2 or 1, func)
 	end
 end
 
@@ -11817,49 +11821,55 @@ function Nx.Quest.WQList:OnListEvent (eventName, sel, val2, click)
 	end
 end
 
+local WQListUpdateDBTimer
 function Nx.Quest.WQList:UpdateDB(event, ...)
+	if WQListUpdateDBTimer then
+		WQListUpdateDBTimer:Cancel()
+	end
 --	if not Nx.Quest.WQList.Win.Frm:IsVisible() then
 --		return
 --	end	
-	local worldquestzones = { 947, 830, 885, 882 }
-	if not WorldMapFrame:IsShown() then
-		--WorldMapFrame:SetMapID(619)
-	end		
-	for i=1,#worldquestzones do
-		local zonequests = {}
-		if worldquestzones[i] == 625 then			
-			--WorldMapFrame:SetMapID(625)			
-			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(worldquestzones[i])			
-		else
-			zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(worldquestzones[i], worldquestzones[i])
-		end
-		for j, quest in pairs(zonequests) do 
-			local questId = quest.questId			
-			C_TaskQuest.RequestPreloadRewardData (questId)
-			if questId and QuestUtils_IsQuestWorldQuest (questId) then
-				if not worldquestdb[questId] then
-					worldquestdb[questId] = {}					
-				end
-				worldquestdb[questId].x = quest.x * 100				
-				worldquestdb[questId].y = quest.y * 100				
-				worldquestdb[questId].mapid = C_TaskQuest.GetQuestZoneID(questId) --worldquestzones[i]
-				worldquestdb[questId].questid = questId
-				worldquestdb[questId].numobjectives = quest.numObjectives
-				local tip = Nx.Quest.WQList:GenWQTip(questId)
-				if not worldquestdb[questId].tip and tip then						
-					worldquestdb[questId].tip = tip
+
+	local func = function ()
+		Nx.prtD("Nx.Quest.WQList:UpdateDB")
+		WQListUpdateDBTimer:Cancel()
+		
+		local worldquestzones = { 947, 830, 885, 882 }	
+		for i=1,#worldquestzones do
+			local zonequests = {}
+			if worldquestzones[i] == 625 then						
+				zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(worldquestzones[i])			
+			else
+				zonequests = C_TaskQuest.GetQuestsForPlayerByMapID(worldquestzones[i], worldquestzones[i])
+			end
+			for j, quest in pairs(zonequests) do 
+				local questId = quest.questId			
+				C_TaskQuest.RequestPreloadRewardData (questId)
+				if questId and QuestUtils_IsQuestWorldQuest (questId) then
+					if not worldquestdb[questId] then
+						worldquestdb[questId] = {}					
+					end
+					worldquestdb[questId].x = quest.x * 100				
+					worldquestdb[questId].y = quest.y * 100				
+					worldquestdb[questId].mapid = C_TaskQuest.GetQuestZoneID(questId) --worldquestzones[i]
+					worldquestdb[questId].questid = questId
+					worldquestdb[questId].numobjectives = quest.numObjectives
+					local tip = Nx.Quest.WQList:GenWQTip(questId)
+					if not worldquestdb[questId].tip and tip then						
+						worldquestdb[questId].tip = tip
+					end
 				end
 			end
 		end
+		Nx.Quest.WQList:Update() 
 	end
-	if not WorldMapFrame:IsShown() then
-		--WorldMapFrame:SetMapID(Nx.Map.UpdateMapID)
-	end	
+	
 	if event == "QUEST_LOG_UPDATE" then
 		Nx.Quest.WQList:UnregisterEvent("QUEST_LOG_UPDATE")
 		C_Timer.After(5, function() Nx.Quest.WQList:UpdateDB() end)
+	else
+		WQListUpdateDBTimer = C_Timer.NewTimer(IsInInstance() and 5 or 1, func)
 	end	
-	C_Timer.After(1, function() Nx.Quest.WQList:Update() end)	
 end
 
 function Nx.Quest.WQList:CheckBounty(questId)
