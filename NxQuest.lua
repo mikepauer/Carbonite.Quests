@@ -6731,9 +6731,11 @@ function Nx.Quest.List:Refresh(event)
 	
 	local func = function ()		
 		-- Update Emmissaries	
-		local pLvl = UnitLevel ("player")
-		if not hideBfAEmmissaries and pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
-		if not hideLegionEmmissaries and pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
+		if not Nx.Map:IsInstanceMap(Nx.Map.RMapId) then
+			local pLvl = UnitLevel ("player")
+			if not hideBfAEmmissaries and pLvl > 111 then emmBfA = GetQuestBountyInfoForMapID(875) end
+			if not hideLegionEmmissaries and pLvl > 109 then emmLegion = GetQuestBountyInfoForMapID(619) end
+		end
 		
 		Nx.Quest:RecordQuests()
 		Nx.Quest.List:LogUpdate()
@@ -6754,7 +6756,7 @@ function Nx.Quest.List:Refresh(event)
 	if event == "QUEST_ACCEPTED" then
 		func()
 	else 
-		QuestListRefreshTimer = C_Timer.NewTimer(1, func)
+		QuestListRefreshTimer = C_Timer.NewTimer(Nx.Map:IsInstanceMap(Nx.Map.RMapId) and 2 or 1, func)
 	end
 end
 
