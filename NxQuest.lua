@@ -11861,7 +11861,9 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 				end
 			end
 		end
-		Nx.Quest.WQList:Update() 
+		if Nx.Quest.WQList.Win.Frm:IsVisible() then
+			Nx.Quest.WQList:Update() 
+		end
 	end
 	
 	if event == "QUEST_LOG_UPDATE" then
