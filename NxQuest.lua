@@ -9228,13 +9228,14 @@ function Nx.Quest.Watch:UpdateList()
 			
 			for bountyIndex, bounty in ipairs(emmBfA) do
 				local objectiveText, objectiveType, finished, numFulfilled, numRequired = GetQuestObjectiveInfo(bounty.questID, 1, false)
-
-				list:ItemAdd(bounty.questID * 0x10000 + bountyIndex)
-				list:ItemSetOffset (16, -1)
-				list:ItemSet(2,"|cffcccccc" .. objectiveText)
-				list:ItemSetButtonTip(ScanTip(bounty))
-				list:ItemSetButton("QuestWatchEmissaryTip", emmBfA_Sel == (bountyIndex) and true or false)
-				list:ItemSetFunc(emmFunc, bounty.questID * 0x10000 + bountyIndex)
+				if objectiveText then
+					list:ItemAdd(bounty.questID * 0x10000 + bountyIndex)
+					list:ItemSetOffset (16, -1)
+					list:ItemSet(2,"|cffcccccc" .. objectiveText)
+					list:ItemSetButtonTip(ScanTip(bounty))
+					list:ItemSetButton("QuestWatchEmissaryTip", emmBfA_Sel == (bountyIndex) and true or false)
+					list:ItemSetFunc(emmFunc, bounty.questID * 0x10000 + bountyIndex)
+				end
 			end
 			
 			if #emmLegion == 0 or hideLegionEmmissaries then
@@ -9251,12 +9252,14 @@ function Nx.Quest.Watch:UpdateList()
 			for bountyIndex, bounty in ipairs(emmLegion) do
 				local objectiveText, objectiveType, finished, numFulfilled, numRequired = GetQuestObjectiveInfo(bounty.questID, 1, false)
 			
-				list:ItemAdd(bounty.questID * 0x10000 + bountyIndex)
-				list:ItemSetOffset (16, -1)
-				list:ItemSet(2,"|cffcccccc" .. objectiveText)
-				list:ItemSetButtonTip(ScanTip(bounty))
-				list:ItemSetButton("QuestWatchEmissaryTip",emmLegion_Sel == (bountyIndex) and true or false)
-				list:ItemSetFunc(emmFunc, bounty.questID * 0x10000 + bountyIndex)
+				if objectiveText then
+					list:ItemAdd(bounty.questID * 0x10000 + bountyIndex)
+					list:ItemSetOffset (16, -1)
+					list:ItemSet(2,"|cffcccccc" .. objectiveText)
+					list:ItemSetButtonTip(ScanTip(bounty))
+					list:ItemSetButton("QuestWatchEmissaryTip",emmLegion_Sel == (bountyIndex) and true or false)
+					list:ItemSetFunc(emmFunc, bounty.questID * 0x10000 + bountyIndex)
+				end
 			end
 			
 			list:ItemAdd(0)
