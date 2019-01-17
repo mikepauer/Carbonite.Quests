@@ -6,7 +6,7 @@
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: NXQuest
-## RequiredDeps: Carbonite
+## RequiredDeps: Carbonite 
 
 ## X-WoWI-ID: 23404
 
