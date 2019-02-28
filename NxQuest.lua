@@ -9269,7 +9269,7 @@ function Nx.Quest.Watch:UpdateList()
 		if not self.Win:IsSizeMin() and self.Win:IsVisible() then
 			self.FlashColor = (self.FlashColor + 1) % 2
 			list:SetItemFrameScaleAlpha (Nx.qdb.profile.QuestWatch.ItemScale, Nx.Util_str2a (Nx.qdb.profile.QuestWatch.ItemAlpha))
-			if Nx.qdb.profile.QuestWatch.HideBlizz then
+			if Nx.qdb.profile.QuestWatch.HideBlizz and not InCombatLockdown() then
 				ObjectiveTrackerFrame:Hide()		-- Hide Blizzard's
 			end
 			if Nx.Quest.AltView then
