@@ -8125,8 +8125,16 @@ function Nx.Quest:UpdateIcons (map)
 						map:ClipFrameZ (f, x, y, 24, 24, 0)
 
 						local selected = info.questId == GetSuperTrackedQuestID();
-
-						--local isCriteria = WorldMapFrame.UIElementsFrame.BountyBoard:IsWorldQuestCriteriaForSelectedBounty(info.questId);
+						
+						local function WQTGetOverlay (memberName)
+							for i = 1, #WorldMapFrame.overlayFrames do
+								local overlay = WorldMapFrame.overlayFrames [i]
+								if (overlay [memberName]) then
+									return overlay
+								end
+							end
+						end
+						local isCriteria = WQTGetOverlay("IsWorldQuestCriteriaForSelectedBounty"):IsWorldQuestCriteriaForSelectedBounty(info.questId);
 						--local isSpellTarget = SpellCanTargetQuest() and IsQuestIDValidSpellTarget(info.questId);
 
 						f.worldQuest = true;
@@ -8137,7 +8145,8 @@ function Nx.Quest:UpdateIcons (map)
 							map:SetTargetAtStr (format("%s, %s", x, y))
 							if not InCombatLockdown() and self.worldQuest then
 							  if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
-								PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);						 
+								PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+								if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil,self.questID,"force",self.mapID) end
 								if IsShiftKeyDown() then
 								  if IsWorldQuestHardWatched(self.questID) or (IsWorldQuestWatched(self.questID) and GetSuperTrackedQuestID() == self.questID) then
 									BonusObjectiveTracker_UntrackWorldQuest(self.questID);
@@ -8155,7 +8164,7 @@ function Nx.Quest:UpdateIcons (map)
 							 end
 						end)
 
-						QuestUtil.SetupWorldQuestButton(f, questtype, rarity, elite, tradeskill, info.inProgress, selected)
+						QuestUtil.SetupWorldQuestButton(f, questtype, rarity, elite, tradeskill, info.inProgress, selected, isCriteria)
 
 						f.texture:Hide()
 
