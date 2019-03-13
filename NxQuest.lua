@@ -9176,56 +9176,56 @@ function Nx.Quest.Watch:UpdateList()
 				local objectiveText, objectiveType, finished = GetQuestObjectiveInfo(questID, objectiveIndex, false);
 				if objectiveText and #objectiveText > 0 then
 					local color = finished and GRAY_FONT_COLOR or HIGHLIGHT_FONT_COLOR;
-					WorldMapTooltip:AddLine(QUEST_DASH .. objectiveText, color.r, color.g, color.b, true);
+					GameTooltip:AddLine(QUEST_DASH .. objectiveText, color.r, color.g, color.b, true);
 				end
 			end
 		end
 		
 		local function ScanTip(bounty)
-			local tipVisible = WorldMapTooltip:IsShown()
+			local tipVisible = GameTooltip:IsShown()
 		
 			local tipText = ""
 			local questIndex = GetQuestLogIndexByID(bounty.questID);
 			local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isStory = GetQuestLogTitle(questIndex);
 		
 			if title and not tipVisible then
-				WorldMapTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
-				WorldMapTooltip.ItemTooltip:Hide();
+				GameTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
+				GameTooltip.ItemTooltip:Hide();
 				
-				WorldMapTooltip:SetText(title, HIGHLIGHT_FONT_COLOR:GetRGB());
+				GameTooltip:SetText(title, HIGHLIGHT_FONT_COLOR:GetRGB());
 				WorldMap_AddQuestTimeToTooltip(bounty.questID);
 
 				local _, questDescription = GetQuestLogQuestText(questIndex);
-				WorldMapTooltip:AddLine(questDescription, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true);
+				GameTooltip:AddLine(questDescription, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true);
 
 				AddObjectives(bounty.questID, bounty.numObjectives);
 
 				if bounty.turninRequirementText then
-					WorldMapTooltip:AddLine(bounty.turninRequirementText, RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b, true);
+					GameTooltip:AddLine(bounty.turninRequirementText, RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b, true);
 				end
 
-				GameTooltip_AddQuestRewardsToTooltip(WorldMapTooltip, bounty.questID, TOOLTIP_QUEST_REWARDS_STYLE_EMISSARY_REWARD);
+				GameTooltip_AddQuestRewardsToTooltip(GameTooltip, bounty.questID, TOOLTIP_QUEST_REWARDS_STYLE_EMISSARY_REWARD);
 
-				for i=1,WorldMapTooltip:NumLines() do
-				  if i == 2 or i == 3 or string.find(_G["WorldMapTooltipTextLeft"..i]:GetText(), "Rewards") then
-					tipText = tipText .. format ("|cff%02x%02x%02x%s", NORMAL_FONT_COLOR.r * 255, NORMAL_FONT_COLOR.g * 255, NORMAL_FONT_COLOR.b * 255, _G["WorldMapTooltipTextLeft"..i]:GetText()) .. "|r\n"				  
+				for i=1,GameTooltip:NumLines() do
+				  if i == 2 or i == 3 or string.find(_G["GameTooltipTextLeft"..i]:GetText(), "Rewards") then
+					tipText = tipText .. format ("|cff%02x%02x%02x%s", NORMAL_FONT_COLOR.r * 255, NORMAL_FONT_COLOR.g * 255, NORMAL_FONT_COLOR.b * 255, _G["GameTooltipTextLeft"..i]:GetText()) .. "|r\n"				  
 				  else
-					if i == WorldMapTooltip:NumLines() then
+					if i == GameTooltip:NumLines() then
 						local money = GetQuestLogRewardMoney(bounty.questID)
 						if ( money > 0 ) then
 							tipText = tipText .. GetCoinTextureString(money)		
 						end
 					end
-					tipText = tipText .. _G["WorldMapTooltipTextLeft"..i]:GetText() .. "\n"
+					tipText = tipText .. _G["GameTooltipTextLeft"..i]:GetText() .. "\n"
 				  end
 				end
-				for i=1,WorldMapTooltipTooltip:NumLines() do
-				  local tipTexture = WorldMapTooltip.ItemTooltip.Icon:GetTexture()
-				  local r, g, b = _G["WorldMapTooltipTooltipTextLeft"..i]:GetTextColor()
-				  tipText = tipText .. ((i == 1 and tipTexture) and "|T"..tipTexture..":33|t " or "\n") .. format ("|cff%02x%02x%02x%s", r * 255, g * 255, b * 255, _G["WorldMapTooltipTooltipTextLeft"..i]:GetText()) .. "|r\n"
+				for i=1,GameTooltipTooltip:NumLines() do
+				  local tipTexture = GameTooltip.ItemTooltip.Icon:GetTexture()
+				  local r, g, b = _G["GameTooltipTooltipTextLeft"..i]:GetTextColor()
+				  tipText = tipText .. ((i == 1 and tipTexture) and "|T"..tipTexture..":33|t " or "\n") .. format ("|cff%02x%02x%02x%s", r * 255, g * 255, b * 255, _G["GameTooltipTooltipTextLeft"..i]:GetText()) .. "|r\n"
 				end
 			end
-			if not tipVisible then WorldMapTooltip:Hide() end
+			if not tipVisible then GameTooltip:Hide() end
 			
 			return tipText
 		end
