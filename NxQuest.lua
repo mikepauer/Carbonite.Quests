@@ -8117,7 +8117,7 @@ function Nx.Quest:UpdateIcons (map)
 					C_TaskQuest.RequestPreloadRewardData (questId)
 					local tid, name, questtype, rarity, elite, tradeskill = GetQuestTagInfo (questId)
 					local timeLeft = C_TaskQuest.GetQuestTimeLeftMinutes(questId)
-					if timeLeft and timeLeft > 0 then
+					if QuestUtils_ShouldDisplayExpirationWarning(questId) or (timeLeft and timeLeft > 0) then
 
 						local x,y = info.x * 100, info.y * 100
 						local f = map:GetIconWQ(120)
@@ -8192,11 +8192,29 @@ function Nx.Quest:UpdateIcons (map)
 								objTxt = objTxt .. "\n- " .. color .. objectiveText
 							end
 						end
-
-						f.NxTip = "|cffffd100Bonus Task:\n" .. title:gsub("Bonus Objective: ", "") .. objTxt
-						f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
-						map:ClipFrameZ (f, x, y, 16, 16, 0)
-						f.texture:SetTexCoord (GetObjectIconTextureCoords(4734))
+						
+						if taskInfo[i].isCombatAllyQuest then
+							f.questID = taskInfo[i].questId
+							f.NxTip = "|cffffd100Daily Task:\n" .. title:gsub("Daily Objective: ", "") .. objTxt .. "\n" .. GREEN_FONT_COLOR:GenerateHexColorMarkup() .. GRANTS_FOLLOWER_XP
+							f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
+							map:ClipFrameZ (f, x, y, 22, 22, 0)
+							f.texture:SetTexCoord (GetObjectIconTextureCoords(4713))
+							f:SetScript("OnMouseDown", function (self, button)
+								 map:SetTargetAtStr (format("%s, %s", x, y))
+								 if not InCombatLockdown() then
+								  if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
+									PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+									if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil,self.questID,"force",self.mapID) end
+								   end
+								 end
+							end)
+						else
+							f.NxTip = "|cffffd100Bonus Task:\n" .. title:gsub("Bonus Objective: ", "") .. objTxt
+							f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
+							map:ClipFrameZ (f, x, y, 16, 16, 0)
+							f.texture:SetTexCoord (GetObjectIconTextureCoords(4734))
+						end
+						
 					end
 				end
 			end
