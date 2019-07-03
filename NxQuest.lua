@@ -8194,20 +8194,22 @@ function Nx.Quest:UpdateIcons (map)
 						end
 						
 						if taskInfo[i].isCombatAllyQuest then
-							f.questID = taskInfo[i].questId
-							f.NxTip = "|cffffd100Daily Task:\n" .. title:gsub("Daily Objective: ", "") .. objTxt .. "\n" .. GREEN_FONT_COLOR:GenerateHexColorMarkup() .. GRANTS_FOLLOWER_XP
-							f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
-							map:ClipFrameZ (f, x, y, 22, 22, 0)
-							f.texture:SetTexCoord (GetObjectIconTextureCoords(4713))
-							f:SetScript("OnMouseDown", function (self, button)
-								 map:SetTargetAtStr (format("%s, %s", x, y))
-								 if not InCombatLockdown() then
-								  if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
-									PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-									if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil,self.questID,"force",self.mapID) end
-								   end
-								 end
-							end)
+							if not taskInfo[i].inProgress  then
+								f.questID = taskInfo[i].questId
+								f.NxTip = "|cffffd100Daily Task:\n" .. title:gsub("Daily Objective: ", "") .. objTxt .. "\n" .. GREEN_FONT_COLOR:GenerateHexColorMarkup() .. GRANTS_FOLLOWER_XP
+								f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
+								map:ClipFrameZ (f, x, y, 22, 22, 0)
+								f.texture:SetTexCoord (GetObjectIconTextureCoords(4713))
+								f:SetScript("OnMouseDown", function (self, button)
+									 map:SetTargetAtStr (format("%s, %s", x, y))
+									 if not InCombatLockdown() then
+									  if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
+										PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+										if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil,self.questID,"force",self.mapID) end
+									   end
+									 end
+								end)
+							end
 						else
 							f.NxTip = "|cffffd100Bonus Task:\n" .. title:gsub("Bonus Objective: ", "") .. objTxt
 							f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
