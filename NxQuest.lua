@@ -2811,8 +2811,8 @@ function Nx.Quest:Init()
 	-- Hook tooltip
 
 	local ttHooks = {
-		"SetAction", "SetAuctionItem", "SetBagItem", "SetGuildBankItem", "SetHyperlink", "SetInboxItem", "SetInventoryItem", "SetLootItem",
-		"SetLootRollItem", "SetMerchantItem", "SetRecipeReagentItem","SetRecipeResultItem","SetQuestItem", "SetQuestLogItem", "SetTradeTargetItem",
+		"SetAction", "SetBagItem", "SetGuildBankItem", "SetHyperlink", "SetInboxItem", "SetInventoryItem", "SetLootItem",
+		"SetLootRollItem", "SetMerchantItem", "SetRecipeReagentItem", "SetRecipeResultItem", "SetQuestItem", "SetQuestLogItem", "SetTradeTargetItem",
 	}
 
 	for k, name in ipairs (ttHooks) do
