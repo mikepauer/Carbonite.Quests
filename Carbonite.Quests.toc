@@ -1,4 +1,4 @@
-## Interface: 80205
+## Interface: 80300
 ## Title: Carbonite Quest @project-version@
 ## Version: @project-version@
 ## Author: No One
