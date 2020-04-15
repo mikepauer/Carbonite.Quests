@@ -3824,10 +3824,13 @@ function Nx.Quest:RecordQuestsLog()
 
 						local total = qT[n + 100]
 
-						local desc, done = self:CalcDesc (qId, n, cnt, total)
-
+						--local desc, done = self:CalcDesc (qId, n, cnt, total)
+						
+						desc = qT[n + 200]
 						cur[n] = desc
-
+						
+						local done = qT[n + 300]
+						
 						done = cur[n + 200] and done
 						cur[n + 200] = done
 
@@ -3878,8 +3881,11 @@ function Nx.Quest:RecordQuestsLog()
 
 						local total = qT[n + 100]
 
-						cur[n], cur[n + 100] = self:CalcDesc (qId, n, cnt, total)
-
+						--cur[n], cur[n + 100] = self:CalcDesc (qId, n, cnt, total)
+						
+						cur[n] = qT[n + 200]
+						cur[n + 100] = qT[n + 300]
+						
 						cur[n + 400] = cur.PartyNames
 
 						if not cur[n + 100] then
@@ -4264,24 +4270,23 @@ function Nx.Quest:QuestQueryTimer()
 	end
 end
 
-local firstTimeEmpty = true
 function Nx.Quest:CalcDesc (qId, objI, cnt, total)
+
 	local odesc = GetQuestObjectiveInfo(qId, objI, false);
-	local _, _, desc = strmatch (odesc or "", "(%d+)/(%d+) (.+)")
+	local desc, _, _ = strmatch (odesc or "", "(.+): (%d+)/(%d+)")
 	
 	if not desc then
 		desc = odesc or "?"
 	end
 	
-	--Nx.prt("%s, %s, %s", qId, objI, odesc)
+--	Nx.prt("%s, %s, %s, %s, %s", qId, objI, desc, cnt, total)
 	
-	if total == 0 then
+	if total == 0 or total == nil then
 		return desc, cnt == 1
 	else
-		return format ("%s: %d/%d", desc, cnt, total), cnt >= total
+		return desc, cnt >= total
 	end
 end
-
 
 function Nx.Quest:GetLogIdLevel (questID)
 	if questID > 0 then
@@ -11369,12 +11374,16 @@ function Nx.Quest:OnPartyMsg (plName, msg)
 	if Nx.qdb and Nx.qdb.profile and not Nx.qdb.profile.Quest.PartyShare then
 		return
 	end
+	
+	local msgA = {Nx.Split("|", msg)}
+	
+	msg = msgA[1]
 
 	-- msg = "Qp1iiiifo111122223333"
 
---	Nx.prt ("OnPartyMsg %s: %s", plName, msg)
+	--Nx.prt ("OnPartyMsg %s: %s", plName, msg)
 
-	local pq = self.PartyQ
+	local pq = self.PartyQ or {}
 	local pl = pq[plName]
 
 	if pl then
@@ -11410,16 +11419,20 @@ function Nx.Quest:OnPartyMsg (plName, msg)
 
 				q.Complete = bit.band (flgs, 1) == 1 and 1 or nil
 
-	--			Nx.prt ("%s: %s %x %s", plName, qId, flgs, oCnt)
+				--Nx.prt ("%s: %s %x %s", plName, qId, flgs, oCnt)
 
 				for i = 1, oCnt do
-
+					
+					local desc, done = Nx.Split("^", msgA[i + 1])
+					
 					local o = off + 6 + (i - 1) * 4
 					local cnt = tonumber (strsub (msg, o, o + 1), 16) or 0
 					local total = tonumber (strsub (msg, o + 2, o + 3), 16) or 0
 
 					q[i] = cnt
 					q[i + 100] = total
+					q[i + 200] = desc
+					q[i + 300] = done == 1 and true or false
 				end
 			end
 
@@ -11459,10 +11472,11 @@ function Nx.Quest:PartyStartSend()
 	end
 
 	if Nx.qdb.profile.Quest.PartyShare then
-		QSendParty = Nx:ScheduleTimer(self.PartyBuildSendData,.5,self)
+		QSendParty = Nx:ScheduleTimer(self.PartyBuildSendData,2,self)
 	end
 end
 
+local PartySendTimer
 function Nx.Quest:PartyBuildSendData()
 
 	local data = {}
@@ -11485,12 +11499,16 @@ function Nx.Quest:PartyBuildSendData()
 			end
 
 			local str = format ("%04x%c%c", qId, flgs + 35, cur.LBCnt + 35)
-
+			local strO = ""
+			
 			for n = 1, cur.LBCnt do
 
 				local _, _, cnt, total = strfind (cur[n], "(%d+)/(%d+)")
 				cnt = tonumber (cnt)
 				total = tonumber (total)
+
+				local desc, done = self:CalcDesc (qId, n, cnt, total)
+				cur[n] = desc
 
 				if cnt and total then
 					if cnt > 200 then
@@ -11505,22 +11523,21 @@ function Nx.Quest:PartyBuildSendData()
 				end
 
 				str = str .. format ("%02x%02x", cnt, total)
+				
+				if desc then
+					strO = strO .. "|" .. desc .. "^" .. (done and 1 or 0)
+				end
 			end
 
-			sendStr = sendStr .. str
+			sendStr = sendStr .. str .. strO
 
-			if #sendStr > 80 then
-				tinsert (data, sendStr)
-				sendStr = ""
-			end
+			
+			tinsert (data, sendStr)
+			sendStr = ""
 		end
 	end
 
-	if #sendStr > 0 or #data == 0 then
-		tinsert (data, sendStr)
-	end
-
-	QSendParty = Nx:ScheduleTimer(self.PartySendTimer,0,self)
+	PartySendTimer = Nx:ScheduleRepeatingTimer(self.PartySendTimer,0,self)
 
 	return 0
 end
@@ -11538,8 +11555,8 @@ function Nx.Quest:PartySendTimer()
 
 	self.PartySendDataI = qi + 1
 
-	if self.PartySendData[self.PartySendDataI] then
-		return .15
+	if not self.PartySendData[self.PartySendDataI] then
+		Nx:CancelTimer(PartySendTimer)
 	end
 end
 
