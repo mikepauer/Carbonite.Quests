@@ -57,7 +57,8 @@ function GetQuestLogTitle(qn)
 	if not q then
 		return
 	end
-	return q.title, q.level, q.suggestedGroup, q.isHeader, q.isCollapsed, q.isComplete, q.frequency, q.questID, q.startEvent, q.QuestID, q.isOnMap, q.hasLocalPOI, q.isTask, q.isBounty, q.isStory, q.isHidden, q.isScaling
+	local isComplete = C_QuestLog.IsComplete(q.questID) and 1 or (C_QuestLog.IsFailed(q.questID) and -1 or nil)
+	return q.title, q.level, q.suggestedGroup, q.isHeader, q.isCollapsed, isComplete, q.frequency, q.questID, q.startEvent, q.QuestID, q.isOnMap, q.hasLocalPOI, q.isTask, q.isBounty, q.isStory, q.isHidden, q.isScaling
 end
 
 function GetQuestTagInfo(id)
@@ -3566,7 +3567,8 @@ function Nx.Quest:RecordQuestsLog()
 						end
 
 						if Nx.qdb.profile.Quest.AutoTurnInAC and cur.IsAutoComplete then
-							ShowQuestComplete (qi)
+							ShowQuestComplete (C_QuestLog.GetQuestIDForLogIndex(qi))
+							
 						end
 
 						if Nx.qdb.profile.QuestWatch.RemoveComplete and not cur.IsAutoComplete then
@@ -9944,7 +9946,7 @@ function Nx.Quest.Watch:OnListEvent (eventName, val1, val2, click, but)
 							local i, cur = Quest:FindCur (qId, qIndex)
 							if cur and cur.CompleteMerge and cur.IsAutoComplete then
 --								Nx.prt ("ShowQuestComplete %s", qIndex)
-								ShowQuestComplete (qIndex)
+								ShowQuestComplete (C_QuestLog.GetQuestIDForLogIndex(qIndex))
 
 							else
 								self:Set (data, val2, not IsShiftKeyDown())
