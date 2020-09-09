@@ -8148,7 +8148,7 @@ function Nx.Quest:UpdateIcons (map)
 
 						map:ClipFrameZ (f, x, y, 24, 24, 0)
 
-						local selected = info.questId == GetSuperTrackedQuestID();
+						local selected = info.questId == C_SuperTrack.GetSuperTrackedQuestID();
 						
 						local function WQTGetOverlay (memberName)
 							for i = 1, #WorldMapFrame.overlayFrames do
@@ -8172,7 +8172,7 @@ function Nx.Quest:UpdateIcons (map)
 								PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 								if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil,self.questID,"force",self.mapID) end
 								if IsShiftKeyDown() then
-								  if IsWorldQuestHardWatched(self.questID) or (IsWorldQuestWatched(self.questID) and GetSuperTrackedQuestID() == self.questID) then
+								  if IsWorldQuestHardWatched(self.questID) or (IsWorldQuestWatched(self.questID) and C_SuperTrack.GetSuperTrackedQuestID() == self.questID) then
 									BonusObjectiveTracker_UntrackWorldQuest(self.questID);
 								  else
 									BonusObjectiveTracker_TrackWorldQuest(self.questID, true);
