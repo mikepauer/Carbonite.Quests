@@ -6857,7 +6857,7 @@ function CarboniteQuest:OnQuestUpdate (event, ...)
 	elseif event == "QUEST_REMOVED" then
 		local questId = arg1
 		if QuestUtils_IsQuestWorldQuest (questId) then
-			SetSuperTrackedQuestID(0);
+			C_SuperTrack.SetSuperTrackedQuestID(0);
 			worldquestdb[questId] = nil
 			Nx.Quest.WQList:UpdateDB()
 		end
@@ -8170,21 +8170,21 @@ function Nx.Quest:UpdateIcons (map)
 							if not InCombatLockdown() and self.worldQuest then
 							  if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
 								PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+								local watchType = C_QuestLog.GetQuestWatchType(self.questID);
 								if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil,self.questID,"force",self.mapID) end
 								if IsShiftKeyDown() then
-								  if IsWorldQuestHardWatched(self.questID) or (IsWorldQuestWatched(self.questID) and C_SuperTrack.GetSuperTrackedQuestID() == self.questID) then
-									BonusObjectiveTracker_UntrackWorldQuest(self.questID);
-								  else
-									BonusObjectiveTracker_TrackWorldQuest(self.questID, true);
-								  end
+									if watchType == Enum.QuestWatchType.Manual or (watchType == Enum.QuestWatchType.Automatic and C_SuperTrack.GetSuperTrackedQuestID() == self.questID) then
+										BonusObjectiveTracker_UntrackWorldQuest(self.questID);
+									else
+										BonusObjectiveTracker_TrackWorldQuest(self.questID, Enum.QuestWatchType.Manual);
+									end
 								else
-								  if IsWorldQuestHardWatched(self.questID) then
-									SetSuperTrackedQuestID(self.questID);
-								  else
-									BonusObjectiveTracker_TrackWorldQuest(self.questID);
-								  end
+									if watchType == Enum.QuestWatchType.Manual then
+										C_SuperTrack.SetSuperTrackedQuestID(self.questID);
+									else
+										BonusObjectiveTracker_TrackWorldQuest(self.questID, Enum.QuestWatchType.Automatic);
+									end
 								end
-							   end
 							 end
 						end)
 
