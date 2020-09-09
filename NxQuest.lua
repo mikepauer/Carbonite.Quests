@@ -2808,8 +2808,8 @@ function Nx.Quest:Init()
 			Nx.Quest:RecordQuestAcceptOrFinish()
 		end
 
-		QuestFrameDetailPanel_OnShow()
-
+		--QuestFrameDetailPanel_OnShow()
+		
 		local auto = Nx.qdb.profile.Quest.AutoAccept
 		if IsShiftKeyDown() and IsControlKeyDown() then
 			auto = not auto
@@ -2823,7 +2823,8 @@ function Nx.Quest:Init()
 		end
 	end
 
-	QuestFrameDetailPanel:SetScript ("OnShow", func);
+	--QuestFrameDetailPanel:SetScript ("OnShow", func);
+	QuestFrameDetailPanel:HookScript('OnShow', func)
 
 	-- Hook tooltip
 
@@ -9666,12 +9667,12 @@ function Nx.Quest.Watch:UpdateList()
 							end
 							if isComplete then
 								local obj = quest and (quest["End"] or quest["Start"])
-								if lbNum > 0 or not obj then
+								--if lbNum > 0 or not obj then
 									nameStr = nameStr .. (isComplete == 1 and "|cff80ff80 " ..L["(Complete)"] or "|cfff04040 - " .. FAILED)
-								else
-									local desc = Quest:UnpackSE (obj)
-									nameStr = format ("%s |cffffffff(%s)", nameStr, desc)
-								end
+								--else
+								--	local desc = Quest:UnpackSE (obj)
+								--	nameStr = format ("%s |cffffffff(%s)", nameStr, desc)
+								--end
 							end
 							if showDist then
 								local d = cur.Distance * 4.575
