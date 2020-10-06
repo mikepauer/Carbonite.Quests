@@ -3723,10 +3723,10 @@ function Nx.Quest:RecordQuestsLog()
 				cur.TagShort = self.TagNames[tag] or ""
 
 				cur.Daily = isDaily
-				if isDaily == LE_QUEST_FREQUENCY_DAILY then
+				if isDaily == Enum.QuestFrequency.Daily then
 					cur.TagShort = "$" .. cur.TagShort
 				end
-				if isDaily == LE_QUEST_FREQUENCY_WEEKLY then
+				if isDaily == Enum.QuestFrequency.Weekly then
 					cur.TagShort = "#" .. cur.TagShort
 				end
 				cur.CanShare = C_QuestLog.IsPushableQuest(questID)
@@ -3990,7 +3990,7 @@ function Nx.Quest:IsDaily(checkID)
 	for qn = 1, C_QuestLog.GetNumQuestLogEntries() do
 		local title, level, groupCnt, isHeader, isCollapsed, isComplete, frequency, questID = GetQuestLogTitle (qn)
 		if questID == checkID then
-			if frequency == LE_QUEST_FREQUENCY_DAILY or frequency == LE_QUEST_FREQUENCY_WEEKLY then
+			if frequency == Enum.QuestFrequency.Daily or frequency == Enum.QuestFrequency.Weekly then
 				isdaily = true
 			end
 			break
@@ -4266,7 +4266,7 @@ end
 
 function Nx.Quest:QuestQueryTimer()
 
-	local qc = GetQuestsCompleted()
+	local qc = C_QuestLog.GetAllCompletedQuestIDs()
 	if not qc then
 		Nx.prt (L["QuestQueryTimer wait"])
 		return 1
@@ -7087,7 +7087,7 @@ function Nx.Quest.List:Update()
 					tag = tag .. " " .. cur.GCnt
 				end
 
-				if cur.Daily == LE_QUEST_FREQUENCY_DAILY then
+				if cur.Daily == Enum.QuestFrequency.Daily then
 					if tag then
 						tag = format (DAILY_QUEST_TAG_TEMPLATE, tag)
 					else
