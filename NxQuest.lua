@@ -2282,11 +2282,14 @@ function Nx.Quest:Init()
 --		if not GetCVarBool ("advancedWatchFrame") then
 
 --			SetCVar ("questFadingDisable", 1)	--V4 gone
-			SetCVar ("autoQuestProgress", 0)
-			SetCVar ("autoQuestWatch", 0)
+		SetCVar ("autoQuestProgress", 0)
+		SetCVar ("autoQuestWatch", 0)
 --			SetCVar ("advancedWatchFrame", 1)
 --			SetCVar ("watchFrameIgnoreCursor", 0)
 --		end
+	else 
+		SetCVar ("autoQuestProgress", 1)
+		SetCVar ("autoQuestWatch", 1)
 	end
 
 	-- DEBUG
