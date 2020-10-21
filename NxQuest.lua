@@ -2178,8 +2178,8 @@ function CarboniteQuest:OnInitialize()
 	
 	-- Update Emmissaries
 	local pLvl = UnitLevel ("player")
-	if not hideBfAEmmissaries and pLvl > 111 then emmBfA = C_QuestLog.GetBountySetInfoForMapID(875) end
-	if not hideLegionEmmissaries and pLvl > 109 then emmLegion = C_QuestLog.GetBountySetInfoForMapID(619) end
+	if not hideBfAEmmissaries and pLvl > 45 then emmBfA = C_QuestLog.GetBountySetInfoForMapID(875) end
+	if not hideLegionEmmissaries and pLvl > 44 then emmLegion = C_QuestLog.GetBountySetInfoForMapID(619) end
 	
 	tinsert(Nx.BrokerMenuTemplate,{ text = L["Toggle Quest Watch"], func = function() Nx.Quest.Watch.Win:Show(not Nx.Quest.Watch.Win:IsShown()) end })
 	tinsert(Nx.Whatsnew.Categories, "Quests")
