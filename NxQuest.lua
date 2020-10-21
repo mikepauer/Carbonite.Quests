@@ -2178,8 +2178,8 @@ function CarboniteQuest:OnInitialize()
 	
 	-- Update Emmissaries
 	local pLvl = UnitLevel ("player")
-	if not hideBfAEmmissaries and pLvl > 45 then emmBfA = C_QuestLog.GetBountySetInfoForMapID(875) end
-	if not hideLegionEmmissaries and pLvl > 44 then emmLegion = C_QuestLog.GetBountySetInfoForMapID(619) end
+	if not hideBfAEmmissaries and pLvl > 45 then emmBfA = C_QuestLog.GetBountiesForMapID(875) or {} end
+	if not hideLegionEmmissaries and pLvl > 44 then emmLegion = C_QuestLog.GetBountiesForMapID(619) or {} end
 	
 	tinsert(Nx.BrokerMenuTemplate,{ text = L["Toggle Quest Watch"], func = function() Nx.Quest.Watch.Win:Show(not Nx.Quest.Watch.Win:IsShown()) end })
 	tinsert(Nx.Whatsnew.Categories, "Quests")
@@ -6769,8 +6769,8 @@ function Nx.Quest.List:Refresh(event)
 		-- Update Emmissaries	
 		if not isInst then
 			local pLvl = UnitLevel ("player")
-			if not hideBfAEmmissaries and pLvl > 111 then emmBfA = C_QuestLog.GetBountySetInfoForMapID(875) end
-			if not hideLegionEmmissaries and pLvl > 109 then emmLegion = C_QuestLog.GetBountySetInfoForMapID(619) end
+			if not hideBfAEmmissaries and pLvl > 45 then emmBfA = C_QuestLog.GetBountiesForMapID(875) or {} end
+			if not hideLegionEmmissaries and pLvl > 44 then emmLegion = C_QuestLog.GetBountiesForMapID(619) or {} end
 		end
 		
 		Nx.Quest:RecordQuests(isInst and 0 or nil)
@@ -11958,7 +11958,7 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 end
 
 function Nx.Quest.WQList:CheckBounty(questId)
-	local bounties = C_QuestLog.GetBountySetInfoForMapID(1014) or {}
+	local bounties = C_QuestLog.GetBountiesForMapID(1014) or {}
 	local isbounty = false
 	for bountyIndex, bounty in ipairs(bounties) do
 		if IsQuestCriteriaForBounty(questId, bounty.questID) then
