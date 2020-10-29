@@ -7230,7 +7230,7 @@ function Nx.Quest.List:Update()
 
 		local mapId = Map:GetCurrentMapId()
 
-		local minLevel = UnitLevel ("player") - GetQuestGreenRange()
+		local minLevel = UnitLevel ("player") - UnitQuestTrivialLevelRange("player")
 		local maxLevel = showHighLevel and MAX_PLAYER_LEVEL or UnitLevel ("player") + 6
 
 		-- Divider
@@ -7358,7 +7358,7 @@ function Nx.Quest.List:Update()
 
 		local mapId = Map:GetCurrentMapId()
 
-		local minLevel = UnitLevel ("player") - GetQuestGreenRange()
+		local minLevel = UnitLevel ("player") - UnitQuestTrivialLevelRange("player")
 		local maxLevel = showHighLevel and 110 or UnitLevel ("player") + 6
 
 		-- Divider
