@@ -11915,8 +11915,8 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 		if WQListUpdateDBTimer then
 			WQListUpdateDBTimer:Cancel()
 		end
-		
-		local worldquestzones = { 947, 830, 885, 882, 1355, 1462 }	
+
+		local worldquestzones = { 947, 830, 885, 882, 1355, 1462, 1525, 1533, 1543, 1565 }	
 		for i=1,#worldquestzones do
 			local zonequests = {}
 			if worldquestzones[i] == 625 then						
