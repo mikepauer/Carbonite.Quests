@@ -8246,7 +8246,7 @@ function Nx.Quest:UpdateIcons (map)
 						else
 							f.NxTip = "|cffffd100Bonus Task:\n" .. title:gsub("Bonus Objective: ", "") .. objTxt
 							f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
-							map:ClipFrameZ (f, x, y, 16, 16, 0)
+							map:ClipFrameZ (f, x, y, 22, 22, 0)
 							f.texture:SetTexCoord (GetObjectIconTextureCoords(4734))
 						end
 						
