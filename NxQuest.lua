@@ -8226,7 +8226,7 @@ function Nx.Quest:UpdateIcons (map)
 							end
 						end
 						
-						if taskInfo[i].isCombatAllyQuest then
+						if taskInfo[i].isCombatAllyQuest or taskInfo[i].isDaily then
 							if not taskInfo[i].inProgress  then
 								f.questID = taskInfo[i].questId
 								f.NxTip = "|cffffd100Daily Task:\n" .. title:gsub("Daily Objective: ", "") .. objTxt .. "\n" .. GREEN_FONT_COLOR:GenerateHexColorMarkup() .. GRANTS_FOLLOWER_XP
@@ -8237,7 +8237,7 @@ function Nx.Quest:UpdateIcons (map)
 									 map:SetTargetAtStr (format("%s, %s", x, y))
 									 if not InCombatLockdown() then
 									  if ( not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) ) then
-										PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+										PlaySound(SOUNDKIT.IG_MAImNMENU_OPTION_CHECKBOX_ON);
 										if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil,self.questID,"force",self.mapID) end
 									   end
 									 end
