@@ -9236,12 +9236,14 @@ function Nx.Quest.Watch:UpdateList()
 		
 		local function ScanTip(bounty)
 			local tipVisible = GameTooltip:IsShown()
-		
+			local bTipVisible = BattlePetTooltip:IsShown()
+			
 			local tipText = ""
 			local questIndex = C_QuestLog.GetLogIndexForQuestID(bounty.questID);
 			local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isStory = GetQuestLogTitle(questIndex);
 		
-			if title and not tipVisible then
+			local processTip
+			if title and not tipVisible and not bTipVisible then
 				GameTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 				GameTooltip.ItemTooltip:Hide();
 				
@@ -9277,8 +9279,9 @@ function Nx.Quest.Watch:UpdateList()
 				  local r, g, b = _G["GameTooltipTooltipTextLeft"..i]:GetTextColor()
 				  tipText = tipText .. ((i == 1 and tipTexture) and "|T"..tipTexture..":33|t " or "\n") .. format ("|cff%02x%02x%02x%s", r * 255, g * 255, b * 255, _G["GameTooltipTooltipTextLeft"..i]:GetText()) .. "|r\n"
 				end
+				processTip = true
 			end
-			if not tipVisible then GameTooltip:Hide() end
+			if processTip then GameTooltip:Hide() end
 			
 			return tipText
 		end
@@ -9294,7 +9297,9 @@ function Nx.Quest.Watch:UpdateList()
 					list:ItemAdd(bounty.questID * 0x10000 + bountyIndex)
 					list:ItemSetOffset (16, -1)
 					list:ItemSet(2,"|cffcccccc" .. objectiveText)
-					list:ItemSetButtonTip(ScanTip(bounty))
+					local tipText = ScanTip(bounty)
+					if tipText ~= "" then emmBfA[bountyIndex].NxToolTip = tipText end
+					if emmBfA[bountyIndex].NxToolTip then list:ItemSetButtonTip(emmBfA[bountyIndex].NxToolTip) end
 					list:ItemSetButton("QuestWatchEmissaryTip", emmBfA_Sel == (bountyIndex) and true or false)
 					list:ItemSetFunc(emmFunc, bounty.questID * 0x10000 + bountyIndex)
 				end
