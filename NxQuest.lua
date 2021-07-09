@@ -7791,7 +7791,7 @@ end
 
 local taskInfoCache = false
 local taskInfoCacheTimer = C_Timer.NewTicker(1, function(self)
-	taskInfoCache = C_TaskQuest.GetQuestsForPlayerByMapID(Nx.Map.UpdateMapID);
+	if Nx.Map.UpdateMapID then taskInfoCache = C_TaskQuest.GetQuestsForPlayerByMapID(Nx.Map.UpdateMapID) end
 end)
 
 function Nx.Quest:UpdateIcons (map)
