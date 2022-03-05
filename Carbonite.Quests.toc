@@ -9,6 +9,7 @@
 ## RequiredDeps: Carbonite 
 
 ## X-WoWI-ID: 23404
+## X-Curse-Project-ID: 87975
 
 Locales\locales.xml
 Data\QuestCats.lua
