@@ -5552,7 +5552,7 @@ function Nx.Quest.List:Open()
 	tinsert (UISpecialFrames, win.Frm:GetName())
 
 	win.Frm:SetToplevel (true)
-	win.Frm:SetMinResize (250, 120)
+	win.Frm:SetResizeBounds (250, 120)
 
 	win:SetUser (self, self.OnWin)
 	CarboniteQuest:RegisterEvent ("PLAYER_LOGIN", "OnQuestUpdate")
@@ -7805,7 +7805,7 @@ function Nx.Quest:UpdateIcons (map)
 	local ptSz = 4 * map.ScaleDraw
 
 	local navscale = Map.Maps[1].IconNavScale * 16
-	local showOnMap = Quest.Watch.ButShowOnMap:GetPressed()
+	local showOnMap = true --Quest.Watch.ButShowOnMap:GetPressed()
 
 	local opts = self.GOpts
 	local showWatchAreas = Nx.qdb.profile.Quest.MapShowWatchAreas
@@ -8747,7 +8747,7 @@ function Nx.Quest.Watch:Open()
 --	self:SetFont()
 
 	if fixedSize then
-		list:SetMinSize (124, 1)		-- Sets the window minimum
+		list:SetResizeBounds (124, 1)		-- Sets the window minimum
 		list.Frm:EnableMouse (false)
 	end
 
@@ -11693,7 +11693,7 @@ function Nx.Quest.WQList:Open()
 	Nx.List:SetCreateFont ("QuestWatch.WatchFont", 12)
 	local list = Nx.List:Create (false, 2, -2, 100, 12 * 3, win.Frm, true, true)
 	self.List = list
-	list:SetMinSize (200, 20)
+	list.Frm:SetResizeBounds (200, 20)
 	list.Frm:EnableMouse (false)	
 	list:ColumnAdd ("", 1, 14)
 	list:ColumnAdd ("Name", 2, 120)
