@@ -8240,7 +8240,7 @@ function Nx.Quest:UpdateIcons (map)
 								f.NxTip = "|cffffd100Daily Task:\n" .. title:gsub("Daily Objective: ", "") .. objTxt .. "\n" .. GREEN_FONT_COLOR:GenerateHexColorMarkup() .. GRANTS_FOLLOWER_XP
 								f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
 								map:ClipFrameZ (f, x, y, 22, 22, 0)
-								f.texture:SetTexCoord (GetObjectIconTextureCoords(4713))
+								f.texture:SetTexCoord (C_Minimap.GetObjectIconTextureCoords(4713))
 								f:SetScript("OnMouseDown", function (self, button)
 									 map:SetTargetAtStr (format("%s, %s", x, y))
 									 if not InCombatLockdown() then
@@ -8255,7 +8255,7 @@ function Nx.Quest:UpdateIcons (map)
 							f.NxTip = "|cffffd100Bonus Task:\n" .. title:gsub("Bonus Objective: ", "") .. objTxt
 							f.texture:SetTexture ("Interface\\Minimap\\ObjectIconsAtlas")
 							map:ClipFrameZ (f, x, y, 22, 22, 0)
-							f.texture:SetTexCoord (GetObjectIconTextureCoords(4734))
+							f.texture:SetTexCoord (C_Minimap.GetObjectIconTextureCoords(4734))
 						end
 						
 					end
@@ -8747,7 +8747,7 @@ function Nx.Quest.Watch:Open()
 --	self:SetFont()
 
 	if fixedSize then
-		list:SetResizeBounds (124, 1)		-- Sets the window minimum
+		list.Frm:SetResizeBounds (124, 1)		-- Sets the window minimum
 		list.Frm:EnableMouse (false)
 	end
 
