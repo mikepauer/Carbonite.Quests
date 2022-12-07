@@ -52,6 +52,10 @@ BINDING_NAME_NxWATCHUSEITEM	= L["NxWATCHUSEITEM"]
 CBQUEST_TEMPLATE = QUEST_TEMPLATE_LOG
 CBQUEST_TEMPLATE.canHaveSealMaterial = nil
 
+function WorldMap_AddQuestTimeToTooltip(questID)
+	GameTooltip_AddQuestTimeToTooltip(GameTooltip, questID);
+end
+
 function GetQuestLogTitle(qn)
 	local q = C_QuestLog.GetInfo(qn)
 	if not q then
@@ -8159,7 +8163,7 @@ function Nx.Quest:UpdateIcons (map)
 
 						local x,y = info.x * 100, info.y * 100
 						local f = map:GetIconWQ(120)
-
+						
 						map:ClipFrameZ (f, x, y, 24, 24, 0)
 
 						local selected = info.questId == C_SuperTrack.GetSuperTrackedQuestID();
