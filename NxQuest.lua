@@ -324,10 +324,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.DetailBC) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -342,10 +342,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.DetailTC) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -537,10 +537,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchAreaTrackColor) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -556,10 +556,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchAreaHoverColor) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -575,10 +575,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchAreaAlpha) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -652,10 +652,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC1) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -671,10 +671,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC2) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -690,10 +690,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC3) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -709,10 +709,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC4) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -728,10 +728,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC5) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -747,10 +747,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC6) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -766,10 +766,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC7) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -785,10 +785,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC8) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -804,10 +804,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC9) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -823,10 +823,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC10) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -842,10 +842,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC11) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -861,10 +861,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.Quest.MapWatchC12) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -1310,10 +1310,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.QuestWatch.BGColor) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -1330,10 +1330,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.QuestWatch.CompleteColor) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -1350,10 +1350,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.QuestWatch.IncompleteColor) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -1370,10 +1370,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.QuestWatch.OCompleteColor) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -1390,10 +1390,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.QuestWatch.OIncompleteColor) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
@@ -1454,10 +1454,10 @@ local function QuestOptions ()
 							hasAlpha = true,
 							get = function()
 								local arr = { Nx.Split("|",Nx.qdb.profile.QuestWatch.ItemAlpha) }
-								local r = arr[1]
-								local g = arr[2]
-								local b = arr[3]
-								local a = arr[4]
+								local r = tonumber(arr[1])
+								local g = tonumber(arr[2])
+								local b = tonumber(arr[3])
+								local a = tonumber(arr[4])
 								return r,g,b,a
 							end,
 							set = function(_,r,g,b,a)
