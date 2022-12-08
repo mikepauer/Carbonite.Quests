@@ -3268,8 +3268,7 @@ function Nx.Quest:CalcWatchColors()
 	local colors = {}
 	self.QLocColors = colors
 
-	local a = Nx.Util_str2a (Nx.qdb.profile.Quest.MapWatchAreaAlpha)
-
+	local a = Nx.Util_str2a (Nx.qdb.profile.Quest.MapWatchAreaAlpha)	
 	local colMax = Nx.qdb.profile.Quest.MapWatchColorCnt
 	local colI = 1
 
@@ -8126,8 +8125,8 @@ function Nx.Quest:UpdateIcons (map)
 												f.texture:SetColorTexture (hovR, hovG, hovB, hovA)
 											elseif tracking then
 												f.texture:SetColorTexture (trkR, trkG, trkB, trkA)
-											else
-												f.texture:SetColorTexture (r, g, b, col[4])
+											else					
+												f.texture:SetColorTexture(r, g, b, tonumber(col[4]))
 											end
 										end
 
