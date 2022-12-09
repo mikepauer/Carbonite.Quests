@@ -37,4 +37,4 @@ jobs:
 
       # once cloned, we just run the GitHub Action for the packager project
       - name: Package and release
-        uses: BigWigsMods/packager
+        uses: BigWigsMods/packager@v2
