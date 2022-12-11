@@ -11619,13 +11619,12 @@ function Nx.Quest:UnpackObjectiveNew (obj)
 end
 
 function Nx.Quest:UnpackLocRect (locStr)
-
 	local _,_,_,x, y, w, h = Nx.Split ("|",locStr)
 
 	return	tonumber(x),		-- * 100 / 200	Optimised
-				tonumber(y),		-- * 100 / 200
-				tonumber(w),
-				tonumber(h)
+			tonumber(y),		-- * 100 / 200
+			tonumber(w),
+			tonumber(h)
 end
 
 function Nx.Quest:UnpackLocPtOff (locStr)
