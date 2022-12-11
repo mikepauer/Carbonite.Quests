@@ -7022,7 +7022,7 @@ function Nx.Quest.List:Update()
 		dailyStr = dailyStr .. "|r  " .. L["Daily reset:"] .. " |cffffffff" .. Nx.Util_GetTimeElapsedStr (GetQuestResetTime())
 	end
 
-	self.Win:SetTitle (format (L["Quests:"] .. " |cffffffff%d/%d|r  %s", i, MAX_QUESTS, dailyStr))
+	self.Win:SetTitle (format (L["Quests:"] .. " |cffffffff%d/35|r  %s", i, dailyStr))
 
 	-- List
 
@@ -8777,7 +8777,7 @@ function Nx.Quest.Watch:Open()
 --	local item = menu:AddItem (0, L["Max Auto Track"], update, self)
 --	item:SetSlider (qopts, 1, 25, 1, "NXWAutoMax")
 
-	local i = 25
+	local i = 35
 
 	local item = menu:AddItem (0, L["Max Visible In List"], update, self)
 	item:SetSlider (qopts, 1, i, 1, "NXWVisMax")
@@ -9082,7 +9082,7 @@ end
 local QuestWatchDistUp
 function Nx.Quest.Watch:Update()
 	self.CalcDistI = 1
-	self.CalcDistCnt = 25
+	self.CalcDistCnt = 35
 	
 	if QuestWatchDistUp then
 		Nx:CancelTimer(QuestWatchDistUp)
@@ -9672,7 +9672,7 @@ function Nx.Quest.Watch:UpdateList()
 							else
 								list:ItemSetButton ("QuestWatchTip", false)		-- QuestWatchTip  >  QuestWatch?
 							end
-							if cur.ItemLink and Nx.qdb.profile.QuestWatch.ItemScale >= 1 then
+							if cur.ItemLink and Nx.qdb.profile.QuestWatch.ItemScale >= 1 then								
 								list:ItemSetFrame ("WatchItem~" .. cur.QI .. "~" .. cur.ItemImg .. "~" .. cur.ItemCharges)
 							end
 							list:ItemSetButtonTip ((cur.ObjText or "?") .. (cur.PartyDesc or ""))
@@ -9854,7 +9854,7 @@ function Nx.Quest.Watch:UpdateList()
 			self.Win:SetTitle ("")
 		else
 			local _, i = C_QuestLog.GetNumQuestLogEntries()
-			self.Win:SetTitle (format ("          |cff40af40%d/25", i))
+			self.Win:SetTitle (format ("          |cff40af40%d/35", i))
 		end
 
 		self.FirstUpdate = nil
@@ -9930,8 +9930,7 @@ function Nx.Quest.Watch:OnListEvent (eventName, val1, val2, click, but)
 				func(data)
 				return
 			end
-			if click == "LeftButton" then
-
+			if click == "LeftButton" then								
 --				Nx.prt ("Data #%d, Id%d", qIndex, qId)
 --				Nx.prt ("List but %s", but:GetType().WatchError or "nil")
 
