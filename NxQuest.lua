@@ -328,7 +328,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.DetailBC = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -346,7 +346,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.DetailTC = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -541,7 +541,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchAreaTrackColor = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -560,7 +560,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchAreaHoverColor = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -579,7 +579,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchAreaAlpha = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -656,7 +656,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC1 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -675,7 +675,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC2 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -694,7 +694,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC3 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -713,7 +713,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC4 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -732,7 +732,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC5 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -751,7 +751,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC6 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -770,7 +770,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC7 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -789,7 +789,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC8 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -808,7 +808,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC9 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -827,7 +827,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC10 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -846,7 +846,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC11 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -865,7 +865,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.Quest.MapWatchC12 = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -1314,7 +1314,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.QuestWatch.BGColor = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -1334,7 +1334,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.QuestWatch.CompleteColor = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -1354,7 +1354,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.QuestWatch.IncompleteColor = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -1374,7 +1374,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.QuestWatch.OCompleteColor = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -1394,7 +1394,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.QuestWatch.OIncompleteColor = r .. "|" .. g .. "|" .. b .. "|" .. a
@@ -1458,7 +1458,7 @@ local function QuestOptions ()
 								local g = tonumber(arr[2])
 								local b = tonumber(arr[3])
 								local a = tonumber(arr[4])
-								return r,g,b,a
+								return r,g,b,tonumber(a)
 							end,
 							set = function(_,r,g,b,a)
 								Nx.qdb.profile.QuestWatch.ItemAlpha = r .. "|" .. g .. "|" .. b .. "|" .. a
