@@ -5575,7 +5575,7 @@ function Nx.Quest.List:Open()
 	CarboniteQuest:RegisterEvent ("WORLD_STATE_TIMER_STOP", "OnQuestUpdate")
 	--CarboniteQuest:RegisterEvent ("QUEST_POI_UPDATE", "OnQuestUpdate")
 	CarboniteQuest:RegisterEvent ("TRACKED_ACHIEVEMENT_UPDATE", "OnTrackedAchievementUpdate")
-	CarboniteQuest:RegisterEvent ("TRACKED_ACHIEVEMENT_LIST_CHANGED", "OnTrackedAchievementsUpdate")
+	CarboniteQuest:RegisterEvent ("CONTENT_TRACKING_UPDATE", "OnTrackedAchievementsUpdate")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_COMBAT_FACTION_CHANGE", "OnChat_msg_combat_faction_change")
 	CarboniteQuest:RegisterEvent ("CHAT_MSG_RAID_BOSS_WHISPER", "OnChat_msg_raid_boss_whisper")
 	-- Filter Edit Box
@@ -6907,7 +6907,7 @@ end
 Nx.Quest.TrackedAchievements = {}
 function CarboniteQuest:OnTrackedAchievementsUpdate (event, ...)
 	Nx.Quest.TrackedAchievements = {}
-	local ach = { GetTrackedAchievements() }
+	local ach = C_ContentTracking.GetTrackedIDs(Enum.ContentTrackingType.Achievement)
 	for _, id in ipairs (ach) do
 		CarboniteQuest:OnTrackedAchievementUpdate(event, id)
 	end
