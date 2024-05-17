@@ -11786,7 +11786,7 @@ function Nx.Quest.WQList:GenWQTip(questId)
 	worldquesttip:SetText(title, color.r, color.g, color.b)	
 	QuestUtils_AddQuestTypeToTooltip(worldquesttip, questId, NORMAL_FONT_COLOR)
 	if factionID then
-		local factionName = GetFactionInfoByID(factionID)
+		local factionName = C_CreatureInfo.GetFactionInfoByID(factionID)
 		if factionName then
 			if capped then
 				worldquesttip:AddLine(factionName, GRAY_FONT_COLOR:GetRGB())
@@ -12031,7 +12031,7 @@ function Nx.Quest.WQList:Update()
 				list:ItemAdd(0)			
 				list:ItemSet(2,colstring .. title)
 				if faction then				
-					local factionname = GetFactionInfoByID(faction)
+					local factionname = C_CreatureInfo.GetFactionInfoByID(faction)
 					newwidth = #factionname * 7 + 10
 					if newwidth > list:ColumnGetWidth(4) then
 						list:ColumnSetWidth(4,newwidth)
