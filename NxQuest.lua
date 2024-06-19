@@ -7234,7 +7234,7 @@ function Nx.Quest.List:Update()
 		local mapId = Map:GetCurrentMapId()
 
 		local minLevel = UnitLevel ("player") - UnitQuestTrivialLevelRange("player")
-		local maxLevel = showHighLevel and MAX_PLAYER_LEVEL or UnitLevel ("player") + 6
+		local maxLevel = showHighLevel and GetMaxLevelForPlayerExpansion() or UnitLevel ("player") + 6
 
 		-- Divider
 
@@ -7615,7 +7615,7 @@ function Nx.Quest.List:Update()
 		list:ItemSet (2, format ("|cffc0c0c0--- %s (%d) ---", str, dbTitleNum), dbTitleIndex)
 
 		local low = max (1, showLowLevel and 1 or minLevel)
-		local high = min (MAX_PLAYER_LEVEL, maxLevel)
+		local high = min (GetMaxLevelForPlayerExpansion(), maxLevel)
 		list:ItemSet (2, format (L["|cffc0c0c0--- Levels %d to %d ---"], low, high), dbTitleIndex + 1)
 	end
 
@@ -9285,7 +9285,7 @@ function Nx.Quest.Watch:UpdateList()
 					if i == GameTooltip:NumLines() then
 						local money = GetQuestLogRewardMoney(bounty.questID)
 						if ( money > 0 ) then
-							tipText = tipText .. GetCoinTextureString(money)		
+							tipText = tipText .. C_CurrencyInfo.GetCoinTextureString(money)		
 						end
 					end
 					tipText = tipText .. _G["GameTooltipTextLeft"..i]:GetText() .. "\n"
@@ -12088,6 +12088,51 @@ local function AddListItem(list, title, factionName, rewardString, timeStr, colS
 end
 
 -- Main update function
+
+local function updateColumnWidth(list, column, text)
+  local newWidth = #text * 7 + 10
+  if newWidth > list:ColumnGetWidth(column) then
+    list:ColumnSetWidth(column, newWidth)
+  end
+end
+
+local function setFactionData(list, column, factionID, colString)
+  local factionData = C_Reputation.GetFactionDataByID(factionID)
+  updateColumnWidth(list, column, factionData.name)
+  list:ItemSet(column, colString .. factionData.name)
+end
+
+local function getRewardString(reward)
+  local rewardStringMap = {
+    [10] = "Artifact Power",
+    [20] = "Gold",
+    [30] = "Order Resources",
+    [40] = "Gear"
+  }
+  return rewardStringMap[reward] or ""
+end
+
+local function shouldFilterQuest(info, faction, isBounty, reward, questId)
+  return (reward == 10 and not Nx.qdb.profile.WQList.showap) or
+         (reward == 20 and not Nx.qdb.profile.WQList.showgold) or
+         (reward == 30 and not Nx.qdb.profile.WQList.showorder) or
+         (reward == 40 and not Nx.qdb.profile.WQList.showgear) or
+         (info.PVP and not Nx.qdb.profile.WQList.showpvp) or
+         (faction == 1900 and not Nx.qdb.profile.WQList.showfaronis) or
+         (faction == 1883 and not Nx.qdb.profile.WQList.showdreamweaver) or
+         (faction == 1828 and not Nx.qdb.profile.WQList.showhighmountain) or
+         (faction == 2045 and not Nx.qdb.profile.WQList.showlegionfall) or
+         (faction == 1859 and not Nx.qdb.profile.WQList.shownightfallen) or
+         (faction == 1894 and not Nx.qdb.profile.WQList.showwardens) or
+         (faction == 1948 and not Nx.qdb.profile.WQList.showvalarjar) or
+         (faction == 1090 and not Nx.qdb.profile.WQList.showkirintor) or
+         (faction == 2165 and not Nx.qdb.profile.WQList.showarmyoflight) or
+         (faction == 2170 and not Nx.qdb.profile.WQList.showargussian) or
+         (not isBounty and Nx.qdb.profile.WQList.showbounty) or
+         (info.mapid ~= Nx.Map:GetCurrentMapAreaID() and Nx.qdb.profile.WQList.zoneonly) or
+         (reward == false and not Nx.qdb.profile.WQList.showother)
+end
+
 function Nx.Quest.WQList:Update()
   local list = Nx.Quest.WQList.List
   list:Empty()
@@ -12095,35 +12140,40 @@ function Nx.Quest.WQList:Update()
   list:ColumnSetWidth(4, 20)
   list:ColumnSetWidth(5, 40)
   list:ColumnSetWidth(6, 20)
-
+  
   for questId, info in pairs(worldquestdb) do
     local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
     local timeLeft = C_TaskQuest.GetQuestTimeLeftMinutes(questId) or 0
     local isBounty = Nx.Quest.WQList:CheckBounty(questId)
     local reward = Nx.Quest.WQList:GetWQReward(questId)
-
-    if timeLeft > 0 then
-      if ShouldFilterQuest(questId, info, reward, faction, isBounty) then
-        worldquestdb[questId].Filtered = true
-      else
-        local colString = "|r"
-        if isBounty and Nx.qdb.profile.WQList.bountycolor then
-          colString = "|cff00DD00"
-        end
-        local rewardString = ""
-        if reward == REWARD_TYPES.AP then
-          rewardString = "Artifact Power"
-        elseif reward == REWARD_TYPES.GOLD then
-          rewardString = "Gold"
-        elseif reward == REWARD_TYPES.ORDER_RESOURCES then
-          rewardString = "Order Resources"
-        elseif reward == REWARD_TYPES.GEAR then
-          rewardString = "Gear"
-        end
-        local timeStr = Nx.Util_GetTimeElapsedStr(timeLeft * 60)
-        AddListItem(list, title, GetFactionName(faction), rewardString, timeStr, colString, info)
-        worldquestdb[questId].Filtered = false
+    
+    if timeLeft > 0 and not shouldFilterQuest(info, faction, isBounty, reward, questId) then
+      local colString = isBounty and Nx.qdb.profile.WQList.bountycolor and "|cff00DD00" or "|r"
+      
+      updateColumnWidth(list, 2, title)
+      list:ItemAdd(0)
+      list:ItemSet(2, colString .. title)
+      
+      if faction then
+        setFactionData(list, 4, faction, colString)
       end
+      
+      local rewardString = getRewardString(reward)
+      updateColumnWidth(list, 5, rewardString)
+      list:ItemSet(5, colString .. rewardString)
+      
+      local timeStr = Nx.Util_GetTimeElapsedStr(timeLeft * 60)
+      updateColumnWidth(list, 6, timeStr)
+      list:ItemSet(6, colString .. timeStr)
+      
+      list:ItemSetButton("QuestWatchCustomTip", false)
+      list:ItemSetData(list:ItemGetNum(), info)
+      if info.tip then
+        list:ItemSetButtonTip(info.tip)
+      end
+      worldquestdb[questId].Filtered = false
+    else
+      worldquestdb[questId].Filtered = true
     end
   end
   list:Update()
