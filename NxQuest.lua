@@ -11979,92 +11979,93 @@ function Nx.Quest.WQList:CheckBounty(questId)
 	return isbounty
 end
 
-function Nx.Quest.WQList:Update()	
-	local list = Nx.Quest.WQList.List	
-	list:Empty()		
-	list:ColumnSetWidth(2,120)
-	list:ColumnSetWidth(4,20)
-	list:ColumnSetWidth(5,40)	
-	list:ColumnSetWidth(6,20)		
-	
-	for quest, _ in pairs(worldquestdb) do
-		local info = worldquestdb[quest]
-		local questId = quest					
-		local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
-		local newwidth = #title * 7 + 10
-		local timeleft = C_TaskQuest.GetQuestTimeLeftMinutes(questId) or 0
-		local rewardstring = ""		
-		local isbounty = Nx.Quest.WQList:CheckBounty(questId)
-		
-		if timeleft > 0 then								
-			local reward = Nx.Quest.WQList:GetWQReward(questId)
-			if (reward == 10 and not Nx.qdb.profile.WQList.showap) or
-			   (reward == 20 and not Nx.qdb.profile.WQList.showgold) or 
-			   (reward == 30 and not Nx.qdb.profile.WQList.showorder) or
-			   (reward == 40 and not Nx.qdb.profile.WQList.showgear) or
-			   (info.PVP and not Nx.qdb.profile.WQList.showpvp) or
-			   (faction == 1900 and not Nx.qdb.profile.WQList.showfaronis) or
-			   (faction == 1883 and not Nx.qdb.profile.WQList.showdreamweaver) or
-			   (faction == 1828 and not Nx.qdb.profile.WQList.showhighmountain) or
-			   (faction == 2045 and not Nx.qdb.profile.WQList.showlegionfall) or
-			   (faction == 1859 and not Nx.qdb.profile.WQList.shownightfallen) or
-			   (faction == 1894 and not Nx.qdb.profile.WQList.showwardens) or
-			   (faction == 1948 and not Nx.qdb.profile.WQList.showvalarjar) or
-			   (faction == 1090 and not Nx.qdb.profile.WQList.showkirintor) or
-			   (faction == 2165 and not Nx.qdb.profile.WQList.showarmyoflight) or
-			   (faction == 2170 and not Nx.qdb.profile.WQList.showargussian) or
-			   (isbounty == false and Nx.qdb.profile.WQList.showbounty) or
-			   (info.mapid ~= Nx.Map:GetCurrentMapAreaID() and Nx.qdb.profile.WQList.zoneonly) or
-			   (reward == false and not Nx.qdb.profile.WQList.showother)then
-					worldquestdb[questId].Filtered = true
-			else					
-				local colstring = "|r"
-				if isbounty and Nx.qdb.profile.WQList.bountycolor then
-					colstring = "|cff00DD00"
-				end
-				if newwidth > list:ColumnGetWidth(2) then
-					list:ColumnSetWidth(2,newwidth)
-				end
-				list:ItemAdd(0)			
-				list:ItemSet(2,colstring .. title)
-				if faction then				
-					local factionname = C_Reputation.GetFactionDataByID(faction)
-					newwidth = #factionname * 7 + 10
-					if newwidth > list:ColumnGetWidth(4) then
-						list:ColumnSetWidth(4,newwidth)
-					end					
-					list:ItemSet(4,colstring .. factionname)
-				end
-				if reward == 10 then
-					rewardstring = "Artifact Power"
-				elseif reward == 20 then
-					rewardstring = "Gold"
-				elseif reward == 30 then
-					rewardstring = "Order Resources"
-				elseif reward == 40 then
-					rewardstring = "Gear"
-				end
-				newwidth = #rewardstring * 7 + 10
-				if newwidth > list:ColumnGetWidth(5) then
-					list:ColumnSetWidth (5, newwidth)
-				end
-				list:ItemSet(5, colstring .. rewardstring)
-				local timestr = Nx.Util_GetTimeElapsedStr (timeleft * 60)
-				newwidth = #timestr * 7 +10
-				if newwidth > list:ColumnGetWidth(6) then
-					list:ColumnSetWidth (6, newwidth)
-				end
-				list:ItemSet(6,colstring .. timestr)				
-				list:ItemSetButton ("QuestWatchCustomTip", false)
-				list:ItemSetData(list:ItemGetNum(), info)
-				if info.tip then
-					list:ItemSetButtonTip(info.tip)
-				end
-				worldquestdb[questId].Filtered = false
-			end
-		end
-	end
-	list:Update()			
+function Nx.Quest.WQList:Update()
+  local list = Nx.Quest.WQList.List
+  list:Empty()
+  list:ColumnSetWidth(2, 120)
+  list:ColumnSetWidth(4, 20)
+  list:ColumnSetWidth(5, 40)
+  list:ColumnSetWidth(6, 20)
+
+  for quest, _ in pairs(worldquestdb) do
+    local info = worldquestdb[quest]
+    local questId = quest
+    local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
+    local newwidth = #title * 7 + 10
+    local timeleft = C_TaskQuest.GetQuestTimeLeftMinutes(questId) or 0
+    local rewardstring = ""
+    local isbounty = Nx.Quest.WQList:CheckBounty(questId)
+
+    if timeleft > 0 then
+      local reward = Nx.Quest.WQList:GetWQReward(questId)
+      if (reward == 10 and not Nx.qdb.profile.WQList.showap) or
+         (reward == 20 and not Nx.qdb.profile.WQList.showgold) or 
+         (reward == 30 and not Nx.qdb.profile.WQList.showorder) or
+         (reward == 40 and not Nx.qdb.profile.WQList.showgear) or
+         (info.PVP and not Nx.qdb.profile.WQList.showpvp) or
+         (faction == 1900 and not Nx.qdb.profile.WQList.showfaronis) or
+         (faction == 1883 and not Nx.qdb.profile.WQList.showdreamweaver) or
+         (faction == 1828 and not Nx.qdb.profile.WQList.showhighmountain) or
+         (faction == 2045 and not Nx.qdb.profile.WQList.showlegionfall) or
+         (faction == 1859 and not Nx.qdb.profile.WQList.shownightfallen) or
+         (faction == 1894 and not Nx.qdb.profile.WQList.showwardens) or
+         (faction == 1948 and not Nx.qdb.profile.WQList.showvalarjar) or
+         (faction == 1090 and not Nx.qdb.profile.WQList.showkirintor) or
+         (faction == 2165 and not Nx.qdb.profile.WQList.showarmyoflight) or
+         (faction == 2170 and not Nx.qdb.profile.WQList.showargussian) or
+         (isbounty == false and Nx.qdb.profile.WQList.showbounty) or
+         (info.mapid ~= Nx.Map:GetCurrentMapAreaID() and Nx.qdb.profile.WQList.zoneonly) or
+         (reward == false and not Nx.qdb.profile.WQList.showother) then
+        worldquestdb[questId].Filtered = true
+      else
+        local colstring = "|r"
+        if isbounty and Nx.qdb.profile.WQList.bountycolor then
+          colstring = "|cff00DD00"
+        end
+        if newwidth > list:ColumnGetWidth(2) then
+          list:ColumnSetWidth(2, newwidth)
+        end
+        list:ItemAdd(0)
+        list:ItemSet(2, colstring .. title)
+        if faction then
+          local factiondata = C_Reputation.GetFactionDataByID(faction)
+          local factionname = factiondata.name
+          newwidth = #factionname * 7 + 10
+          if newwidth > list:ColumnGetWidth(4) then
+            list:ColumnSetWidth(4, newwidth)
+          end
+          list:ItemSet(4, colstring .. factionname)
+        end
+        if reward == 10 then
+          rewardstring = "Artifact Power"
+        elseif reward == 20 then
+          rewardstring = "Gold"
+        elseif reward == 30 then
+          rewardstring = "Order Resources"
+        elseif reward == 40 then
+          rewardstring = "Gear"
+        end
+        newwidth = #rewardstring * 7 + 10
+        if newwidth > list:ColumnGetWidth(5) then
+          list:ColumnSetWidth(5, newwidth)
+        end
+        list:ItemSet(5, colstring .. rewardstring)
+        local timestr = Nx.Util_GetTimeElapsedStr(timeleft * 60)
+        newwidth = #timestr * 7 + 10
+        if newwidth > list:ColumnGetWidth(6) then
+          list:ColumnSetWidth(6, newwidth)
+        end
+        list:ItemSet(6, colstring .. timestr)
+        list:ItemSetButton("QuestWatchCustomTip", false)
+        list:ItemSetData(list:ItemGetNum(), info)
+        if info.tip then
+          list:ItemSetButtonTip(info.tip)
+        end
+        worldquestdb[questId].Filtered = false
+      end
+    end
+  end
+  list:Update()
 end
 
 -------------------------------------------------------------------------------
