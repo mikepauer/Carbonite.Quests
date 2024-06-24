@@ -7234,7 +7234,7 @@ function Nx.Quest.List:Update()
 		local mapId = Map:GetCurrentMapId()
 
 		local minLevel = UnitLevel ("player") - UnitQuestTrivialLevelRange("player")
-		local maxLevel = showHighLevel and MAX_PLAYER_LEVEL or UnitLevel ("player") + 6
+		local maxLevel = showHighLevel and GetMaxLevelForPlayerExpansion() or UnitLevel ("player") + 6
 
 		-- Divider
 
@@ -7615,7 +7615,7 @@ function Nx.Quest.List:Update()
 		list:ItemSet (2, format ("|cffc0c0c0--- %s (%d) ---", str, dbTitleNum), dbTitleIndex)
 
 		local low = max (1, showLowLevel and 1 or minLevel)
-		local high = min (MAX_PLAYER_LEVEL, maxLevel)
+		local high = min (GetMaxLevelForPlayerExpansion(), maxLevel)
 		list:ItemSet (2, format (L["|cffc0c0c0--- Levels %d to %d ---"], low, high), dbTitleIndex + 1)
 	end
 
@@ -9285,7 +9285,7 @@ function Nx.Quest.Watch:UpdateList()
 					if i == GameTooltip:NumLines() then
 						local money = GetQuestLogRewardMoney(bounty.questID)
 						if ( money > 0 ) then
-							tipText = tipText .. GetCoinTextureString(money)		
+							tipText = tipText .. C_CurrencyInfo.GetCoinTextureString(money)		
 						end
 					end
 					tipText = tipText .. _G["GameTooltipTextLeft"..i]:GetText() .. "\n"
@@ -11792,7 +11792,7 @@ function Nx.Quest.WQList:GenWQTip(questId)
 	worldquesttip:SetText(title, color.r, color.g, color.b)	
 	QuestUtils_AddQuestTypeToTooltip(worldquesttip, questId, NORMAL_FONT_COLOR)
 	if factionID then
-		local factionName = GetFactionInfoByID(factionID)
+		local factionName = C_Reputation.GetFactionDataByID(factionID)
 		if factionName then
 			if capped then
 				worldquesttip:AddLine(factionName, GRAY_FONT_COLOR:GetRGB())
@@ -12037,7 +12037,7 @@ function Nx.Quest.WQList:Update()
 				list:ItemAdd(0)			
 				list:ItemSet(2,colstring .. title)
 				if faction then				
-					local factionname = GetFactionInfoByID(faction)
+					local factionname = C_Reputation.GetFactionDataByID(faction)
 					newwidth = #factionname * 7 + 10
 					if newwidth > list:ColumnGetWidth(4) then
 						list:ColumnSetWidth(4,newwidth)
