@@ -9435,9 +9435,9 @@ function Nx.Quest.Watch:UpdateList()
                 print("Error: C_ScenarioInfo.GetCriteriaInfo returned nil")
               end
             end
-            local bonusSteps = C_ScenarioInfo.GetBonusSteps() or {}
+            local bonusSteps = C_Scenario.GetBonusSteps() or {}
             if #bonusSteps >= 1 then
-              local stepInfo = C_ScenarioInfo.GetStepInfo(bonusSteps[1])
+              local stepInfo = C_Scenario.GetStepInfo(bonusSteps[1])
               local title, task, _, completed = stepInfo.title, stepInfo.description, stepInfo.numCriteria, stepInfo.isCompleted
               local tasktexts = { "Bonus |cff00ff00" }
               task:gsub('%S+%s*', function(word)
