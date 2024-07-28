@@ -7895,254 +7895,255 @@ function Nx.Quest:UpdateIcons(map)
     end
 
     -- Draw
-
+	local mapType = map.GetMapType and map:GetMapType() or nil
     local areaTex = Nx.Opts.ChoicesQAreaTex[Nx.qdb.profile.Quest.MapWatchAreaGfx]
 
     local colorPerQ = Nx.qdb.profile.Quest.MapWatchColorPerQ
     local colMax = Nx.qdb.profile.Quest.MapWatchColorCnt
 
     for trackId, trackMode in pairs(tracking) do
+		if QuestDataProviderMixin:ShouldShowQuest(trackId, mapType, Nx.qdb.profile.Quest.MapShowTaskObjectives, false) then
+			local cur = Quest.IdToCurQ[trackId]
+			local quest = cur and cur.Q or Nx.Quests[trackId]
+			local qname = Nx.TXTBLUE .. L["Quest: "] .. (cur and cur.Title or Quest:UnpackName(quest["Quest"]))
 
-        local cur = Quest.IdToCurQ[trackId]
-        local quest = cur and cur.Q or Nx.Quests[trackId]
-        local qname = Nx.TXTBLUE .. L["Quest: "] .. (cur and cur.Title or Quest:UnpackName(quest["Quest"]))
+			local mask = showOnMap and cur and cur.TrackMask or trackMode
+			local showEnd
 
-        local mask = showOnMap and cur and cur.TrackMask or trackMode
-        local showEnd
+			if bit.band(mask, 1) > 0 then
 
-        if bit.band(mask, 1) > 0 then
+				if not (cur and (cur.QI > 0 or cur.Party)) then
 
-            if not (cur and (cur.QI > 0 or cur.Party)) then
+					local startName, zone, x, y = Quest:GetSEPos(quest["Start"])
+					local mapId = zone
 
-                local startName, zone, x, y = Quest:GetSEPos(quest["Start"])
-                local mapId = zone
+					if mapId then
 
-                if mapId then
+						local wx, wy = map:GetWorldPos(mapId, x, y)
+						local f = map:GetIconStatic(4)
 
-                    local wx, wy = map:GetWorldPos(mapId, x, y)
-                    local f = map:GetIconStatic(4)
+						if map:ClipFrameByMapType(f, wx, wy, navscale, navscale, 0) then
+							f.NxTip = format(L["%s\nStart: %s (%.1f %.1f)"], qname, startName, x, y)
+							f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconExclaim")
+						end
+					end
+				else
 
-                    if map:ClipFrameByMapType(f, wx, wy, navscale, navscale, 0) then
-                        f.NxTip = format(L["%s\nStart: %s (%.1f %.1f)"], qname, startName, x, y)
-                        f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconExclaim")
-                    end
-                end
-            else
+					showEnd = true
+				end
+			end
 
-                showEnd = true
-            end
-        end
+			if showEnd or bit.band(mask, 0x10000) > 0 then
 
-        if showEnd or bit.band(mask, 0x10000) > 0 then
+				local obj = quest["End"] or quest["Start"]
 
-            local obj = quest["End"] or quest["Start"]
+				local endName, zone, x, y = Quest:GetSEPos(obj)
+				local mapId = zone
 
-            local endName, zone, x, y = Quest:GetSEPos(obj)
-            local mapId = zone
+				if mapId and (not cur or not cur.CompleteMerge) then
 
-            if mapId and (not cur or not cur.CompleteMerge) then
+					local wx, wy = map:GetWorldPos(mapId, x, y)
+					local f = map:GetIconStatic(4)
 
-                local wx, wy = map:GetWorldPos(mapId, x, y)
-                local f = map:GetIconStatic(4)
+					if map:ClipFrameByMapType(f, wx, wy, navscale, navscale, 0) then
 
-                if map:ClipFrameByMapType(f, wx, wy, navscale, navscale, 0) then
+						f.NXType = 9000
+						f.NXData = cur
+						f.NxTip = format("%s\n" .. L["End: "] .. "%s (%.1f %.1f)", qname, endName, x, y)
+						if cur and cur.PartyNames then
+							f.NxTip = f.NxTip .. "\n" .. cur.PartyNames
+						end
+						f.texture:SetVertexColor(.6, 1, .6, 1)
+						f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconQuestion")
+						-- f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconQTarget")
+					end
+				end
+			end
 
-                    f.NXType = 9000
-                    f.NXData = cur
-                    f.NxTip = format("%s\n" .. L["End: "] .. "%s (%.1f %.1f)", qname, endName, x, y)
-                    if cur and cur.PartyNames then
-                        f.NxTip = f.NxTip .. "\n" .. cur.PartyNames
-                    end
-                    f.texture:SetVertexColor(.6, 1, .6, 1)
-                    f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconQuestion")
-                    -- f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconQTarget")
-                end
-            end
-        end
+			-- Objectives (max of 15)
 
-        -- Objectives (max of 15)
+			if not cur or cur.QI > 0 or cur.Party then
 
-        if not cur or cur.QI > 0 or cur.Party then
+				local drawArea
 
-            local drawArea
+				if cur then
+					local qStatus = Nx.Quest:GetQuest(cur.QId)
+					drawArea = showWatchAreas and qStatus == "W"
+				end
+				-- local drawArea = bit.band(trackMode, 0x10000) == 0
 
-            if cur then
-                local qStatus = Nx.Quest:GetQuest(cur.QId)
-                drawArea = showWatchAreas and qStatus == "W"
-            end
-            -- local drawArea = bit.band(trackMode, 0x10000) == 0
+				for n = 1, 15 do
 
-            for n = 1, 15 do
+					local obj = quest["Objectives"]
+					if obj then
+						obj = quest["Objectives"][n]
+					end
+					if not obj then
+						break
+					end
 
-                local obj = quest["Objectives"]
-                if obj then
-                    obj = quest["Objectives"][n]
-                end
-                if not obj then
-                    break
-                end
+					local objName, objZone, typ = Nx.Quest:UnpackObjectiveNew(obj)
 
-                local objName, objZone, typ = Nx.Quest:UnpackObjectiveNew(obj)
+					if objZone and objZone ~= 9000 then
 
-                if objZone and objZone ~= 9000 then
+						local mapId = objZone
 
-                    local mapId = objZone
+						if not mapId then
+							-- Nx.prt("Nxzone error %s %s", objName, objZone)
+							break
+						end
+						if bit.band(mask, bit.lshift(1, n)) > 0 then
+							local colI = n
 
-                    if not mapId then
-                        -- Nx.prt("Nxzone error %s %s", objName, objZone)
-                        break
-                    end
-                    if bit.band(mask, bit.lshift(1, n)) > 0 then
-                        local colI = n
+							if colorPerQ then
+								colI = ((cur and cur.Index or 1) - 1) % colMax + 1
+							end
 
-                        if colorPerQ then
-                            colI = ((cur and cur.Index or 1) - 1) % colMax + 1
-                        end
+							local col = qLocColors[colI]
+							local r = col[1]
+							local g = col[2]
+							local b = col[3]
 
-                        local col = qLocColors[colI]
-                        local r = col[1]
-                        local g = col[2]
-                        local b = col[3]
+							local oname = cur and cur[n] or objName
 
-                        local oname = cur and cur[n] or objName
+							if typ == 32 then -- Points
+								-- Nx.prt("%s, pt %s", objName, strsub(obj, loc + 1))
+								local cnt = 1
+								local sz = navscale
 
-                        if typ == 32 then -- Points
-                            -- Nx.prt("%s, pt %s", objName, strsub(obj, loc + 1))
-                            local cnt = 1
-                            local sz = navscale
+								if cnt > 1 then
+									sz = map:GetWorldZoneScale(mapId) / 10.02 * ptSz
+								end
+								local x, y = Nx.Quest:UnpackLocPtOff(obj)
+								local wx, wy = map:GetWorldPos(mapId, x, y)
 
-                            if cnt > 1 then
-                                sz = map:GetWorldZoneScale(mapId) / 10.02 * ptSz
-                            end
-                            local x, y = Nx.Quest:UnpackLocPtOff(obj)
-                            local wx, wy = map:GetWorldPos(mapId, x, y)
+								local f = map:GetIconStatic(4)
+								if map:ClipFrameByMapType(f, wx, wy, sz, sz, 0) then
+									f.NXType = 9000 + n
+									f.NXData = cur
+									f.NxTip = format("%s\nObj: %s (%.1f %.1f)", qname, oname, x, y)
+									if cur and cur[n + 400] then
+										f.NxTip = f.NxTip .. "\n" .. cur[n + 400]
+									end
+									if cnt == 1 then
+										f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconQTarget")
+										f.texture:SetVertexColor(r, g, b, .9)
+									else
+										f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconCirclePlus")
+										f.texture:SetVertexColor(r, g, b, .5)
+									end
+								end
 
-                            local f = map:GetIconStatic(4)
-                            if map:ClipFrameByMapType(f, wx, wy, sz, sz, 0) then
-                                f.NXType = 9000 + n
-                                f.NXData = cur
-                                f.NxTip = format("%s\nObj: %s (%.1f %.1f)", qname, oname, x, y)
-                                if cur and cur[n + 400] then
-                                    f.NxTip = f.NxTip .. "\n" .. cur[n + 400]
-                                end
-                                if cnt == 1 then
-                                    f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconQTarget")
-                                    f.texture:SetVertexColor(r, g, b, .9)
-                                else
-                                    f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconCirclePlus")
-                                    f.texture:SetVertexColor(r, g, b, .5)
-                                end
-                            end
+							else -- Spans (areas)
 
-                        else -- Spans (areas)
+								-- Nx.prt("%s, spans %s", objName, strsub(obj, loc))
 
-                            -- Nx.prt("%s, spans %s", objName, strsub(obj, loc))
+								local hover = Quest.IconHoverCur == cur and Quest.IconHoverObjI == n
+								local tracking = bit.band(trackMode, bit.lshift(1, n)) > 0
 
-                            local hover = Quest.IconHoverCur == cur and Quest.IconHoverObjI == n
-                            local tracking = bit.band(trackMode, bit.lshift(1, n)) > 0
+								local tip = format(L["%s\nObj: %s"], qname, oname)
+								if cur and cur[n + 400] then
+									tip = tip .. "\n" .. cur[n + 400]
+								end
 
-                            local tip = format(L["%s\nObj: %s"], qname, oname)
-                            if cur and cur[n + 400] then
-                                tip = tip .. "\n" .. cur[n + 400]
-                            end
+								local x
 
-                            local x
+								if cur then
+									local d = cur["OD" .. n]
+									if d and d > 0 then
+										x = cur["OX" .. n]
+									end
+								end
 
-                            if cur then
-                                local d = cur["OD" .. n]
-                                if d and d > 0 then
-                                    x = cur["OX" .. n]
-                                end
-                            end
+								if x then
+									local y = cur["OY" .. n]
+									local f = map:GetIcon(4)
+									local sz = navscale
 
-                            if x then
-                                local y = cur["OY" .. n]
-                                local f = map:GetIcon(4)
-                                local sz = navscale
+									if not hover then
+										sz = sz * .8
+									end
 
-                                if not hover then
-                                    sz = sz * .8
-                                end
+									if map:ClipFrameByMapType(f, x, y, sz, sz, 0) then
 
-                                if map:ClipFrameByMapType(f, x, y, sz, sz, 0) then
+										f.NXType = 9000 + n
+										f.NXData = cur
+										f.NxTip = tip
 
-                                    f.NXType = 9000 + n
-                                    f.NXData = cur
-                                    f.NxTip = tip
+										f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconAreaArrows")
 
-                                    f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconAreaArrows")
+										if tracking then
+											f.texture:SetVertexColor(.8, .8, .8, 1)
+										else
+											f.texture:SetVertexColor(r, g, b, .7)
+										end
+									end
+								end
 
-                                    if tracking then
-                                        f.texture:SetVertexColor(.8, .8, .8, 1)
-                                    else
-                                        f.texture:SetVertexColor(r, g, b, .7)
-                                    end
-                                end
-                            end
+								if not cur or drawArea or hover or (bit.band(trackMode, bit.lshift(1, n)) > 0 and tonumber(trkA) > .05) then
 
-                            if not cur or drawArea or hover or (bit.band(trackMode, bit.lshift(1, n)) > 0 and tonumber(trkA) > .05) then
+									local scale = map:GetWorldZoneScale(mapId) / 10.02
+									local ssub = strsub
 
-                                local scale = map:GetWorldZoneScale(mapId) / 10.02
-                                local ssub = strsub
+									for _, loc1 in pairs(obj) do
+										if loc1 == "" then
+											break
+										end
 
-                                for _, loc1 in pairs(obj) do
-                                    if loc1 == "" then
-                                        break
-                                    end
+										local x, y, w, h = Nx.Quest:UnpackLocRect(loc1)
+										local wx, wy = map:GetWorldPos(mapId, x, y)
 
-                                    local x, y, w, h = Nx.Quest:UnpackLocRect(loc1)
-                                    local wx, wy = map:GetWorldPos(mapId, x, y)
+										local f = map:GetIconStatic(hover and 1)
+										if areaTex then
 
-                                    local f = map:GetIconStatic(hover and 1)
-                                    if areaTex then
+											if map:ClipFrameTL(f, wx, wy, w * scale, h * scale) then
+												f.NXType = 9000 + n
+												f.NXData = cur
+												f.NxTip = tip
 
-                                        if map:ClipFrameTL(f, wx, wy, w * scale, h * scale) then
-                                            f.NXType = 9000 + n
-                                            f.NXData = cur
-                                            f.NxTip = tip
+												f.texture:SetTexture(areaTex)
 
-                                            f.texture:SetTexture(areaTex)
+												if hover then
+													f.texture:SetVertexColor(hovR, hovG, hovB, hovA)
+												elseif tracking then
+													f.texture:SetVertexColor(trkR, trkG, trkB, trkA)
+												else
+													local alpha = tonumber(col[4])
+													if not alpha or alpha < 0 or alpha > 1 then
+														alpha = 1 -- Default to full opacity if invalid
+													end
+													f.texture:SetVertexColor(r, g, b, alpha)
+												end
+											end
 
-                                            if hover then
-                                                f.texture:SetVertexColor(hovR, hovG, hovB, hovA)
-                                            elseif tracking then
-                                                f.texture:SetVertexColor(trkR, trkG, trkB, trkA)
-                                            else
-                                                local alpha = tonumber(col[4])
-                                                if not alpha or alpha < 0 or alpha > 1 then
-                                                    alpha = 1 -- Default to full opacity if invalid
-                                                end
-                                                f.texture:SetVertexColor(r, g, b, alpha)
-                                            end
-                                        end
+										else
 
-                                    else
+											if map:ClipFrameTLSolid(f, wx, wy, w * scale, h * scale) then
 
-                                        if map:ClipFrameTLSolid(f, wx, wy, w * scale, h * scale) then
+												f.NXType = 9000 + n
+												f.NXData = cur
+												f.NxTip = tip
 
-                                            f.NXType = 9000 + n
-                                            f.NXData = cur
-                                            f.NxTip = tip
-
-                                            if hover then
-                                                f.texture:SetColorTexture(hovR, hovG, hovB, hovA)
-                                            elseif tracking then
-                                                f.texture:SetColorTexture(trkR, trkG, trkB, trkA)
-                                            else
-                                                local alpha = tonumber(col[4])
-                                                if not alpha or alpha < 0 or alpha > 1 then
-                                                    alpha = 1 -- Default to full opacity if invalid
-                                                end
-                                                f.texture:SetColorTexture(r, g, b, alpha)
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
+												if hover then
+													f.texture:SetColorTexture(hovR, hovG, hovB, hovA)
+												elseif tracking then
+													f.texture:SetColorTexture(trkR, trkG, trkB, trkA)
+												else
+													local alpha = tonumber(col[4])
+													if not alpha or alpha < 0 or alpha > 1 then
+														alpha = 1 -- Default to full opacity if invalid
+													end
+													f.texture:SetColorTexture(r, g, b, alpha)
+												end
+											end
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
         end
     end
 
@@ -8159,7 +8160,7 @@ function Nx.Quest:UpdateIcons(map)
                 local info = taskInfo[i]
                 local questId = taskInfo[i].questId
                 local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
-                if HaveQuestData(questId) and QuestUtils_IsQuestWorldQuest(questId) and (worldquestdb[questId] and worldquestdb[questId].mapid == Map.UpdateMapID and not worldquestdb[questId].Filtered) then
+                if QuestUtils_IsQuestWorldQuest(questId) and (worldquestdb[questId] and worldquestdb[questId].mapid == Map.UpdateMapID and not worldquestdb[questId].Filtered) then
                     activeWQ[questId] = true
                     C_TaskQuest.RequestPreloadRewardData(questId)
                     local tid, name, questtype, rarity, elite, tradeskill = GetQuestTagInfo(questId)
@@ -8168,7 +8169,7 @@ function Nx.Quest:UpdateIcons(map)
 
                         local x, y = info.x * 100, info.y * 100
                         local f = map:GetIconWQ(120)
-
+						
                         map:ClipFrameZ(f, x, y, 24, 24, 0)
 
                         local selected = info.questId == C_SuperTrack.GetSuperTrackedQuestID()
@@ -8215,7 +8216,11 @@ function Nx.Quest:UpdateIcons(map)
 
                         local tagInfo = C_QuestLog.GetQuestTagInfo(info.questId)
                         local isEffectivelyTracked = watchType == Enum.QuestWatchType.Manual or (watchType == Enum.QuestWatchType.Automatic and C_SuperTrack.GetSuperTrackedQuestID() == info.questId)
-                        QuestUtil.SetupWorldQuestButton(f, tagInfo, info.inProgress, selected, isCriteria, isSpellTarget, isEffectivelyTracked)
+						if tagInfo then
+							QuestUtil.SetupWorldQuestButton(f, tagInfo, tagInfo, selected, isCriteria, isSpellTarget, isEffectivelyTracked)
+						else
+							f:Hide()
+						end
 
                         f.texture:Hide()
 
