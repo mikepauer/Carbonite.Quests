@@ -8159,7 +8159,7 @@ function Nx.Quest:UpdateIcons(map)
                 local info = taskInfo[i]
                 local questId = taskInfo[i].questId
                 local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
-                if QuestUtils_IsQuestWorldQuest(questId) and (worldquestdb[questId] and worldquestdb[questId].mapid == Map.UpdateMapID and not worldquestdb[questId].Filtered) then
+                if HaveQuestData(questId) and QuestUtils_IsQuestWorldQuest(questId) and (worldquestdb[questId] and worldquestdb[questId].mapid == Map.UpdateMapID and not worldquestdb[questId].Filtered) then
                     activeWQ[questId] = true
                     C_TaskQuest.RequestPreloadRewardData(questId)
                     local tid, name, questtype, rarity, elite, tradeskill = GetQuestTagInfo(questId)
