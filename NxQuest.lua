@@ -8243,7 +8243,7 @@ function Nx.Quest:UpdateIcons(map)
                         end]]--
                     end
                 else
-                    if not worldquestdb[questId] then
+                    if not worldquestdb[questId] and title then
                         taskIconIndex = taskIconIndex + 1
                         local x, y = taskInfo[i].x * 100, taskInfo[i].y * 100
                         local f = map:GetIcon(3)
