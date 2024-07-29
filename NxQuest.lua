@@ -8193,23 +8193,33 @@ function Nx.Quest:UpdateIcons(map)
                             map:SetTargetAtStr(format("%s, %s", x, y))
                             if not InCombatLockdown() and self.worldQuest then
                                 if (not ChatEdit_TryInsertQuestLinkForQuestID(self.questID)) then
-                                    PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-                                    local watchType = C_QuestLog.GetQuestWatchType(self.questID)
-                                    if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil, self.questID, "force", self.mapID)
-                                    end
+                                    local watchType = C_QuestLog.GetQuestWatchType(self.questID);
+									local isSuperTracked = C_SuperTrack.GetSuperTrackedQuestID() == self.questID;
+			
+                                    if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil, self.questID, "force", self.mapID) end
+									
                                     if IsShiftKeyDown() then
-                                        if watchType == Enum.QuestWatchType.Manual or (watchType == Enum.QuestWatchType.Automatic and C_SuperTrack.GetSuperTrackedQuestID() == self.questID) then
-                                            BonusObjectiveTracker_UntrackWorldQuest(self.questID)
-                                        else
-                                            BonusObjectiveTracker_TrackWorldQuest(self.questID, Enum.QuestWatchType.Manual)
-                                        end
-                                    else
-                                        if watchType == Enum.QuestWatchType.Manual then
-                                            C_SuperTrack.SetSuperTrackedQuestID(self.questID)
-                                        else
-                                            BonusObjectiveTracker_TrackWorldQuest(self.questID, Enum.QuestWatchType.Automatic)
-                                        end
-                                    end
+										if watchType == Enum.QuestWatchType.Manual or (watchType == Enum.QuestWatchType.Automatic and isSuperTracked) then
+											PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
+											QuestUtil.UntrackWorldQuest(self.questID);
+										else
+											PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+											QuestUtil.TrackWorldQuest(self.questID, Enum.QuestWatchType.Manual);
+										end
+									else
+										if isSuperTracked then
+											PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
+											C_SuperTrack.SetSuperTrackedQuestID(0);
+										else
+											PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+
+											if watchType ~= Enum.QuestWatchType.Manual then
+												QuestUtil.TrackWorldQuest(self.questID, Enum.QuestWatchType.Automatic);
+											end
+
+											C_SuperTrack.SetSuperTrackedQuestID(self.questID);
+										end
+									end
                                 end
                             end
                         end)
