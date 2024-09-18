@@ -8824,6 +8824,12 @@ function Nx.Quest.Watch:Open()
 	end
 end
 
+ObjectiveTrackerFrame:HookScript ("OnShow", function()
+	if Nx.qdb.profile.QuestWatch.HideBlizz then
+		ObjectiveTrackerFrame:Hide()		-- Hide Blizzard's
+	end
+end);
+
 -------------------------------------------------------------------------------
 -- Setup list font
 -------------------------------------------------------------------------------
