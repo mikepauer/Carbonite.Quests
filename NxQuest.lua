@@ -8825,7 +8825,7 @@ function Nx.Quest.Watch:Open()
 end
 
 ObjectiveTrackerFrame:HookScript ("OnShow", function()
-	if Nx.qdb.profile.QuestWatch.HideBlizz then
+	if Nx.qdb and Nx.qdb.profile and Nx.qdb.profile.QuestWatch.HideBlizz then
 		ObjectiveTrackerFrame:Hide()		-- Hide Blizzard's
 	end
 end);
