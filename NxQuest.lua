@@ -7851,24 +7851,83 @@ function Nx.Quest:RenderWorldQuestIcon(map, info)
       local f = map:GetIconWQ(120)
 
       map:ClipFrameZ(f, x, y, 24, 24, 0)
-      self:SetupWorldQuestTooltip(f, info.questId, questTagInfo)
+
+      local selected = info.questId == C_SuperTrack.GetSuperTrackedQuestID()
+      local isCriteria = self:IsWorldQuestCriteria(info.questId)
+
+      f.worldQuest = true
+      f.questID = info.questId
+      f.numObjectives = info.numObjectives
+      f.Texture:SetDrawLayer("OVERLAY")
+      f:SetScript("OnClick", function(self, button)
+        self:HandleWorldQuestClick(map, x, y, self.questID)
+      end)
+
+      if questTagInfo.tagName then
+        QuestUtil.SetupWorldQuestButton(f, questTagInfo, questTagInfo.tagName, selected, isCriteria, false, true)
+      else
+        f:Hide()
+      end
+
+      f.texture:Hide()
     end
   end
 end
 
--- Setup the tooltip for a world quest icon
-function Nx.Quest:SetupWorldQuestTooltip(frame, questId, questTagInfo)
-  local tagName = questTagInfo.tagName
-  frame.worldQuest = true
-  frame.questID = questId
-  frame.Texture:SetDrawLayer("OVERLAY")
+-- Check if a world quest is a criteria for the selected bounty
+function Nx.Quest:IsWorldQuestCriteria(questId)
+  local overlay = self:WQTGetOverlay("IsWorldQuestCriteriaForSelectedBounty")
+  return overlay and overlay:IsWorldQuestCriteriaForSelectedBounty(questId)
+end
 
-  if tagName then
-    QuestUtil.SetupWorldQuestButton(frame, questTagInfo, tagName, false, false, false, true)
-  else
-    frame:Hide()
+-- Get the overlay used for world quest criteria checking
+function Nx.Quest:WQTGetOverlay(memberName)
+  for i = 1, #WorldMapFrame.overlayFrames do
+    local overlay = WorldMapFrame.overlayFrames[i]
+    if overlay[memberName] then
+      return overlay
+    end
+  end
+  return nil
+end
+
+-- Handle click events on world quest icons
+function Nx.Quest:HandleWorldQuestClick(map, x, y, questId)
+  map:SetTargetAtStr(string.format("%s, %s", x, y))
+  if not InCombatLockdown() then
+    if not ChatEdit_TryInsertQuestLinkForQuestID(questId) then
+      local watchType = C_QuestLog.GetQuestWatchType(questId)
+      local isSuperTracked = C_SuperTrack.GetSuperTrackedQuestID() == questId
+
+      -- Zygor World Quest Guide suggestion
+      if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then
+        ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil, questId, "force", Nx.Map.UpdateMapID)
+      end
+
+      if IsShiftKeyDown() then
+        if watchType == Enum.QuestWatchType.Manual or (watchType == Enum.QuestWatchType.Automatic and isSuperTracked) then
+          PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
+          QuestUtil.UntrackWorldQuest(questId)
+        else
+          PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+          QuestUtil.TrackWorldQuest(questId, Enum.QuestWatchType.Manual)
+        end
+      else
+        if isSuperTracked then
+          PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
+          C_SuperTrack.SetSuperTrackedQuestID(0)
+        else
+          PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+          if watchType ~= Enum.QuestWatchType.Manual then
+            QuestUtil.TrackWorldQuest(questId, Enum.QuestWatchType.Automatic)
+          end
+          C_SuperTrack.SetSuperTrackedQuestID(questId)
+        end
+      end
+    end
   end
 end
+
 
 function Nx.Quest:IconOnEnter(frm)
     local i = frm.NXType - 9000
