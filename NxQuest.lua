@@ -6082,7 +6082,7 @@ function Nx.Quest.List:Select (qId, qI)
 		if i then
 
 			local qi = bit.band (i, 0xff)
-			local qid = bit.rshift (i, 16)
+			local qid = Nx.rshift (i, 16)
 
 			if qi == qI and qid == qId then
 
@@ -6104,7 +6104,7 @@ function Nx.Quest.List:GetCurSelected()
 	if i then
 
 		local qi = bit.band (i, 0xff)
-		local qid = bit.rshift (i, 16)
+		local qid = Nx.rshift (i, 16)
 		if qid > 0 or qi > 0 then
 			local _, cur = Nx.Quest:FindCur (qid, qi)
 			return cur
@@ -6117,7 +6117,7 @@ function Nx.Quest.List:GetCurSelected()
 			return cur
 		else
 
-			local qid = bit.rshift (i, 16)
+			local qid = Nx.rshift (i, 16)
 			local i, cur = Nx.Quest:FindCur (qid)
 			return cur
 		end
@@ -6223,7 +6223,7 @@ function Nx.Quest.List:Menu_OnGoto (item)
 			Nx.prt (L["Already have the quest!"])
 
 		else
-			local qId = bit.rshift (i, 16)
+			local qId = Nx.rshift (i, 16)
 			Nx.Quest:Goto (qId)
 
 			self:Update()
@@ -6294,7 +6294,7 @@ function Nx.Quest.List:Menu_OnCompleted (item)
 	local i = self.List:ItemGetData()
 	if i then
 
-		local qId = bit.rshift (i, 16)
+		local qId = Nx.rshift (i, 16)
 		local qStatus, qTime = Nx.Quest:GetQuest (qId)
 
 		if qStatus == "C" then
@@ -6460,7 +6460,7 @@ function Nx.Quest.List:Menu_OnAbandon (item)
 	if i then
 
 		local qIndex = bit.band (i, 0xff)
-		local qId = bit.rshift (i, 16)
+		local qId = Nx.rshift (i, 16)
 		Nx.Quest:Abandon (qIndex, qId)
 
 --		self:Update()	-- Dialog gets closed!
@@ -6505,7 +6505,7 @@ function Nx.Quest.List:OnListEvent (eventName, sel, val2, click)
 	local hdrCur = self.List:ItemGetDataEx (sel, 1)
 
 	local qIndex = bit.band (itemData, 0xff)
-	local qId = bit.rshift (itemData, 16)
+	local qId = Nx.rshift (itemData, 16)
 
 	local shift = IsShiftKeyDown() or eventName == "mid"
 
@@ -6529,7 +6529,7 @@ function Nx.Quest.List:OnListEvent (eventName, sel, val2, click)
 					end
 
 					local qIndex = bit.band (itemData, 0xff)
-					local qId = bit.rshift (itemData, 16)
+					local qId = Nx.rshift (itemData, 16)
 
 					local i, cur, id = Quest:FindCur (qId, qIndex)
 
@@ -6584,7 +6584,7 @@ function Nx.Quest.List:OnListEvent (eventName, sel, val2, click)
 		if qId > 0 then
 
 			-- 0 is quest name line
-			local qObj = bit.band (bit.rshift (itemData, 8), 0xff)
+			local qObj = bit.band (Nx.rshift (itemData, 8), 0xff)
 
 			local mapId = Map:GetCurrentMapId()
 			Quest:TrackOnMap (qId, qObj, qIndex > 0, shift)
@@ -6615,7 +6615,7 @@ function Nx.Quest.List:OnListEvent (eventName, sel, val2, click)
 
 		else
 			-- 0 is quest name line
-			local qObj = bit.band (bit.rshift (itemData, 8), 0xff)
+			local qObj = bit.band (Nx.rshift (itemData, 8), 0xff)
 
 			if self.TabSelected == 1 then
 
@@ -8787,7 +8787,7 @@ function Nx.Quest.Watch:Open()
 	menu:AddItem (0, L["FindGroup"], function(self) 
 		local data = self.List:ItemGetData()
 		if data then
-			local qId = bit.rshift (data, 16)
+			local qId = Nx.rshift (data, 16)
 			if qId > 0 then
 				local activityID, categoryID, filters, questName = LFGListUtil_GetQuestCategoryData(qId)
 				if not activityID then
@@ -9150,7 +9150,7 @@ function Nx.Quest.Watch:UpdateList()
 
     -- Emissaries
     local emmFunc = function(id) 
-      qId = bit.rshift(id, 16)
+      qId = Nx.rshift(id, 16)
       bId = bit.band(id, 0xff)
       --WorldMapFrame.overlayFrames[3].SetSelectedBountyIndex(bId)		
     end
@@ -9827,7 +9827,7 @@ function Nx.Quest.Watch:OnListEvent (eventName, val1, val2, click, but)
 	if eventName == "menu" then	
 		local data = self.List:ItemGetData (val1)
 		if data then
-			local qId = bit.rshift (data, 16)
+			local qId = Nx.rshift (data, 16)
 			if qId and qId > 0 then
 				self.RMenu:Open()
 			end
@@ -9843,7 +9843,7 @@ function Nx.Quest.Watch:OnListEvent (eventName, val1, val2, click, but)
 		local data = self.List:ItemGetData (val1)
 		if data then
 			local qIndex = bit.band (data, 0xff)
-			local qId = bit.rshift (data, 16)
+			local qId = Nx.rshift (data, 16)
 			local typ = but:GetType()
 			if typ.CustomTip or typ.EmissaryTip then
 				local func = self.List:ItemGetFunc(data)
@@ -9939,7 +9939,7 @@ function Nx.Quest.Watch:Set (data, on, track)
 	local Quest = Nx.Quest
 
 	local qIndex = bit.band (data, 0xff)
-	local qId = bit.rshift (data, 16)
+	local qId = Nx.rshift (data, 16)
 
 	if qId > 0 then
 
@@ -9962,7 +9962,7 @@ function Nx.Quest.Watch:Set (data, on, track)
 		self:ClearAutoTarget (true)
 
 		-- 0 is quest name line
-		local qObj = bit.band (bit.rshift (data, 8), 0xff)
+		local qObj = bit.band (Nx.rshift (data, 8), 0xff)
 
 		local tbits = Quest.Tracking[qId] or 0
 
@@ -10051,7 +10051,7 @@ function Nx.Quest.Watch:ClearCompleted (qIdMatch)
 		if i then
 
 			local qIndex = bit.band (i, 0xff)
-			local qId = bit.rshift (i, 16)
+			local qId = Nx.rshift (i, 16)
 
 			if qId > 0 and (not qIdMatch or qIdMatch == qId) then
 
@@ -10059,7 +10059,7 @@ function Nx.Quest.Watch:ClearCompleted (qIdMatch)
 				if cur then
 
 					local qComplete = cur.CompleteMerge	-- Remember for objectives
-					local qObj = bit.band (bit.rshift (i, 8), 0xff)
+					local qObj = bit.band (Nx.rshift (i, 8), 0xff)
 
 --					Nx.prt ("Data #%d Id %d Obj %d C=%s", qIndex, qId, qObj, tostring (cur.CompleteMerge))
 
