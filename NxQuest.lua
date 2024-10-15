@@ -9771,11 +9771,20 @@ function Nx.Quest.Watch:UpdateList()
     end
 
     if w < 127 then
-      self.Win:SetTitle ("")
+      self.Win:SetTitle("")
     else
-      local _, i = C_QuestLog.GetNumQuestLogEntries()
-      self.Win:SetTitle (format ("          |cff40af40%d/35", i))
-    end
+      local questCount = 0
+      local numEntries = C_QuestLog.GetNumQuestLogEntries()
+
+        for i = 1, numEntries do
+          local info = C_QuestLog.GetInfo(i)
+          if info and not info.isHeader and not info.isHidden and info.frequency ~= Enum.QuestFrequency.Daily then
+            questCount = questCount + 1
+          end
+        end
+	
+        self.Win:SetTitle(format("          |cff40af40%d/35", questCount))
+      end
 
     self.FirstUpdate = nil
   end
