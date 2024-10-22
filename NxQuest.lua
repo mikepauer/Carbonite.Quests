@@ -7009,20 +7009,29 @@ function Nx.Quest.List:Update()
 
 	-- Title
 
-	local _, i = C_QuestLog.GetNumQuestLogEntries()
-
+	local questCount = 0
+	local numEntries = C_QuestLog.GetNumQuestLogEntries()
+	
+	for i = 1, numEntries do
+	  local questInfo = C_QuestLog.GetInfo(i)
+	  if questInfo and not questInfo.isHeader and not questInfo.isHidden and questInfo.frequency ~= Enum.QuestFrequency.Daily then
+	    questCount = questCount + 1
+	  end
+	end
+	
 	local dailyStr = ""
 	local dailysDone = GetDailyQuestsCompleted()
 	if Nx.qdb.profile.Quest.ShowDailyCount then
-		if dailysDone > 0 then
-			dailyStr = L["Daily Quests Completed:"] .. " |cffffffff" .. dailysDone
-		end
+	  if dailysDone > 0 then
+	    dailyStr = L["Daily Quests Completed:"] .. " |cffffffff" .. dailysDone
+	  end
 	end
 	if Nx.qdb.profile.Quest.ShowDailyReset then
-		dailyStr = dailyStr .. "|r  " .. L["Daily reset:"] .. " |cffffffff" .. Nx.Util_GetTimeElapsedStr (GetQuestResetTime())
+	  dailyStr = dailyStr .. "|r  " .. L["Daily reset:"] .. " |cffffffff" .. Nx.Util_GetTimeElapsedStr(GetQuestResetTime())
 	end
+	
+	self.Win:SetTitle(format(L["Quests:"] .. " |cffffffff%d/35|r  %s", questCount, dailyStr))
 
-	self.Win:SetTitle (format (L["Quests:"] .. " |cffffffff%d/35|r  %s", i, dailyStr))
 
 	-- List
 
