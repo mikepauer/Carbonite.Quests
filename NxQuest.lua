@@ -3413,31 +3413,21 @@ end
 
 function Nx.Quest:ExpandQuests()
 
---	if next (self.HeaderExpanded) then	-- Currently expanded?
---		Nx.prt ("ExpandQuests skip")
---		return
---	end
+  repeat
+    local found = false
+    local cnt = C_QuestLog.GetNumQuestLogEntries()
 
---	Nx.prt ("ExpandQuests")
-
-	repeat
-		local found = false
-		local cnt = C_QuestLog.GetNumQuestLogEntries()
-
-		for qn = 1, cnt do
-
-			local title, level, groupCnt, isHeader, isCollapsed, _, _, questID = GetQuestLogTitle (qn)
-			local tagID, tag = GetQuestTagInfo(questID)
-			if isHeader and isCollapsed then
-				local he = self.HeaderExpanded
-				he[title] = true
-				ExpandQuestHeader (qn)
---				Nx.prt ("Expand #%s %s %s", qn, title, isCollapsed or "nil")
-				found = true
-				break
-			end
-		end
-	until not found
+    for qn = 1, cnt do
+      local info = C_QuestLog.GetInfo(qn)
+      if info.isHeader and info.isCollapsed then
+        local he = self.HeaderExpanded
+        he[info.title] = true
+        ExpandQuestHeader(qn, false)
+        found = true
+        break
+      end
+    end
+  until not found
 end
 
 -------------------------------------------------------------------------------
@@ -3483,24 +3473,27 @@ end
 
 function Nx.Quest:AccessAllQuests()
 
---	Nx.prt ("AccessAllQuests")
+  self:ExpandQuests()
 
-	self:ExpandQuests()
+  local qcnt = C_QuestLog.GetNumQuestLogEntries()
 
-	local qcnt = C_QuestLog.GetNumQuestLogEntries()
+  for qi = 1, qcnt do
+    local questInfo = C_QuestLog.GetInfo(qi)
+    if questInfo then
+      local title = questInfo.title
+      local level = questInfo.level
 
-	for qi = 1, qcnt do
+      local objectives = C_QuestLog.GetQuestObjectives(questInfo.questID)
+      for n, objective in ipairs(objectives) do
+        local description = objective.text
+        local isComplete = objective.finished
+      end
+    end
+  end
 
-		local title, level = GetQuestLogTitle (qi)
-
-		local lbCnt = GetNumQuestLeaderBoards (qi)
-		for n = 1, lbCnt do
-			GetQuestLogLeaderBoard (n, qi)
-		end
-	end
-
-	self:RestoreExpandQuests()
+  self:RestoreExpandQuests()
 end
+
 
 -------------------------------------------------------------------------------
 -- Record quests
@@ -3511,457 +3504,369 @@ end
 -------------------------------------------------------------------------------
 
 function Nx.Quest:RecordQuests(worldcheck)
---	Nx.prt ("Record Quests")
-	local self = Nx.Quest
-	local qcnt = C_QuestLog.GetNumQuestLogEntries()
-	for qn = 1, qcnt do	-- Test all quests
+  local self = Nx.Quest
+  local qcnt = C_QuestLog.GetNumQuestLogEntries()
+  
+  for qn = 1, qcnt do
+    local questInfo = C_QuestLog.GetInfo(qn)
 
-		local title, level = GetQuestLogTitle (qn)
-		if level < 0 then		-- If a -1 then data not updated. QuestGuru causes this to happen when zoning
-			return
-		end
-	end
---	local tm = GetTime()
-	self:ScanBlizzQuestDataZone()			-- Capture current zone
-	if worldcheck == nil then
-		self:ScanBlizzQuestData()				-- Triggers RecordQuestsLog() after done
-	end
+		if questInfo then
+      local title = questInfo.title
+      local level = questInfo.level
+      
+      if level < 0 then
+        return
+      end
+    end
+  end
+  
+  self:ScanBlizzQuestDataZone()
+  
+  if worldcheck == nil then
+    self:ScanBlizzQuestData()
+  end
+
 	self:RecordQuestsLog()
-
---	Nx.prt ("%f secs", GetTime() - tm)
 end
 
 -------------------------------------------------------------------------------
 
 function Nx.Quest:RecordQuestsLog()
-
-	local qcnt = C_QuestLog.GetNumQuestLogEntries()
-
-	local opts = self.GOpts
-	local curq = self.CurQ
-	local oldSel = C_QuestLog.GetSelectedQuest()
-
---	Nx.prt ("RecordQuestsLog %s, %s", qcnt, #curq)
-
-	local lastChanged
-
-	local qIds = {}
-	self.QIds = qIds
-
-	--
-
-	local partySend
-
-	if self.RealQEntries == qcnt then	-- No quests added or removed?
-
-		for curi, cur in ipairs (curq) do
-
-			local qi = cur.QI
-			if qi > 0 then
-
-				local title, level, groupCnt, isHeader, isCollapsed, isComplete, _, questID = GetQuestLogTitle (qi)
-				title = self:ExtractTitle (title)
-
---				Nx.prt ("QD %s %s %s %s", title, qi, isHeader and "H1" or "H0", isComplete and "C1" or "C0")
-
-				if cur.Title == title then		-- Still matches?
-
-					local change
-
-					if isComplete == 1 and not cur.Complete then
-						Nx.prt (L["Quest Complete '%s'"], title)
-
-						if Nx.qdb.profile.Quest.SndPlayCompleted then
-							self:PlaySound()
-						end
-
-						if Nx.qdb.profile.Quest.AutoTurnInAC and cur.IsAutoComplete then
-							ShowQuestComplete (C_QuestLog.GetQuestIDForLogIndex(qi))
-							
-						end
-
-						if Nx.qdb.profile.QuestWatch.RemoveComplete and not cur.IsAutoComplete then
-							self.Watch:RemoveWatch (cur.QId, cur.QI)
-							self.Watch:Update()
-							self.WQList:Update()
-							change = false
-						else
-							change = true
-						end
-
-					end
-
-					local lbCnt = GetNumQuestLeaderBoards (qi)
-					for n = 1, lbCnt do
-
-						local desc, _, done = GetQuestLogLeaderBoard (n, qi)
-
-						--V4
-
-						if desc and (desc ~= cur[n] or done ~= cur[n + 100]) then
-
---							Nx.prt ("Q Change %s->%s", desc, cur[n] or "nil")
-
-							if Nx.qdb.profile.QuestWatch.AddChanged then
-								if change == nil then
-									change = true
-								end
-							end
-
-							local s1, _, oldCnt = strfind (cur[n] or "", "(%d+)/%d+ ")
-							if s1 then
-								oldCnt = tonumber (oldCnt)
-							end
-
-							local s1, _, newCnt = strfind (desc, "(%d+)/%d+ ")
-							if s1 then
---								Nx.prt ("%s %s", i, total)
-								newCnt = tonumber (newCnt)
-							end
-
-							if done or (oldCnt and newCnt and newCnt > oldCnt) then
-								self:Capture (curi, n)
-							end
-
-							lastChanged = cur
-
-							partySend = true
-						end
-					end
-
-					if change and Nx.qdb.profile.QuestWatch.AddChanged then
-						self.Watch:Add (curi)
-					end
-				end
-			end
-		end
-
-	else
-
-		partySend = true
-	end
-
-	-- Remove real blizz quests
-
-	local fakeq = {}
-
-	local n = 1
-	while curq[n] do
-
-		local cur = curq[n]
-		if not cur.Goto or cur.Party then
---			Nx.prt ("RecordQuests RemoveQ %s - %s", cur.Title, cur.QI)
-			table.remove (curq, n)
-		else
-			fakeq[cur.Q] = cur
-			n = n + 1
-		end
-	end
-
-	-- Add blizz quests
-
-	self.RealQ = {}
-
-	local header = "?"
-
-	self.RealQEntries = qcnt
-
-	local index = #curq + 1
-
-	for qn = 1, qcnt do
-		local title, level, groupCnt, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isBounty, isStory, isHidden = GetQuestLogTitle(qn)
-		local tagID, tag, worldQuestType, rarity, isElite, tradeskillLineIndex = GetQuestTagInfo(questID)
-		local isDaily = frequency
---		Nx.prt ("Q %d %s %s %d %s %s %s %s", qn, isHeader and "H" or " ", title, level, tag or "nil", groupCnt or "nil", isDaily or "not daily", isComplete and "C1" or "C0")
-
-		if isHeader then
-			header = title or "?"
---			if isCollapsed then
---				Nx.prt ("Q %s collapsed!", title)
---			end
-		else
-			title = self:ExtractTitle (title)
-			C_QuestLog.SetSelectedQuest (C_QuestLog.GetQuestIDForLogIndex(qn))
-			local qDesc, qObj = GetQuestLogQuestText()
-			local qId, qLevel = self:GetLogIdLevel (questID)
-			--Nx.prt ("%d",GetQuestLogQuestType(qn)) -- Seeing what quest type function returns
-			--Nx.prt("%s", qDesc)
-			if qId and not isHidden then
-				local quest = Nx.Quests[qId]
-				local lbCnt = GetNumQuestLeaderBoards (qn)
-				local cur = quest and fakeq[quest]
-				if not cur then
-					cur = {}
-					curq[index] = cur
-					cur.Index = index
-					index = index + 1
-				else
-					cur.Goto = nil					-- Might have been a goto quest
-					cur.Index = index
-					if quest then
-						self.Tracking[qId] = 0
-						self:TrackOnMap (qId, 0, true)
-					end
-				end
-
-				qIds[qId] = cur
-
-				cur.Q = quest
-				cur.QI = qn						-- Blizzard index
-				cur.QId = qId
-				cur.Header = header
-				cur.Title = title
-				cur.ObjText = qObj
-				cur.DescText = qDesc
-				cur.Level = level
-				cur.RealLevel = qLevel
-				cur.NewTime = self.QIdsNew[qId]				-- Copy new time
-
-				cur.Tag = tag
-				cur.GCnt = groupCnt or 0
-
-				cur.PartySize = groupCnt or 1
---			if cur.Tag then Nx.prt ("%s %s", cur.Tag, cur.GCnt) end
-				if tag == "Heroic" then
-					cur.PartySize = 5
-				end
-
-				cur.TagShort = self.TagNames[tag] or ""
-
-				cur.Daily = isDaily
-				if isDaily == Enum.QuestFrequency.Daily then
-					cur.TagShort = "$" .. cur.TagShort
-				end
-				if isDaily == Enum.QuestFrequency.Weekly then
-					cur.TagShort = "#" .. cur.TagShort
-				end
-				cur.CanShare = C_QuestLog.IsPushableQuest(questID)
-				cur.Complete = isComplete			-- 1 is Done, nil not. Otherwise failed
-				local qInfo = C_QuestLog.GetInfo(qn)
-				cur.IsAutoComplete = qInfo.isAutoComplete
-
-				local left = GetQuestLogTimeLeft()
-				if left then
-					cur.TimeExpire = time() + left
-					cur.HighPri = true
-				end
-
-				cur.ItemLink, cur.ItemImg, cur.ItemCharges = GetQuestLogSpecialItemInfo (qn)
-
-				--Nx.prt("Q num: %d itmLink: %s item: %s charges: %d", qn, cur.ItemLink or " ", cur.ItemImg or " ", cur.ItemCharges)
-				if cur.ItemLink then
-					local itemString = string.match(cur.ItemLink, ".+|Hitem:([^:]+):.+")
-					if itemString then
-					--	Nx.prt("itemID: %s",itemString)
-						cur.ItemID = tonumber(itemString)
-					else
-						cur.ItemID = 0
-					end
-				end
-				cur.Priority = 1
-				cur.Distance = 999999999
-				cur.LBCnt = lbCnt
-
-				for n = 1, lbCnt do
-					local desc, _, done = GetQuestLogLeaderBoard (n, qn)
-					cur[n] = desc or "?"		--V4
-					cur[n + 100] = done
-				end
-
-				local mask = 0
-				local ender = quest and (quest["End"] or quest["Start"])
-
-				if (isComplete and ender) or lbCnt == 0 or (cur.Goto and quest["Start"]) then
-					mask = 1
-
-				else
-					for n = 1, 99 do
-						local done
-						if n <= lbCnt then
-							done = cur[n + 100]
-						end
-
-						local obj = quest and quest["Objectives"]
-
-						if not obj then
-							break
-						else obj = quest and quest["Objectives"][n]
-						end
-						if not obj then
-							break
-						end
-
-						if obj and not done then
-							mask = mask + bit.lshift (1, n)
-						end
-					end
-				end
-				cur.TrackMask = mask
-
---			Nx.prt ("%s %x", title, mask)
-
-				self.RealQ[title] = cur			-- For diff
-
-			-- Calc total number in quest chain
-
-				if quest then
-					self:CalcCNumMax (cur, quest)
-				end
-			end
-		end
-	end
-
-
-	if Nx.qdb.profile.Quest.PartyShare and self.Watch.ButShowParty:GetPressed() then
-
---		Nx.prt ("-PQuest-")
-
-		local pq = self.PartyQ
-
-		for plName, pdata in pairs (pq) do
-
-		--Nx.prt ("PQuest %s", plName)
-			for qId, qT in pairs (pdata) do
-				local quest = Nx.Quests[qId]
-				local cur = qIds[qId]
-
-				if cur then		-- We have the quest?
-					local s = format ("\n|cff8080f0%s|r", plName)
-
-					if not cur.PartyDesc then
-
-						cur.PartyDesc = ""
-						cur.PartyNames = "\n|cfff080f0Me"
-						cur.PartyCnt = 0
-						cur.PartyComplete = cur.Complete
-
-						for n, cnt in ipairs (qT) do
-							cur[n + 200] = cur[n + 100]
-							cur[n + 400] = "\n|cfff080f0Me" .. s
-						end
-					end
-
-					cur.PartyDesc = cur.PartyDesc .. s
-					cur.PartyNames = cur.PartyNames .. s
-					cur.PartyCnt = cur.PartyCnt + 1
-					cur.PartyComplete = cur.PartyComplete and qT.Complete
-
-					local mask = (cur.PartyComplete or #qT == 0) and 1 or 0
-
-					for n, cnt in ipairs (qT) do
-
-						local total = qT[n + 100]
-
-						--local desc, done = self:CalcDesc (qId, n, cnt, total)
-						
-						desc = qT[n + 200]
-						cur[n] = desc
-						
-						local done = qT[n + 300]
-						
-						done = cur[n + 200] and done
-						cur[n + 200] = done
-
-						cur.PartyDesc = cur.PartyDesc .. "\n " .. desc
-						cur[n + 400] = cur[n + 400] .. " " .. desc
-
-						if not done then
-							mask = mask + bit.lshift (1, n)
-						end
-					end
-
-					cur.TrackMask = mask
-
-				elseif quest then
-
-					local name, side, lvl = self:Unpack (quest["Quest"])
-
---					Nx.prt ("PartyQ %s", name)
-
-					local cur = {}
-					cur.Goto = true
-					cur.Party = plName
-					cur.PartyDesc = format ("\n|cff8080f0%s|r", plName)
-					cur.PartyNames = cur.PartyDesc
-					cur.Q = quest
-					cur.QI = 0
-					cur.QId = qId
-					cur.Header = "Party, " .. plName
-					cur.Title = name
-					cur.ObjText = ""
-					cur.Level = lvl
-					cur.PartySize = 1
-					cur.TagShort = ""
-					cur.Complete = qT.Complete
-					cur.Priority = 1
-					cur.Distance = 999999999
-
-					self:CalcCNumMax (cur, quest)
-
-					tinsert (curq, cur)
-					cur.Index = #curq
-
-					cur.LBCnt = #qT
-
-					local mask = (qT.Complete or #qT == 0) and 1 or 0
-
-					for n, cnt in ipairs (qT) do
-
-						local total = qT[n + 100]
-
-						--cur[n], cur[n + 100] = self:CalcDesc (qId, n, cnt, total)
-						
-						cur[n] = qT[n + 200]
-						cur[n + 100] = qT[n + 300]
-						
-						cur[n + 400] = cur.PartyNames
-
-						if not cur[n + 100] then
-							mask = mask + bit.lshift (1, n)
-						end
-					end
-
-					cur.TrackMask = mask
-				end
-			end
-		end
-	end
-
-	for curi, cur in ipairs (curq) do
-		if cur.PartyCnt then
-			cur.CompleteMerge = cur.PartyComplete
-
-			for n, desc in ipairs (cur) do
-				cur[n + 300] = cur[n + 200]
-			end
-
-		else
-			cur.CompleteMerge = cur.Complete
-
-			for n, desc in ipairs (cur) do
-				cur[n + 300] = cur[n + 100]
-			end
-		end
-	end
-
-	--
-
-	if lastChanged then
-		self.QLastChanged = self:FindCurFromOld (lastChanged)
-	end
-
-	C_QuestLog.SetSelectedQuest (oldSel)
-
---	Nx.prt ("CurQ %d", #curq)
-
-	self:SortQuests()
-
-	if partySend then
-		self:PartyStartSend()
-	end
-
---	local map = Nx.Map:GetMap (1)
-	self.Map.Guide:UpdateMapIcons()
+  local qcnt = C_QuestLog.GetNumQuestLogEntries()
+  local opts = self.GOpts
+  local curq = self.CurQ
+  local oldSel = C_QuestLog.GetSelectedQuest()
+
+  local lastChanged = nil
+  local qIds = {}
+  self.QIds = qIds
+
+  local partySend = false
+
+  if self.RealQEntries == qcnt then -- No quests added or removed?
+    for curi, cur in ipairs(curq) do
+      local qi = cur.QI
+      if qi > 0 then
+        local questInfo = C_QuestLog.GetInfo(qi)
+        local rawTitle = questInfo.title
+        local level = questInfo.level
+        local isHeader = questInfo.isHeader
+        local isComplete = questInfo.isComplete
+        local questID = questInfo.questID
+
+        local title = self:ExtractTitle(rawTitle)
+
+        if cur.Title == title then -- Still matches?
+          local change = nil
+
+          if isComplete == 1 and not cur.Complete then
+            Nx.prt(L["Quest Complete '%s'"], title)
+
+            if Nx.qdb.profile.Quest.SndPlayCompleted then
+              self:PlaySound()
+            end
+
+            if Nx.qdb.profile.Quest.AutoTurnInAC and cur.IsAutoComplete then
+              ShowQuestComplete(C_QuestLog.GetQuestIDForLogIndex(qi))
+            end
+
+            if Nx.qdb.profile.QuestWatch.RemoveComplete and not cur.IsAutoComplete then
+              self.Watch:RemoveWatch(cur.QId, cur.QI)
+              self.Watch:Update()
+              self.WQList:Update()
+              change = false
+            else
+              change = true
+            end
+          end
+
+          local lbCnt = GetNumQuestLeaderBoards(qi)
+          for n = 1, lbCnt do
+            local desc, _, done = GetQuestLogLeaderBoard(n, qi)
+
+            if desc and (desc ~= cur[n] or done ~= cur[n + 100]) then
+              if Nx.qdb.profile.QuestWatch.AddChanged then
+                if change == nil then
+                  change = true
+                end
+              end
+
+              local oldCnt = self:extractCountFromDescription(cur[n])
+              local newCnt = self:extractCountFromDescription(desc)
+
+              if done or (oldCnt and newCnt and newCnt > oldCnt) then
+                self:Capture(curi, n)
+              end
+
+              lastChanged = cur
+              partySend = true
+            end
+          end
+
+          if change and Nx.qdb.profile.QuestWatch.AddChanged then
+            self.Watch:Add(curi)
+          end
+        end
+      end
+    end
+  else
+    partySend = true
+  end
+
+  -- Remove real blizz quests
+  local fakeq = {}
+  local n = 1
+  while curq[n] do
+    local cur = curq[n]
+    if not cur.Goto or cur.Party then
+      table.remove(curq, n)
+    else
+      fakeq[cur.Q] = cur
+      n = n + 1
+    end
+  end
+
+  -- Add blizz quests
+  self.RealQ = {}
+  local header = "?"
+
+  self.RealQEntries = qcnt
+  local index = #curq + 1
+
+  for qn = 1, qcnt do
+    local questInfo = C_QuestLog.GetInfo(qn)
+    local title = self:ExtractTitle(questInfo.title)
+    C_QuestLog.SetSelectedQuest(C_QuestLog.GetQuestIDForLogIndex(qn))
+
+    local qDesc, qObj = GetQuestLogQuestText()
+    local qId, qLevel = self:GetLogIdLevel(questInfo.questID)
+
+    if qId and not questInfo.isHidden then
+      local quest = Nx.Quests[qId]
+      local lbCnt = GetNumQuestLeaderBoards(qn)
+      local cur = quest and fakeq[quest]
+
+      if not cur then
+        cur = {}
+        curq[index] = cur
+        cur.Index = index
+        index = index + 1
+      else
+        cur.Goto = nil -- Might have been a goto quest
+        cur.Index = index
+        if quest then
+          self.Tracking[qId] = 0
+          self:TrackOnMap(qId, 0, true)
+        end
+      end
+
+      qIds[qId] = cur
+      cur.Q = quest
+      cur.QI = qn
+      cur.QId = qId
+      cur.Header = header
+      cur.Title = title
+      cur.ObjText = qObj
+      cur.DescText = qDesc
+      cur.Level = questInfo.level
+      cur.RealLevel = qLevel
+      cur.NewTime = self.QIdsNew[qId]
+      cur.Tag = questInfo.tag
+      cur.GCnt = questInfo.groupCnt or 0
+      cur.PartySize = questInfo.groupCnt or 1
+
+      if cur.Tag == "Heroic" then
+        cur.PartySize = 5
+      end
+
+      cur.TagShort = self.TagNames[questInfo.tag] or ""
+      cur.Daily = questInfo.frequency
+
+      if questInfo.frequency == Enum.QuestFrequency.Daily then
+        cur.TagShort = "$" .. cur.TagShort
+      end
+      if questInfo.frequency == Enum.QuestFrequency.Weekly then
+        cur.TagShort = "#" .. cur.TagShort
+      end
+
+      cur.CanShare = C_QuestLog.IsPushableQuest(questInfo.questID)
+      cur.Complete = questInfo.isComplete
+      cur.IsAutoComplete = questInfo.isAutoComplete
+
+      local left = GetQuestLogTimeLeft()
+      if left then
+        cur.TimeExpire = os.time() + left
+        cur.HighPri = true
+      end
+
+      local specialItemInfo = GetQuestLogSpecialItemInfo(qn)
+      if specialItemInfo then
+        cur.ItemLink = specialItemInfo.ItemLink
+        cur.ItemImg = specialItemInfo.ItemImg
+        cur.ItemCharges = specialItemInfo.ItemCharges
+      end
+
+      if cur.ItemLink then
+        local itemString = string.match(cur.ItemLink, ".+|Hitem:([^:]+):.+")
+        if itemString then
+          cur.ItemID = tonumber(itemString)
+        else
+          cur.ItemID = 0
+        end
+      end
+
+      cur.Priority = 1
+      cur.Distance = math.huge
+      cur.LBCnt = lbCnt
+
+      for n = 1, lbCnt do
+        local desc, _, done = GetQuestLogLeaderBoard(n, qn)
+        cur[n] = desc or "?"
+        cur[n + 100] = done
+      end
+
+      local mask = self:calculateMask(cur, quest, questInfo)
+      cur.TrackMask = mask
+
+      self.RealQ[title] = cur
+
+      if quest then
+        self:CalcCNumMax(cur, quest)
+      end
+    end
+  end
+
+  if Nx.qdb.profile.Quest.PartyShare and self.Watch.ButShowParty:GetPressed() then
+    self:processPartyQuests(qIds, curq)
+  end
+
+  for _, cur in ipairs(curq) do
+    cur.CompleteMerge = cur.PartyCnt and cur.PartyComplete or cur.Complete
+    for n = 1, #cur do
+      cur[n + 300] = cur.PartyCnt and cur[n + 200] or cur[n + 100]
+    end
+  end
+
+  if lastChanged then
+    self.QLastChanged = self:FindCurFromOld(lastChanged)
+  end
+
+  C_QuestLog.SetSelectedQuest(oldSel)
+  self:SortQuests()
+
+  if partySend then
+    self:PartyStartSend()
+  end
+
+  self.Map.Guide:UpdateMapIcons()
+end
+
+-- Helper functions
+function Nx.Quest:extractCountFromDescription(desc)
+  if desc then
+    local match = string.match(desc, "(%d+)/%d+")
+    return match and tonumber(match) or nil
+  end
+  return nil
+end
+
+function Nx.Quest:calculateMask(cur, quest, questInfo)
+  local mask = 0
+  local ender = quest and (quest["End"] or quest["Start"])
+
+  if (questInfo.isComplete and ender) or cur.LBCnt == 0 or (cur.Goto and quest["Start"]) then
+    mask = 1
+  else
+    for n = 1, 99 do
+      local done = cur[n + 100]
+      local obj = quest and quest.Objectives and quest.Objectives[n]
+      if not obj then break end
+      if obj and not done then
+        mask = mask + bit.lshift(1, n)
+      end
+    end
+  end
+  return mask
+end
+
+function Nx.Quest:processPartyQuests(qIds, curq)
+  local pq = self.PartyQ
+  for plName, pdata in pairs(pq) do
+    for qId, qT in pairs(pdata) do
+      local quest = Nx.Quests[qId]
+      local cur = qIds[qId]
+
+      if cur then
+        local partyDesc = "\n|cff8080f0" .. plName .. "|r"
+        cur.PartyDesc = cur.PartyDesc or ""
+        cur.PartyNames = cur.PartyNames or "\n|cfff080f0Me"
+        cur.PartyCnt = cur.PartyCnt or 0
+        cur.PartyComplete = cur.PartyComplete and qT.Complete
+
+        cur.PartyDesc = cur.PartyDesc .. partyDesc
+        cur.PartyNames = cur.PartyNames .. partyDesc
+        cur.PartyCnt = cur.PartyCnt + 1
+
+        local mask = cur.PartyComplete or #qT == 0 and 1 or 0
+        for n, cnt in ipairs(qT) do
+          local total = qT[n + 100]
+          cur[n] = qT[n + 200]
+          local done = qT[n + 300]
+          cur[n + 200] = done
+          cur.PartyDesc = cur.PartyDesc .. "\n " .. qT[n + 200]
+          cur[n + 400] = (cur[n + 400] or "") .. " " .. qT[n + 200]
+
+          if not done then
+            mask = mask + bit.lshift(1, n)
+          end
+        end
+
+        cur.TrackMask = mask
+      elseif quest then
+        cur = self:createPartyQuestEntry(plName, quest, qT)
+        table.insert(curq, cur)
+      end
+    end
+  end
+end
+
+function Nx.Quest:createPartyQuestEntry(plName, quest, qT)
+  local name, _, lvl = self:Unpack(quest.Quest)
+  local partyDesc = "\n|cff8080f0" .. plName .. "|r"
+  local cur = {
+    Goto = true,
+    Party = plName,
+    PartyDesc = partyDesc,
+    PartyNames = partyDesc,
+    Q = quest,
+    QI = 0,
+    QId = quest.Id,
+    Header = "Party, " .. plName,
+    Title = name,
+    ObjText = "",
+    Level = lvl,
+    PartySize = 1,
+    TagShort = "",
+    Complete = qT.Complete,
+    Priority = 1,
+    Distance = math.huge,
+    LBCnt = #qT
+  }
+
+  local mask = (qT.Complete or #qT == 0) and 1 or 0
+  for n, cnt in ipairs(qT) do
+    local total = qT[n + 100]
+    cur[n] = qT[n + 200]
+    cur[n + 100] = qT[n + 300]
+    cur[n + 400] = partyDesc
+
+    if not cur[n + 100] then
+      mask = mask + bit.lshift(1, n)
+    end
+  end
+
+  cur.TrackMask = mask
+  return cur
 end
 
 -------------------------------------------------------------------------------
@@ -6993,6 +6898,7 @@ end
 -- Update list security stub
 -------------------------------------------------------------------------------
 
+-- Main Update Function
 function Nx.Quest.List:Update()
 
 	if not self.Win:IsShown() then
@@ -7809,411 +7715,228 @@ local taskInfoCacheTimer = C_Timer.NewTicker(1, function(self)
 end)
 
 function Nx.Quest:UpdateIcons(map)
-    if not Nx.QInit then
-        return
-    end
+  if not Nx.QInit then
+    return
+  end
 
-    local Nx = Nx
-    local Quest = Nx.Quest
-    local Map = Nx.Map
-    local qLocColors = Quest.QLocColors
-    local ptSz = 4 * map.ScaleDraw
-    local navscale = Map.Maps[1].IconNavScale * 16
-    local showOnMap = true --Quest.Watch.ButShowOnMap:GetPressed()
-
-    local opts = self.GOpts
-    local showWatchAreas = Nx.qdb.profile.Quest.MapShowWatchAreas
-    local trkR, trkG, trkB, trkA = Nx.Quest.Cols["trkR"], Nx.Quest.Cols["trkG"], Nx.Quest.Cols["trkB"], Nx.Quest.Cols["trkA"]
-    local hovR, hovG, hovB, hovA = Nx.Quest.Cols["hovR"], Nx.Quest.Cols["hovG"], Nx.Quest.Cols["hovB"], Nx.Quest.Cols["hovA"]
-
-    local typ, tid = Map:GetTargetInfo()
-    if typ == "Q" then
-        local qid = math.floor(tid / 100)
-        local i, cur = Quest:FindCur(qid)
-
-        if cur then
-            Quest:CalcDistances(cur.Index, cur.Index)
-            Quest:TrackOnMap(cur.QId, tid % 100, cur.QI > 0 or cur.Party, true, true)
-        end
-    end
-
-    for k, cur in ipairs(Quest.CurQ) do
-        if cur.Q and cur.CompleteMerge then
-            local q = cur.Q
-            local obj = q["End"] or q["Start"]
-
-            local endName, zone, x, y = Quest:GetSEPos(obj)
-            local mapId = zone
-
-            if mapId then
-                local wx, wy = map:GetWorldPos(mapId, x, y)
-                local f = map:GetIconStatic(4)
-
-                if map:ClipFrameByMapType(f, wx, wy, navscale, navscale, 0) then
-                    f.NXType = 9000
-                    f.NXData = cur
-                    local qname = Nx.TXTBLUE .. "Quest: " .. cur.Title
-                    f.NxTip = string.format("%s\nEnd: %s (%.1f %.1f)", qname, endName, x, y)
-                    if cur.PartyNames then
-                        f.NxTip = f.NxTip .. "\n" .. cur.PartyNames
-                    end
-                    f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconQuestion")
-                end
-            end
-        end
-    end
-
-    local tracking = self.IconTracking
-
-    if Nx.Tick % 10 == 0 then
-        wipe(tracking)
-
-        for trackId, trackMode in pairs(Quest.Tracking) do
-            tracking[trackId] = trackMode
-        end
-
-        if showOnMap then
-            for k, cur in ipairs(Quest.CurQ) do
-                if cur.Q and (Nx.Quest:GetQuest(cur.QId) == "W" or cur.PartyDesc) then
-                    tracking[cur.QId] = (tracking[cur.QId] or 0) + 0x10000
-                end
-            end
-        end
-
-        self.IconTracking = tracking
-    end
-
-    local mapType = map.GetMapType and map:GetMapType() or nil
-    local areaTex = Nx.Opts.ChoicesQAreaTex[Nx.qdb.profile.Quest.MapWatchAreaGfx]
-    local colorPerQ = Nx.qdb.profile.Quest.MapWatchColorPerQ
-    local colMax = Nx.qdb.profile.Quest.MapWatchColorCnt
-
-    for trackId, trackMode in pairs(tracking) do
-        if QuestDataProviderMixin:ShouldShowQuest(trackId, mapType, Nx.qdb.profile.Quest.MapShowTaskObjectives, false) then
-            local cur = Quest.IdToCurQ[trackId]
-            local quest = cur and cur.Q or Nx.Quests[trackId]
-            local qname = Nx.TXTBLUE .. "Quest: " .. (cur and cur.Title or Quest:UnpackName(quest["Quest"]))
-
-            local mask = showOnMap and cur and cur.TrackMask or trackMode
-            local showEnd
-
-            if bit.band(mask, 1) > 0 then
-                if not (cur and (cur.QI > 0 or cur.Party)) then
-                    local startName, zone, x, y = Quest:GetSEPos(quest["Start"])
-                    local mapId = zone
-
-                    if mapId then
-                        local wx, wy = map:GetWorldPos(mapId, x, y)
-                        local f = map:GetIconStatic(4)
-
-                        if map:ClipFrameByMapType(f, wx, wy, navscale, navscale, 0) then
-                            f.NxTip = string.format("%s\nStart: %s (%.1f %.1f)", qname, startName, x, y)
-                            f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconExclaim")
-                        end
-                    end
-                else
-                    showEnd = true
-                end
-            end
-
-            if showEnd or bit.band(mask, 0x10000) > 0 then
-                local obj = quest["End"] or quest["Start"]
-                local endName, zone, x, y = Quest:GetSEPos(obj)
-                local mapId = zone
-
-                if mapId and (not cur or not cur.CompleteMerge) then
-                    local wx, wy = map:GetWorldPos(mapId, x, y)
-                    local f = map:GetIconStatic(4)
-
-                    if map:ClipFrameByMapType(f, wx, wy, navscale, navscale, 0) then
-                        f.NXType = 9000
-                        f.NXData = cur
-                        f.NxTip = string.format("%s\nEnd: %s (%.1f %.1f)", qname, endName, x, y)
-                        if cur and cur.PartyNames then
-                            f.NxTip = f.NxTip .. "\n" .. cur.PartyNames
-                        end
-                        f.texture:SetVertexColor(0.6, 1, 0.6, 1)
-                        f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconQuestion")
-                    end
-                end
-            end
-
-            if not cur or cur.QI > 0 or cur.Party then
-                local drawArea
-                if cur then
-                    local qStatus = Nx.Quest:GetQuest(cur.QId)
-                    drawArea = showWatchAreas and qStatus == "W"
-                end
-
-                for n = 1, 15 do
-                    local obj = quest["Objectives"] and quest["Objectives"][n]
-                    if not obj then
-                        break
-                    end
-
-                    local objName, objZone, typ = Nx.Quest:UnpackObjectiveNew(obj)
-
-                    if objZone and objZone ~= 9000 then
-                        local mapId = objZone
-                        if bit.band(mask, bit.lshift(1, n)) > 0 then
-                            local colI = n
-
-                            if colorPerQ then
-                                colI = ((cur and cur.Index or 1) - 1) % colMax + 1
-                            end
-
-                            local col = qLocColors[colI]
-                            local r, g, b = col[1], col[2], col[3]
-                            local oname = cur and cur[n] or objName
-
-                            if typ == 32 then
-                                local cnt = 1
-                                local sz = navscale
-                                if cnt > 1 then
-                                    sz = map:GetWorldZoneScale(mapId) / 10.02 * ptSz
-                                end
-                                local x, y = Nx.Quest:UnpackLocPtOff(obj)
-                                local wx, wy = map:GetWorldPos(mapId, x, y)
-
-                                local f = map:GetIconStatic(4)
-                                if map:ClipFrameByMapType(f, wx, wy, sz, sz, 0) then
-                                    f.NXType = 9000 + n
-                                    f.NXData = cur
-                                    f.NxTip = string.format("%s\nObj: %s (%.1f %.1f)", qname, oname, x, y)
-                                    if cur and cur[n + 400] then
-                                        f.NxTip = f.NxTip .. "\n" .. cur[n + 400]
-                                    end
-                                    if cnt == 1 then
-                                        f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconQTarget")
-                                        f.texture:SetVertexColor(r, g, b, 0.9)
-                                    else
-                                        f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconCirclePlus")
-                                        f.texture:SetVertexColor(r, g, b, 0.5)
-                                    end
-                                end
-
-                            else
-                                local hover = Quest.IconHoverCur == cur and Quest.IconHoverObjI == n
-                                local tracking = bit.band(trackMode, bit.lshift(1, n)) > 0
-                                local tip = string.format("%s\nObj: %s", qname, oname)
-                                if cur and cur[n + 400] then
-                                    tip = tip .. "\n" .. cur[n + 400]
-                                end
-
-                                if cur and cur["OD" .. n] and cur["OD" .. n] > 0 then
-                                    local x = cur["OX" .. n]
-                                    local y = cur["OY" .. n]
-                                    local f = map:GetIcon(4)
-                                    local sz = hover and navscale or navscale * 0.8
-
-                                    if map:ClipFrameByMapType(f, x, y, sz, sz, 0) then
-                                        f.NXType = 9000 + n
-                                        f.NXData = cur
-                                        f.NxTip = tip
-                                        f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconAreaArrows")
-
-                                        if tracking then
-                                            f.texture:SetVertexColor(0.8, 0.8, 0.8, 1)
-                                        else
-                                            f.texture:SetVertexColor(r, g, b, 0.7)
-                                        end
-                                    end
-                                end
-
-                                if not cur or drawArea or hover or (bit.band(trackMode, bit.lshift(1, n)) > 0 and tonumber(trkA) > 0.05) then
-                                    local scale = map:GetWorldZoneScale(mapId) / 10.02
-                                    for _, loc1 in pairs(obj) do
-                                        if loc1 == "" then
-                                            break
-                                        end
-
-                                        local x, y, w, h = Nx.Quest:UnpackLocRect(loc1)
-                                        local wx, wy = map:GetWorldPos(mapId, x, y)
-                                        local f = map:GetIconStatic(hover and 1)
-                                        if areaTex then
-                                            if map:ClipFrameTL(f, wx, wy, w * scale, h * scale) then
-                                                f.NXType = 9000 + n
-                                                f.NXData = cur
-                                                f.NxTip = tip
-                                                f.texture:SetTexture(areaTex)
-
-                                                if hover then
-                                                    f.texture:SetVertexColor(hovR, hovG, hovB, hovA)
-                                                elseif tracking then
-                                                    f.texture:SetVertexColor(trkR, trkG, trkB, trkA)
-                                                else
-                                                    local alpha = tonumber(col[4])
-                                                    if not alpha or alpha < 0 or alpha > 1 then
-                                                        alpha = 1
-                                                    end
-                                                    f.texture:SetVertexColor(r, g, b, alpha)
-                                                end
-                                            end
-                                        else
-                                            if map:ClipFrameTLSolid(f, wx, wy, w * scale, h * scale) then
-                                                f.NXType = 9000 + n
-                                                f.NXData = cur
-                                                f.NxTip = tip
-
-                                                if hover then
-                                                    f.texture:SetColorTexture(hovR, hovG, hovB, hovA)
-                                                elseif tracking then
-                                                    f.texture:SetColorTexture(trkR, trkG, trkB, trkA)
-                                                else
-                                                    local alpha = tonumber(col[4])
-                                                    if not alpha or alpha < 0 or alpha > 1 then
-                                                        alpha = 1
-                                                    end
-                                                    f.texture:SetColorTexture(r, g, b, alpha)
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    local taskIconIndex = 1
-    local activeWQ = {}
-    if Map.UpdateMapID ~= 9000 then
-        if Nx.Map.mapChange then
-            taskInfoCache = C_TaskQuest.GetQuestsForPlayerByMapID(Map.UpdateMapID)
-        end
-        local taskInfo = taskInfoCache
-        if taskInfo and Nx.db.char.Map.ShowWorldQuest then
-            for i = 1, #taskInfo do
-                local info = taskInfo[i]
-                local questId = taskInfo[i].questId
-                local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
-
-                -- Fetch the quest tag information using the new API function
-                local questTagInfo = C_QuestLog.GetQuestTagInfo(questId)
-                
-                if questTagInfo then
-                    local isCriteria = false
-                    local isElite = questTagInfo.isElite
-                    local isDaily = questTagInfo.isDaily
-                    local isRepeatable = questTagInfo.isRepeatable
-                    local tagName = questTagInfo.tagName
-
-                    local timeLeft = C_TaskQuest.GetQuestTimeLeftMinutes(questId)
-                    if QuestUtils_ShouldDisplayExpirationWarning(questId) or (timeLeft and timeLeft > 0) then
-                        local x, y = info.x * 100, info.y * 100
-                        local f = map:GetIconWQ(120)
-
-                        map:ClipFrameZ(f, x, y, 24, 24, 0)
-
-                        local selected = info.questId == C_SuperTrack.GetSuperTrackedQuestID()
-
-                        local function WQTGetOverlay(memberName)
-                            for i = 1, #WorldMapFrame.overlayFrames do
-                                local overlay = WorldMapFrame.overlayFrames[i]
-                                if overlay[memberName] then
-                                    return overlay
-                                end
-                            end
-                        end
-                        isCriteria = WQTGetOverlay("IsWorldQuestCriteriaForSelectedBounty"):IsWorldQuestCriteriaForSelectedBounty(info.questId)
-
-                        f.worldQuest = true
-                        f.questID = info.questId
-                        f.numObjectives = info.numObjectives
-                        f.Texture:SetDrawLayer("OVERLAY")
-                        f:SetScript("OnClick", function(self, button)
-                            map:SetTargetAtStr(string.format("%s, %s", x, y))
-                            if not InCombatLockdown() and self.worldQuest then
-                                if not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) then
-                                    local watchType = C_QuestLog.GetQuestWatchType(self.questID)
-                                    local isSuperTracked = C_SuperTrack.GetSuperTrackedQuestID() == self.questID
-
-                                    if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then
-                                        ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil, self.questID, "force", self.mapID)
-                                    end
-
-                                    if IsShiftKeyDown() then
-                                        if watchType == Enum.QuestWatchType.Manual or (watchType == Enum.QuestWatchType.Automatic and isSuperTracked) then
-                                            PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
-                                            QuestUtil.UntrackWorldQuest(self.questID)
-                                        else
-                                            PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-                                            QuestUtil.TrackWorldQuest(self.questID, Enum.QuestWatchType.Manual)
-                                        end
-                                    else
-                                        if isSuperTracked then
-                                            PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
-                                            C_SuperTrack.SetSuperTrackedQuestID(0)
-                                        else
-                                            PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-                                            if watchType ~= Enum.QuestWatchType.Manual then
-                                                QuestUtil.TrackWorldQuest(self.questID, Enum.QuestWatchType.Automatic)
-                                            end
-                                            C_SuperTrack.SetSuperTrackedQuestID(self.questID)
-                                        end
-                                    end
-                                end
-                            end
-                        end)
-
-                        if tagName then
-                            QuestUtil.SetupWorldQuestButton(f, questTagInfo, tagName, selected, isCriteria, false, true)
-                        else
-                            f:Hide()
-                        end
-
-                        f.texture:Hide()
-                    end
-                else
-                    if not worldquestdb[questId] and title then
-                        taskIconIndex = taskIconIndex + 1
-                        local x, y = taskInfo[i].x * 100, taskInfo[i].y * 100
-                        local f = map:GetIcon(3)
-
-                        local objTxt = ""
-                        for objectiveIndex = 1, taskInfo[i].numObjectives do
-                            local objectiveText, objectiveType, finished = GetQuestObjectiveInfo(questId, objectiveIndex, false)
-                            if objectiveText and #objectiveText > 0 then
-                                local color = finished and HIGHLIGHT_FONT_COLOR or GRAY_FONT_COLOR
-                                color = string.format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
-                                objTxt = objTxt .. "\n- " .. color .. objectiveText
-                            end
-                        end
-
-                        if taskInfo[i].isCombatAllyQuest or taskInfo[i].isDaily then
-                            if not taskInfo[i].inProgress then
-                                f.questID = taskInfo[i].questId
-                                f.NxTip = "|cffffd100Daily Task:\n" .. title:gsub("Daily Objective: ", "") .. objTxt .. "\n" .. GREEN_FONT_COLOR:GenerateHexColorMarkup() .. GRANTS_FOLLOWER_XP
-                                f.texture:SetTexture("Interface\\Minimap\\ObjectIconsAtlas")
-                                map:ClipFrameZ(f, x, y, 22, 22, 0)
-                                f.texture:SetTexCoord(C_Minimap.GetObjectIconTextureCoords(4713))
-                                f:SetScript("OnMouseDown", function(self, button)
-                                    map:SetTargetAtStr(string.format("%s, %s", x, y))
-                                    if not InCombatLockdown() then
-                                        if not ChatEdit_TryInsertQuestLinkForQuestID(self.questID) then
-                                            PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-                                            if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then
-                                                ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil, self.questID, "force", self.mapID)
-                                            end
-                                        end
-                                    end
-                                end)
-                            end
-                        else
-                            f.NxTip = "|cffffd100Bonus Task:\n" .. title:gsub("Bonus Objective: ", "") .. objTxt
-                            f.texture:SetTexture("Interface\\Minimap\\ObjectIconsAtlas")
-                            map:ClipFrameZ(f, x, y, 22, 22, 0)
-                            f.texture:SetTexCoord(C_Minimap.GetObjectIconTextureCoords(4734))
-                        end
-                    end
-                end
-            end
-        end
-    end
+  self:InitializeQuestIconSettings(map)
+  self:HandleQuestTarget(map)
+  self:UpdateTrackedQuests(map)
+  self:RenderQuestIcons(map)
+  self:HandleWorldQuests(map)
 end
+
+-- Initialize the variables, settings, and icon sizes
+function Nx.Quest:InitializeQuestIconSettings(map)
+  local Quest = Nx.Quest
+  local Map = Nx.Map
+  self.qLocColors = Quest.QLocColors
+  self.ptSz = 4 * map.ScaleDraw
+  self.navscale = Map.Maps[1].IconNavScale * 16
+  self.showOnMap = true -- Quest.Watch.ButShowOnMap:GetPressed()
+  self.opts = self.GOpts
+  self.showWatchAreas = Nx.qdb.profile.Quest.MapShowWatchAreas
+  self.trkR, self.trkG, self.trkB, self.trkA = Quest.Cols["trkR"], Quest.Cols["trkG"], Quest.Cols["trkB"], Quest.Cols["trkA"]
+  self.hovR, self.hovG, self.hovB, self.hovA = Quest.Cols["hovR"], Quest.Cols["hovG"], Quest.Cols["hovB"], Quest.Cols["hovA"]
+end
+
+-- Handle quest target information and update tracking for the current quest
+function Nx.Quest:HandleQuestTarget(map)
+  local typ, tid = Nx.Map:GetTargetInfo()
+  if typ == "Q" then
+    local qid = math.floor(tid / 100)
+    local i, cur = Nx.Quest:FindCur(qid)
+
+    if cur then
+      Nx.Quest:CalcDistances(cur.Index, cur.Index)
+      Nx.Quest:TrackOnMap(cur.QId, tid % 100, cur.QI > 0 or cur.Party, true, true)
+    end
+  end
+end
+
+-- Update tracked quests and ensure quests are refreshed every 10 ticks
+function Nx.Quest:UpdateTrackedQuests(map)
+  if Nx.Tick % 10 == 0 then
+    local tracking = self.IconTracking
+    wipe(tracking)
+    for trackId, trackMode in pairs(Nx.Quest.Tracking) do
+      tracking[trackId] = trackMode
+    end
+    if self.showOnMap then
+      for _, cur in ipairs(Nx.Quest.CurQ) do
+        if cur.Q and (Nx.Quest:GetQuest(cur.QId) == "W" or cur.PartyDesc) then
+          tracking[cur.QId] = (tracking[cur.QId] or 0) + 0x10000
+        end
+      end
+    end
+    self.IconTracking = tracking
+  end
+end
+
+-- Iterate through quests and render quest icons on the map
+function Nx.Quest:RenderQuestIcons(map)
+  local mapType = map.GetMapType and map:GetMapType() or nil
+  local areaTex = Nx.Opts.ChoicesQAreaTex[Nx.qdb.profile.Quest.MapWatchAreaGfx]
+  local colorPerQ = Nx.qdb.profile.Quest.MapWatchColorPerQ
+  local colMax = Nx.qdb.profile.Quest.MapWatchColorCnt
+  local tracking = self.IconTracking
+
+  for trackId, trackMode in pairs(tracking) do
+    if QuestDataProviderMixin:ShouldShowQuest(trackId, mapType, Nx.qdb.profile.Quest.MapShowTaskObjectives, false) then
+      local cur = Nx.Quest.IdToCurQ[trackId]
+      local quest = cur and cur.Q or Nx.Quests[trackId]
+      self:RenderQuestIconForSingleQuest(map, cur, quest, trackMode, colorPerQ, colMax, areaTex)
+    end
+  end
+end
+
+-- Render a single quest's icon on the map
+function Nx.Quest:RenderQuestIconForSingleQuest(map, cur, quest, trackMode, colorPerQ, colMax, areaTex)
+  local Quest = Nx.Quest
+  local qname = Nx.TXTBLUE .. "Quest: " .. (cur and cur.Title or Quest:UnpackName(quest["Quest"]))
+  local mask = self.showOnMap and cur and cur.TrackMask or trackMode
+  local showEnd
+
+  if bit.band(mask, 1) > 0 then
+    if not (cur and (cur.QI > 0 or cur.Party)) then
+      local startName, zone, x, y = Quest:GetSEPos(quest["Start"])
+      self:PlaceQuestIcon(map, zone, x, y, qname, "Start", startName)
+    else
+      showEnd = true
+    end
+  end
+
+  if showEnd or bit.band(mask, 0x10000) > 0 then
+    local obj = quest["End"] or quest["Start"]
+    local endName, zone, x, y = Quest:GetSEPos(obj)
+    if zone and (not cur or not cur.CompleteMerge) then
+      self:PlaceQuestIcon(map, zone, x, y, qname, "End", endName)
+    end
+  end
+end
+
+-- Helper function to place quest icons on the map
+function Nx.Quest:PlaceQuestIcon(map, zone, x, y, qname, position, posName)
+  if zone then
+    local wx, wy = map:GetWorldPos(zone, x, y)
+    local f = map:GetIconStatic(4)
+
+    if map:ClipFrameByMapType(f, wx, wy, self.navscale, self.navscale, 0) then
+      f.NxTip = string.format("%s\n%s: %s (%.1f %.1f)", qname, position, posName, x, y)
+      f.texture:SetTexture("Interface\\AddOns\\Carbonite\\Gfx\\Map\\IconQuestion")
+    end
+  end
+end
+
+-- Handle and update world quest icons
+function Nx.Quest:HandleWorldQuests(map)
+  local taskIconIndex = 1
+  local activeWQ = {}
+  if Nx.Map.UpdateMapID ~= 9000 then
+    if Nx.Map.mapChange then
+      self.taskInfoCache = C_TaskQuest.GetQuestsForPlayerByMapID(Nx.Map.UpdateMapID)
+    end
+
+    local taskInfo = self.taskInfoCache
+    if taskInfo and Nx.db.char.Map.ShowWorldQuest then
+      for i = 1, #taskInfo do
+        local info = taskInfo[i]
+        self:RenderWorldQuestIcon(map, info)
+      end
+    end
+  end
+end
+
+-- Render individual world quest icons
+function Nx.Quest:RenderWorldQuestIcon(map, info)
+  local questId = info.questId
+  local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
+
+  local questTagInfo = C_QuestLog.GetQuestTagInfo(questId)
+  if questTagInfo then
+    local timeLeft = C_TaskQuest.GetQuestTimeLeftMinutes(questId)
+    if QuestUtils_ShouldDisplayExpirationWarning(questId) or (timeLeft and timeLeft > 0) then
+      local x, y = info.x * 100, info.y * 100
+      local f = map:GetIconWQ(120)
+
+      map:ClipFrameZ(f, x, y, 24, 24, 0)
+
+      local selected = info.questId == C_SuperTrack.GetSuperTrackedQuestID()
+      local isCriteria = self:IsWorldQuestCriteria(info.questId)
+
+      f.worldQuest = true
+      f.questID = info.questId
+      f.numObjectives = info.numObjectives
+      f.Texture:SetDrawLayer("OVERLAY")
+      f:SetScript("OnClick", function(self, button)
+        self:HandleWorldQuestClick(map, x, y, self.questID)
+      end)
+
+      if questTagInfo.tagName then
+        QuestUtil.SetupWorldQuestButton(f, questTagInfo, questTagInfo.tagName, selected, isCriteria, false, true)
+      else
+        f:Hide()
+      end
+
+      f.texture:Hide()
+    end
+  end
+end
+
+-- Check if a world quest is a criteria for the selected bounty
+function Nx.Quest:IsWorldQuestCriteria(questId)
+  local overlay = self:WQTGetOverlay("IsWorldQuestCriteriaForSelectedBounty")
+  return overlay and overlay:IsWorldQuestCriteriaForSelectedBounty(questId)
+end
+
+-- Get the overlay used for world quest criteria checking
+function Nx.Quest:WQTGetOverlay(memberName)
+  for i = 1, #WorldMapFrame.overlayFrames do
+    local overlay = WorldMapFrame.overlayFrames[i]
+    if overlay[memberName] then
+      return overlay
+    end
+  end
+  return nil
+end
+
+-- Handle click events on world quest icons
+function Nx.Quest:HandleWorldQuestClick(map, x, y, questId)
+  map:SetTargetAtStr(string.format("%s, %s", x, y))
+  if not InCombatLockdown() then
+    if not ChatEdit_TryInsertQuestLinkForQuestID(questId) then
+      local watchType = C_QuestLog.GetQuestWatchType(questId)
+      local isSuperTracked = C_SuperTrack.GetSuperTrackedQuestID() == questId
+
+      -- Zygor World Quest Guide suggestion
+      if ZygorGuidesViewer and ZygorGuidesViewer.WorldQuests then
+        ZygorGuidesViewer.WorldQuests:SuggestWorldQuestGuideFromMap(nil, questId, "force", Nx.Map.UpdateMapID)
+      end
+
+      if IsShiftKeyDown() then
+        if watchType == Enum.QuestWatchType.Manual or (watchType == Enum.QuestWatchType.Automatic and isSuperTracked) then
+          PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
+          QuestUtil.UntrackWorldQuest(questId)
+        else
+          PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+          QuestUtil.TrackWorldQuest(questId, Enum.QuestWatchType.Manual)
+        end
+      else
+        if isSuperTracked then
+          PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
+          C_SuperTrack.SetSuperTrackedQuestID(0)
+        else
+          PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+          if watchType ~= Enum.QuestWatchType.Manual then
+            QuestUtil.TrackWorldQuest(questId, Enum.QuestWatchType.Automatic)
+          end
+          C_SuperTrack.SetSuperTrackedQuestID(questId)
+        end
+      end
+    end
+  end
+end
+
 
 function Nx.Quest:IconOnEnter(frm)
     local i = frm.NXType - 9000
