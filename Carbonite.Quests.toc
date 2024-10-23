@@ -1,4 +1,4 @@
-## Interface: 110000, 110002
+## Interface: 110000, 110005
 ## Title: Carbonite Quest @project-version@
 ## Version: @project-version@
 ## Author: No One
@@ -7,6 +7,7 @@
 ## LoadOnDemand: 0
 ## SavedVariables: NXQuest
 ## RequiredDeps: Carbonite 
+## IconTexture: Interface\AddOns\Carbonite\Gfx\MMBut.tga
 
 ## X-WoWI-ID: 23404
 ## X-Curse-Project-ID: 87975

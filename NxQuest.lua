@@ -8088,11 +8088,11 @@ function Nx.Quest:UpdateIcons(map)
         if taskInfo and Nx.db.char.Map.ShowWorldQuest then
             for i = 1, #taskInfo do
                 local info = taskInfo[i]
-                local questId = taskInfo[i].questId
-                local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questId)
+                local questID = taskInfo[i].questID
+                local title, faction = C_TaskQuest.GetQuestInfoByQuestID(questID)
 
                 -- Fetch the quest tag information using the new API function
-                local questTagInfo = C_QuestLog.GetQuestTagInfo(questId)
+                local questTagInfo = C_QuestLog.GetQuestTagInfo(questID)
                 
                 if questTagInfo then
                     local isCriteria = false
@@ -8101,14 +8101,15 @@ function Nx.Quest:UpdateIcons(map)
                     local isRepeatable = questTagInfo.isRepeatable
                     local tagName = questTagInfo.tagName
 
-                    local timeLeft = C_TaskQuest.GetQuestTimeLeftMinutes(questId)
-                    if QuestUtils_ShouldDisplayExpirationWarning(questId) or (timeLeft and timeLeft > 0) then
+                    local timeLeft = C_TaskQuest.GetQuestTimeLeftMinutes(questID)
+                    if QuestUtils_ShouldDisplayExpirationWarning(questID) or (timeLeft and timeLeft > 0) then
                         local x, y = info.x * 100, info.y * 100
                         local f = map:GetIconWQ(120)
-
+						f.questID = info.questID
+						
                         map:ClipFrameZ(f, x, y, 24, 24, 0)
 
-                        local selected = info.questId == C_SuperTrack.GetSuperTrackedQuestID()
+                        local selected = info.questID == C_SuperTrack.GetSuperTrackedQuestID()
 
                         local function WQTGetOverlay(memberName)
                             for i = 1, #WorldMapFrame.overlayFrames do
@@ -8118,10 +8119,10 @@ function Nx.Quest:UpdateIcons(map)
                                 end
                             end
                         end
-                        isCriteria = WQTGetOverlay("IsWorldQuestCriteriaForSelectedBounty"):IsWorldQuestCriteriaForSelectedBounty(info.questId)
+                        isCriteria = WQTGetOverlay("IsWorldQuestCriteriaForSelectedBounty"):IsWorldQuestCriteriaForSelectedBounty(info.questID)
 
                         f.worldQuest = true
-                        f.questID = info.questId
+                        f.questID = info.questID
                         f.numObjectives = info.numObjectives
                         f.Texture:SetDrawLayer("OVERLAY")
                         f:SetScript("OnClick", function(self, button)
@@ -8168,14 +8169,14 @@ function Nx.Quest:UpdateIcons(map)
                         f.texture:Hide()
                     end
                 else
-                    if not worldquestdb[questId] and title then
+                    if not worldquestdb[questID] and title then
                         taskIconIndex = taskIconIndex + 1
                         local x, y = taskInfo[i].x * 100, taskInfo[i].y * 100
                         local f = map:GetIcon(3)
 
                         local objTxt = ""
                         for objectiveIndex = 1, taskInfo[i].numObjectives do
-                            local objectiveText, objectiveType, finished = GetQuestObjectiveInfo(questId, objectiveIndex, false)
+                            local objectiveText, objectiveType, finished = GetQuestObjectiveInfo(questID, objectiveIndex, false)
                             if objectiveText and #objectiveText > 0 then
                                 local color = finished and HIGHLIGHT_FONT_COLOR or GRAY_FONT_COLOR
                                 color = string.format("|cff%02x%02x%02x", color.r * 255, color.g * 255, color.b * 255)
@@ -8185,7 +8186,7 @@ function Nx.Quest:UpdateIcons(map)
 
                         if taskInfo[i].isCombatAllyQuest or taskInfo[i].isDaily then
                             if not taskInfo[i].inProgress then
-                                f.questID = taskInfo[i].questId
+                                f.questID = taskInfo[i].questID
                                 f.NxTip = "|cffffd100Daily Task:\n" .. title:gsub("Daily Objective: ", "") .. objTxt .. "\n" .. GREEN_FONT_COLOR:GenerateHexColorMarkup() .. GRANTS_FOLLOWER_XP
                                 f.texture:SetTexture("Interface\\Minimap\\ObjectIconsAtlas")
                                 map:ClipFrameZ(f, x, y, 22, 22, 0)
@@ -9420,7 +9421,7 @@ function Nx.Quest.Watch:UpdateList()
           local taskInfo = C_TaskQuest.GetQuestsForPlayerByMapID(map.UpdateMapID)
           if taskInfo then
             for i=1,#taskInfo do
-              local questId = taskInfo[i].questId
+              local questId = taskInfo[i].questID
               local inArea, onMap, numObjectives = GetTaskInfo(questId)
               tasks[questId] = true
               if inArea then
@@ -11877,7 +11878,7 @@ function Nx.Quest.WQList:UpdateDB(event, ...)
 			end
 			if zonequests == nil then zonequests = {} end
 			for j, quest in pairs(zonequests) do 
-				local questId = quest.questId			
+				local questId = quest.questID		
 				C_TaskQuest.RequestPreloadRewardData (questId)
 				if questId and QuestUtils_IsQuestWorldQuest (questId) then
 					if not worldquestdb[questId] then
